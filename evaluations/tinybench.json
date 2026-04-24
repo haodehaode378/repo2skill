@@ -1,0 +1,33 @@
+{
+  "name": "tinybench-context",
+  "cases": [
+    {
+      "name": "tinybench",
+      "input": "https://github.com/tinylibs/tinybench",
+      "assertions": [
+        {
+          "artifact": "SKILL.md",
+          "includes": [
+            "Run `pnpm test` for `test` (script: `vitest run`).",
+            "Config: `vitest.config.ts` (test, high)",
+            "Entrypoint: `./dist/index.js` (package-output, high, main)",
+            "Entrypoint: `src/index.ts` (source, medium)",
+            "Directory: `src` (source, medium)"
+          ]
+        },
+        {
+          "artifact": "AGENTS.md",
+          "includes": [
+            "Start from evidenced directories: `src`.",
+            "Run `pnpm test` for the `test` command.",
+            "`./dist/index.js` (package-output, high, main)",
+            "`src/index.ts` (source, medium)"
+          ],
+          "excludes": [
+            "- `dist`"
+          ]
+        }
+      ]
+    }
+  ]
+}

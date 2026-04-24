@@ -3,6 +3,14 @@
   "version": "0.1.0",
   "description": "Turn any GitHub repo into agent-ready onboarding context.",
   "type": "module",
+  "homepage": "https://github.com/haodehaode378/repo2skill#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/haodehaode378/repo2skill.git"
+  },
+  "bugs": {
+    "url": "https://github.com/haodehaode378/repo2skill/issues"
+  },
   "bin": {
     "repo2skill": "dist/index.js"
   },
@@ -14,6 +22,7 @@
   "scripts": {
     "dev": "tsx src/cli/index.ts",
     "benchmark": "tsx src/cli/benchmark.ts",
+    "evaluate": "tsx src/cli/evaluate.ts",
     "build": "tsup src/cli/index.ts --format esm --dts --clean",
     "prepack": "npm run build",
     "test": "vitest run",
@@ -30,7 +39,10 @@
     "skills",
     "onboarding",
     "github",
-    "cli"
+    "cli",
+    "agents-md",
+    "repository-analysis",
+    "developer-tools"
   ],
   "license": "MIT",
   "dependencies": {

@@ -28,6 +28,18 @@ repo2skill v0.1：把仓库转换成 agent 可执行 onboarding 上下文
 
 ## Try It From Source / 从源码试用
 
+After npm release:
+
+发布到 npm 后：
+
+```bash
+npx repo2skill https://github.com/tinylibs/tinybench --out ./out-tinybench
+```
+
+From source:
+
+从源码运行：
+
 ```bash
 git clone https://github.com/haodehaode378/repo2skill.git
 cd repo2skill
@@ -72,4 +84,11 @@ npm test
 npm run build
 npm pack --dry-run
 npm run benchmark -- ./benchmarks/public-node-ts-smoke.json --cache-dir E:/r2s-cache --out ./benchmark-smoke-out --compare ./benchmarks/baselines/public-node-ts-smoke.summary.json
+npm run evaluate -- ./evaluations/tinybench.json --cache-dir E:/r2s-cache --out ./evaluation-out
 ```
+
+Recorded verification results:
+
+已记录的验证结果：
+
+- [v0.1 release verification](./release-verification.md)
