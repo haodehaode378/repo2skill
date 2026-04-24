@@ -1,291 +1,146 @@
 # repo2skill
 
-把任意仓库转换成 agent-ready onboarding context。  
-Turn any repository into agent-ready onboarding context.
+> Turn any repository into agent-ready onboarding context.
 
-`repo2skill` 会分析本地仓库或公开 GitHub 仓库，并生成有证据支撑的 agent onboarding 产物：`repo2skill.json`、`project-map.md`、`AGENTS.md`、`SKILL.md`、跨平台 quickstart，以及可选 HTML 报告。
+[![npm package](https://img.shields.io/badge/npm-repo2skill-cb3837?style=flat-square)](https://www.npmjs.com/package/repo2skill)
+[![TypeScript](https://img.shields.io/badge/TypeScript-ready-3178c6?style=flat-square)](https://www.typescriptlang.org/)
+[![License: MIT](https://img.shields.io/badge/license-MIT-111827?style=flat-square)](./LICENSE)
 
-`repo2skill` analyzes a local repository or public GitHub repo and generates evidence-backed onboarding artifacts for coding agents and humans: `repo2skill.json`, `project-map.md`, `AGENTS.md`, `SKILL.md`, OS quickstarts, and an optional HTML report.
+**语言 / Language:** [简体中文](#简体中文) | [English](#english)
 
-## Quick Start / 快速开始
+---
 
-分析公开 GitHub 仓库：
+## 简体中文
 
-Analyze a public GitHub repo:
+`repo2skill` 会分析本地仓库或公开 GitHub 仓库，把真实仓库证据转换成 coding agent 可以直接使用的 onboarding 产物。
+
+它不是再写一份泛泛的项目说明，而是生成可执行、可追溯、适合交给 agent 的上下文：命令、入口文件、关键配置、重要目录、环境变量线索、验证步骤，以及专用 `SKILL.md`。
+
+### 适合什么场景
+
+- 你想把一个陌生仓库快速交给 Codex、Claude Code 或其他 coding agent。
+- 你想生成一份可提交的 `AGENTS.md`，告诉 agent 修改前应该看哪里、完成前应该跑什么。
+- 你想把公开 GitHub 仓库变成可复用的 repository skill。
+- 你想用 benchmark 防止仓库分析能力回退。
+
+### 快速开始
+
+安装依赖：
 
 ```bash
-npm run dev -- https://github.com/octocat/Hello-World --out ./out
+npm install
 ```
 
-分析内置本地 fixture：
+分析一个公开 GitHub 仓库：
 
-Analyze the included local fixture:
+```bash
+npm run dev -- https://github.com/tinylibs/tinybench --no-cache --out ./out-tinybench
+```
+
+分析本地 fixture：
 
 ```bash
 npm run dev -- ./tests/fixtures/analysis-target --out ./out
 ```
 
-## Output Preview / 输出预览
+只打印摘要，不写文件：
 
-示例输出见 [examples/analysis-target](./examples/analysis-target)。`repo2skill` 会把仓库证据转换成可直接给 agent 使用的操作指南。
+```bash
+npm run dev -- ./tests/fixtures/analysis-target --summary-only
+```
 
-See [examples/analysis-target](./examples/analysis-target) for committed sample output. `repo2skill` turns repository evidence into directly usable agent guidance.
+### 会生成什么
+
+| 文件 | 用途 |
+| --- | --- |
+| `repo2skill.json` | 结构化分析结果，供工具链继续处理 |
+| `project-map.md` | 简洁的仓库地图 |
+| `AGENTS.md` | 给 coding agent 的仓库级工作说明 |
+| `SKILL.md` | 可复制给 agent 使用的 repository skill |
+| `quickstart.windows.md` | Windows 快速开始 |
+| `quickstart.macos.md` | macOS 快速开始 |
+| `quickstart.linux.md` | Linux 快速开始 |
+| `report.html` | `--format all` 时生成的 HTML 报告 |
+
+### 输出示例
+
+`AGENTS.md` 会给出清晰的修改前导航和验证指令：
 
 ```md
 ## Before Changing Code
 
-- Review relevant config first: `package.json`, `vite.config.ts`, `.env.example`.
+- Review relevant config first: `package.json`, `vitest.config.ts`.
 - Start from evidenced directories: `src`.
 
 ## Validation Before Finishing
 
 - Run only the evidenced validation commands that are relevant to your change.
 - Run `pnpm test` for the `test` command.
-- Run `pnpm build` for the `build` command.
 ```
 
-同一份分析也会生成仓库专属 `SKILL.md`：
-
-The same analysis also generates a repository-specific `SKILL.md`:
+`SKILL.md` 会保留证据来源，包括源码入口和发布产物入口的区别：
 
 ```md
-## Steps
+## References
 
-- Review relevant config files first: `.env.example`, `package.json`, `vite.config.ts`.
-- Start code navigation from evidenced directories: `src`.
-- Use only the detected commands below; do not invent package scripts.
+- Config: `vitest.config.ts` (test, high)
+- Entrypoint: `./dist/index.js` (package-output, high, main)
+- Entrypoint: `src/index.ts` (source, medium)
+- Directory: `src` (source, medium)
 ```
 
-## What It Produces / 生成内容
+完整示例见 [examples/analysis-target](./examples/analysis-target)。
 
-给定本地仓库路径或公开 GitHub URL，`repo2skill` 当前会生成：
+### 当前可检测内容
 
-Given a local repository path or public GitHub URL, `repo2skill` currently writes:
+- 包管理器：来自 lockfile。
+- 项目类型：来自框架配置、依赖和 CLI 信号。
+- 命令：来自 `package.json` scripts，并渲染为 `pnpm test`、`npm run build` 等可执行命令。
+- 入口文件：区分 `source`、`package-output`、`cli`、`generated` 等角色。
+- 工作区：检测 `pnpm-workspace.yaml`、`package.json workspaces`、`turbo.json`、`nx.json` 等信号。
+- 重要目录：来自源码入口和 workspace globs，不会把 `dist` 当作优先导航目录。
+- 关键配置：例如 `tsconfig`、Vite、Next.js、ESLint、Prettier、Vitest、GitHub Actions、Dockerfile。
+- 环境变量：来自 `.env.example`、`.env.local.example` 和源码里的 `process.env.*`。
 
-- `repo2skill.json`
-- `project-map.md`
-- `AGENTS.md`
-- `SKILL.md`
-- `quickstart.windows.md`
-- `quickstart.macos.md`
-- `quickstart.linux.md`
-- `report.html` when using `--format all`
+### 常用命令
 
-所有产物都来自同一个结构化分析对象，避免不同文档互相矛盾。
-
-All generated files derive from the same structured analysis object, so different artifacts do not drift apart.
-
-## Why It Exists / 为什么需要它
-
-Coding agent 在进入陌生仓库时，最缺的不是更多 prose，而是可信、可执行、可追溯的上下文：
-
-When a coding agent enters an unfamiliar repository, it needs trustworthy, executable, traceable context rather than more prose:
-
-- 清晰的命令面 / a clear command surface
-- 简洁的项目地图 / a concise project map
-- 有证据支撑的环境变量、入口点、配置文件提示 / evidence-backed environment, entrypoint, and config hints
-- 稳定的 onboarding 文档，而不是猜测出来的说明 / stable onboarding docs instead of guessed instructions
-
-`repo2skill` 的目标是自动生成这一层上下文。
-
-`repo2skill` is built to generate that layer automatically.
-
-## Current Status / 当前状态
-
-- 已支持本地仓库和公开 GitHub 仓库分析 / local and public GitHub analysis paths implemented
-- 已支持 smoke/full benchmark baseline / benchmark runner with smoke and full baselines
-- 已支持 regression compare / compare mode for regression checks
-- schema-first、evidence-first 输出管线 / schema-first and evidence-first output pipeline
-
-当前 benchmark baseline：
-
-Current benchmark baselines:
-
-- smoke set: 10 public repositories
-- full set: 21 public repositories
-
-## What It Detects Today / 当前检测能力
-
-当前 MVP 可以提取：
-
-The current MVP can extract:
-
-- 包管理器，来自 lockfile / package manager from lockfiles
-- 项目类型，来自强框架或 CLI 信号 / project type from strong framework or CLI signals
-- `package.json` 中的 canonical scripts / canonical scripts from `package.json`
-- 可执行命令事实，例如 `pnpm test` / executable command facts such as `pnpm test`
-- 重要目录，来自 entrypoints 和 workspace globs / important directories from entrypoints and workspace globs
-- 关键配置文件，例如 `tsconfig`、框架配置、lint/format 配置、GitHub Actions / key config files such as `tsconfig`, framework configs, lint/format configs, and GitHub Actions workflows
-- 入口点，来自 `package.json` 字段和常见约定 / entrypoints from `package.json` fields and common conventions
-- 环境变量，来自 `.env.example`、`.env.local.example` 和 `process.env.*` / environment variables from `.env.example`, `.env.local.example`, and `process.env.*` usage
-
-输出结果会保持 narrow and evidence-backed。没有证据的内容会被省略，而不是脑补。
-
-Outputs are intentionally narrow and evidence-backed. Missing evidence means omitted sections instead of guessed prose.
-
-## Current Scope / 当前范围
-
-已支持：
-
-Supported now:
-
-- 公开 GitHub 仓库 / public GitHub repositories
-- 本地仓库 / local repositories
-- Node.js / TypeScript-oriented repositories
-- `json`、`md`、`all` export modes
-- 公开 GitHub clone 的本地缓存 / simple local cache for repeated public GitHub clones
-- 显式缓存刷新和 no-cache 模式 / explicit cache refresh and no-cache modes
-
-暂不支持：
-
-Not implemented yet:
-
-- 私有仓库鉴权 / private repository authentication
-- 广泛多语言支持 / broad multi-language support
-
-## Usage / 使用方式
-
-安装依赖：
-
-Install dependencies:
-
-```bash
-npm install
-```
-
-分析本地仓库：
-
-Run the CLI against a local repository:
-
-```bash
-npm run dev -- ./tests/fixtures/analysis-target --out ./out
-```
-
-只打印摘要，不写输出文件：
-
-Analyze a repository without writing output files:
-
-```bash
-npm run dev -- ./tests/fixtures/analysis-target --summary-only
-```
-
-分析公开 GitHub 仓库：
-
-Run the CLI against a public GitHub repository:
-
-```bash
-npm run dev -- https://github.com/octocat/Hello-World --out ./out-github
-```
-
-使用自定义缓存目录：
-
-Use a custom cache directory:
-
-```bash
-npm run dev -- https://github.com/octocat/Hello-World --cache-dir E:/repo2skill-cache --out ./out-github
-```
-
-刷新已有缓存：
-
-Refresh a cached public GitHub clone before analyzing:
-
-```bash
-npm run dev -- https://github.com/octocat/Hello-World --refresh --out ./out-github
-```
-
-使用临时 clone，分析结束后删除：
-
-Analyze with a temporary clone that is removed after the run:
-
-```bash
-npm run dev -- https://github.com/octocat/Hello-World --no-cache --out ./out-github
-```
-
-分析指定 branch：
-
-Clone and analyze a specific GitHub branch:
+分析指定 GitHub 分支：
 
 ```bash
 npm run dev -- https://github.com/octocat/Hello-World --branch master --out ./out-github
 ```
 
-运行 benchmark：
-
-Run the benchmark manifest:
+刷新缓存后分析：
 
 ```bash
-npm run benchmark -- ./benchmarks/public-node-ts.json --out ./benchmark-out
+npm run dev -- https://github.com/octocat/Hello-World --refresh --out ./out-github
 ```
 
-Windows 上重复跑 benchmark 时，建议使用较短 cache 路径，降低 long-path checkout 风险：
+使用临时 clone，分析后删除：
 
-For repeated benchmark runs on Windows, prefer a short cache path to reduce long-path checkout failures:
+```bash
+npm run dev -- https://github.com/octocat/Hello-World --no-cache --out ./out-github
+```
+
+运行 benchmark：
 
 ```bash
 npm run benchmark -- ./benchmarks/public-node-ts-smoke.json --cache-dir E:/r2s-cache --out ./benchmark-smoke-out
 ```
 
-写入 baseline summary：
-
-Write a baseline summary JSON while running the benchmark:
+写入 benchmark baseline：
 
 ```bash
 npm run benchmark -- ./benchmarks/public-node-ts-smoke.json --cache-dir E:/r2s-cache --out ./benchmark-smoke-out --baseline-out ./benchmarks/baselines/public-node-ts-smoke.summary.json
 ```
 
-对比当前 benchmark 和已有 baseline：
-
-Compare the current benchmark run with an existing baseline:
+对比已有 baseline：
 
 ```bash
 npm run benchmark -- ./benchmarks/public-node-ts-smoke.json --cache-dir E:/r2s-cache --out ./benchmark-smoke-out --compare ./benchmarks/baselines/public-node-ts-smoke.summary.json
 ```
 
-将 compare 结果写成 JSON：
-
-Write the compare result to JSON:
-
-```bash
-npm run benchmark -- ./benchmarks/public-node-ts-smoke.json --cache-dir E:/r2s-cache --out ./benchmark-smoke-out --compare ./benchmarks/baselines/public-node-ts-smoke.summary.json --compare-out ./benchmark-smoke-out/compare.json
-```
-
-## Example Output / 示例输出
-
-当前 fixture 会生成：
-
-From the current fixture, `repo2skill` produces:
-
-- `repo2skill.json`：包含 `pnpm`、命令、配置文件、目录、环境变量和证据 / detected `pnpm`, commands, config files, directories, env vars, and evidence
-- `project-map.md`：简洁仓库地图 / concise repository facts
-- `AGENTS.md`：优先命令、修改前导航、配置引用和完成前检查 / priority commands, pre-change navigation, config references, and finishing checks
-- `SKILL.md`：`Use When`、`Steps`、`Commands`、`Validation`、`References`
-- OS quickstarts：只包含有证据的命令和环境变量提示 / OS-specific quickstarts with only evidenced commands and env hints
-- `report.html`：HTML report when using `--format all`
-- benchmark summaries：跨公开仓库的 regression signals / regression signals across public repository manifests
-
-See [examples/analysis-target](./examples/analysis-target) for committed sample output.
-
-## Design Principles / 设计原则
-
-- detectors collect facts / detector 只收集事实
-- exporters render from structured analysis / exporter 只从结构化分析渲染
-- missing evidence means omitted sections / 没有证据就省略
-- no hallucinated commands / 不生成脑补命令
-- benchmark protects core facts from regression / benchmark 保护核心事实不退化
-
-## Development / 开发
-
-运行测试：
-
-Run the test suite:
-
-```bash
-npm test
-```
-
-运行完整本地验证：
-
-Run the full local verification loop:
+### 开发验证
 
 ```bash
 npm run lint
@@ -294,16 +149,191 @@ npm test
 npm run build
 ```
 
-运行当前 benchmark manifest：
+### 设计原则
 
-Run the current benchmark manifest:
+- 只收集有证据的事实，不生成脑补命令。
+- detector 负责收集事实，exporter 负责渲染产物。
+- 所有产物来自同一个结构化分析对象，避免文档之间互相矛盾。
+- benchmark 保护核心能力，防止回归。
+
+### 当前范围
+
+已支持：
+
+- 本地仓库和公开 GitHub 仓库。
+- 以 Node.js / TypeScript 为主的项目。
+- `json`、`md`、`all` 导出模式。
+- GitHub clone 缓存、`--refresh`、`--no-cache`。
+- smoke/full benchmark baseline 和 regression compare。
+
+暂不支持：
+
+- 私有仓库鉴权。
+- 广泛多语言仓库的深度语义分析。
+
+[Back to top](#repo2skill)
+
+---
+
+## English
+
+`repo2skill` analyzes a local repository or public GitHub repository and turns real repository evidence into onboarding artifacts that coding agents can use immediately.
+
+It does not write another generic project summary. It produces executable, traceable context for agents: commands, entrypoints, key config files, important directories, environment-variable hints, validation steps, and a repository-specific `SKILL.md`.
+
+### When to use it
+
+- You want to hand an unfamiliar repository to Codex, Claude Code, or another coding agent.
+- You want a committed `AGENTS.md` that tells agents where to look before editing and what to run before finishing.
+- You want to turn a public GitHub repository into a reusable repository skill.
+- You want benchmark coverage that catches regressions in repository analysis quality.
+
+### Quick start
+
+Install dependencies:
 
 ```bash
-npm run benchmark -- ./benchmarks/public-node-ts.json --out ./benchmark-out
+npm install
 ```
 
-## Release Notes / 发布说明
+Analyze a public GitHub repository:
 
-当前是 early MVP，但已经不只是 scaffold：本地和公开 GitHub 分析路径、结构化事实源、AGENTS/SKILL/quickstart/exporters、benchmark runner 和 HTML report 都已实现并验证。
+```bash
+npm run dev -- https://github.com/tinylibs/tinybench --no-cache --out ./out-tinybench
+```
 
-This is still an early MVP, but no longer just a scaffold: local and public-GitHub analysis paths, structured facts, AGENTS/SKILL/quickstart exporters, benchmark runner, and HTML report are implemented and verified.
+Analyze the included local fixture:
+
+```bash
+npm run dev -- ./tests/fixtures/analysis-target --out ./out
+```
+
+Print a summary without writing files:
+
+```bash
+npm run dev -- ./tests/fixtures/analysis-target --summary-only
+```
+
+### Generated artifacts
+
+| File | Purpose |
+| --- | --- |
+| `repo2skill.json` | Structured analysis for downstream tooling |
+| `project-map.md` | Concise repository map |
+| `AGENTS.md` | Repository-level instructions for coding agents |
+| `SKILL.md` | Repository skill that can be copied into an agent session |
+| `quickstart.windows.md` | Windows quickstart |
+| `quickstart.macos.md` | macOS quickstart |
+| `quickstart.linux.md` | Linux quickstart |
+| `report.html` | HTML report generated with `--format all` |
+
+### Output preview
+
+`AGENTS.md` gives clear pre-change navigation and validation guidance:
+
+```md
+## Before Changing Code
+
+- Review relevant config first: `package.json`, `vitest.config.ts`.
+- Start from evidenced directories: `src`.
+
+## Validation Before Finishing
+
+- Run only the evidenced validation commands that are relevant to your change.
+- Run `pnpm test` for the `test` command.
+```
+
+`SKILL.md` preserves evidence, including the difference between source entrypoints and package output entrypoints:
+
+```md
+## References
+
+- Config: `vitest.config.ts` (test, high)
+- Entrypoint: `./dist/index.js` (package-output, high, main)
+- Entrypoint: `src/index.ts` (source, medium)
+- Directory: `src` (source, medium)
+```
+
+See [examples/analysis-target](./examples/analysis-target) for committed sample output.
+
+### What it detects today
+
+- Package manager from lockfiles.
+- Project type from framework config, dependencies, and CLI signals.
+- Commands from `package.json` scripts, rendered as executable commands such as `pnpm test` or `npm run build`.
+- Entrypoints with roles such as `source`, `package-output`, `cli`, and `generated`.
+- Workspace signals such as `pnpm-workspace.yaml`, `package.json workspaces`, `turbo.json`, and `nx.json`.
+- Important directories from source entrypoints and workspace globs, without treating `dist` as a priority navigation target.
+- Key config files such as `tsconfig`, Vite, Next.js, ESLint, Prettier, Vitest, GitHub Actions, and Dockerfile.
+- Environment variables from `.env.example`, `.env.local.example`, and `process.env.*` usage.
+
+### Common commands
+
+Analyze a specific GitHub branch:
+
+```bash
+npm run dev -- https://github.com/octocat/Hello-World --branch master --out ./out-github
+```
+
+Refresh the cache before analysis:
+
+```bash
+npm run dev -- https://github.com/octocat/Hello-World --refresh --out ./out-github
+```
+
+Use a temporary clone that is deleted after analysis:
+
+```bash
+npm run dev -- https://github.com/octocat/Hello-World --no-cache --out ./out-github
+```
+
+Run the benchmark manifest:
+
+```bash
+npm run benchmark -- ./benchmarks/public-node-ts-smoke.json --cache-dir E:/r2s-cache --out ./benchmark-smoke-out
+```
+
+Write a benchmark baseline:
+
+```bash
+npm run benchmark -- ./benchmarks/public-node-ts-smoke.json --cache-dir E:/r2s-cache --out ./benchmark-smoke-out --baseline-out ./benchmarks/baselines/public-node-ts-smoke.summary.json
+```
+
+Compare against an existing baseline:
+
+```bash
+npm run benchmark -- ./benchmarks/public-node-ts-smoke.json --cache-dir E:/r2s-cache --out ./benchmark-smoke-out --compare ./benchmarks/baselines/public-node-ts-smoke.summary.json
+```
+
+### Development
+
+```bash
+npm run lint
+npm run typecheck
+npm test
+npm run build
+```
+
+### Design principles
+
+- Collect evidence-backed facts only. Do not invent commands.
+- Detectors collect facts. Exporters render artifacts.
+- All artifacts derive from the same structured analysis object to avoid drift.
+- Benchmarks protect core behavior from regressions.
+
+### Current scope
+
+Supported now:
+
+- Local repositories and public GitHub repositories.
+- Node.js / TypeScript-oriented projects.
+- `json`, `md`, and `all` export modes.
+- GitHub clone cache, `--refresh`, and `--no-cache`.
+- Smoke/full benchmark baselines and regression comparison.
+
+Not implemented yet:
+
+- Private repository authentication.
+- Deep semantic analysis for broad multi-language repositories.
+
+[Back to top](#repo2skill)
