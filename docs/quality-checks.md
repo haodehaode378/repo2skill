@@ -62,3 +62,11 @@ For benchmark regression checks:
 ```bash
 npm run benchmark -- ./benchmarks/public-node-ts-smoke.json --cache-dir E:/r2s-cache --out ./benchmark-smoke-out --compare ./benchmarks/baselines/public-node-ts-smoke.summary.json
 ```
+
+For artifact-level context checks:
+
+用于生成物级别的上下文检查：
+
+```bash
+npm run evaluate -- ./evaluations/tinybench.json --cache-dir E:/r2s-cache --out ./evaluation-out
+```

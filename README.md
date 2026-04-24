@@ -9,7 +9,7 @@
 **语言 / Language:** [简体中文](#简体中文) | [English](#english)
 
 ```bash
-npm run dev -- https://github.com/tinylibs/tinybench --no-cache --out ./out-tinybench
+npx repo2skill https://github.com/tinylibs/tinybench --out ./out-tinybench
 ```
 
 ```txt
@@ -22,7 +22,7 @@ Input repository
   -> report.html
 ```
 
-[View tinybench demo](./docs/demo-tinybench.md) · [Release checklist](./docs/release-checklist.md) · [Quality checks](./docs/quality-checks.md)
+[View tinybench demo](./docs/demo-tinybench.md) · [Before / After](./docs/before-after.md) · [Context evaluation](./docs/evaluation.md) · [Release checklist](./docs/release-checklist.md) · [Release verification](./docs/release-verification.md) · [Quality checks](./docs/quality-checks.md)
 
 ![repo2skill README preview](./img/readme-hero.png)
 
@@ -43,15 +43,18 @@ Input repository
 
 ### 快速开始
 
-安装依赖：
+使用 npm 包运行：
 
 ```bash
-npm install
+npx repo2skill https://github.com/tinylibs/tinybench --out ./out-tinybench
 ```
 
-分析一个公开 GitHub 仓库：
+从源码运行：
 
 ```bash
+git clone https://github.com/haodehaode378/repo2skill.git
+cd repo2skill
+npm install
 npm run dev -- https://github.com/tinylibs/tinybench --no-cache --out ./out-tinybench
 ```
 
@@ -173,6 +176,12 @@ npm test
 npm run build
 ```
 
+生成物级别的上下文评估：
+
+```bash
+npm run evaluate -- ./evaluations/tinybench.json --cache-dir E:/r2s-cache --out ./evaluation-out
+```
+
 ### 设计原则
 
 - 只收集有证据的事实，不生成脑补命令。
@@ -214,15 +223,18 @@ It does not write another generic project summary. It produces executable, trace
 
 ### Quick start
 
-Install dependencies:
+Run from npm:
 
 ```bash
-npm install
+npx repo2skill https://github.com/tinylibs/tinybench --out ./out-tinybench
 ```
 
-Analyze a public GitHub repository:
+Run from source:
 
 ```bash
+git clone https://github.com/haodehaode378/repo2skill.git
+cd repo2skill
+npm install
 npm run dev -- https://github.com/tinylibs/tinybench --no-cache --out ./out-tinybench
 ```
 
@@ -342,6 +354,12 @@ npm run lint
 npm run typecheck
 npm test
 npm run build
+```
+
+Artifact-level context evaluation:
+
+```bash
+npm run evaluate -- ./evaluations/tinybench.json --cache-dir E:/r2s-cache --out ./evaluation-out
 ```
 
 ### Design principles
