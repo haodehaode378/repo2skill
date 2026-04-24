@@ -24,7 +24,7 @@ Input repository
 
 [View tinybench demo](./docs/demo-tinybench.md) · [Release checklist](./docs/release-checklist.md) · [Quality checks](./docs/quality-checks.md)
 
-![repo2skill report preview](./docs/assets/report-preview.svg)
+![repo2skill README preview](./img/readme-hero.png)
 
 ---
 
@@ -82,7 +82,11 @@ npm run dev -- ./tests/fixtures/analysis-target --summary-only
 
 ### 输出示例
 
-视觉预览见 [report preview](./docs/assets/report-preview.svg)。真实仓库验证见 [tinybench demo](./docs/demo-tinybench.md)。
+真实仓库验证见 [tinybench demo](./docs/demo-tinybench.md)。截图预览：
+
+- [终端运行结果](./img/terminal-demo.png)
+- [生成的 SKILL.md](./img/skill-output.png)
+- [HTML report](./img/report-html.png)
 
 `AGENTS.md` 会给出清晰的修改前导航和验证指令：
 
@@ -249,7 +253,11 @@ npm run dev -- ./tests/fixtures/analysis-target --summary-only
 
 ### Output preview
 
-See the [report preview](./docs/assets/report-preview.svg) for the visual summary, and the [tinybench demo](./docs/demo-tinybench.md) for a real repository check.
+See the [tinybench demo](./docs/demo-tinybench.md) for a real repository check. Screenshot previews:
+
+- [Terminal run](./img/terminal-demo.png)
+- [Generated SKILL.md](./img/skill-output.png)
+- [HTML report](./img/report-html.png)
 
 `AGENTS.md` gives clear pre-change navigation and validation guidance:
 
