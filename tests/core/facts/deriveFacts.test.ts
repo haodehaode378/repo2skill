@@ -32,7 +32,29 @@ function createAnalysis(): RepoAnalysis {
       commands: [],
       directories: [],
       configFiles: [],
-      entrypoints: ["src/main.ts", "scripts/build.ts"],
+      entrypoints: ["./dist/index.js", "src/main.ts", "scripts/build.ts"],
+      entrypointFacts: [
+        {
+          path: "./dist/index.js",
+          role: "package-output",
+          source: "package.json",
+          confidence: "high",
+          reason: "main"
+        },
+        {
+          path: "src/main.ts",
+          role: "source",
+          source: "src/main.ts",
+          confidence: "medium"
+        },
+        {
+          path: "scripts/build.ts",
+          role: "cli",
+          source: "package.json",
+          confidence: "high",
+          reason: "bin"
+        }
+      ],
       envVars: []
     },
     evidence: []
@@ -79,7 +101,7 @@ describe("deriveFacts", () => {
         path: "scripts",
         role: "scripts",
         source: "scripts/build.ts",
-        confidence: "medium"
+        confidence: "high"
       },
       {
         path: "src",

@@ -1,6 +1,6 @@
 import path from "node:path";
 import fs from "fs-extra";
-import type { RepoAnalysis } from "../../schemas/analysis.js";
+import type { EntrypointRole, RepoAnalysis } from "../../schemas/analysis.js";
 
 const CONVENTIONAL_ENTRYPOINTS = [
   "src/main.ts",
@@ -42,14 +42,14 @@ export async function detectEntrypoints(
     registerPackageEntrypoint(found, analysis, packageJson.browser, "browser");
 
     if (typeof packageJson.bin === "string") {
-      registerEntrypoint(found, analysis, normalizePath(packageJson.bin), "package.json", "high");
+      registerEntrypoint(found, analysis, normalizePath(packageJson.bin), "package.json", "high", "bin");
     } else if (packageJson.bin != null && typeof packageJson.bin === "object") {
       for (const value of Object.values(packageJson.bin)) {
         if (typeof value !== "string") {
           continue;
         }
 
-        registerEntrypoint(found, analysis, normalizePath(value), "package.json", "high");
+        registerEntrypoint(found, analysis, normalizePath(value), "package.json", "high", "bin");
       }
     }
   }
@@ -92,6 +92,14 @@ function registerEntrypoint(
 
   found.add(entrypoint);
   analysis.detected.entrypoints.push(entrypoint);
+  analysis.detected.entrypointFacts ??= [];
+  analysis.detected.entrypointFacts.push({
+    path: entrypoint,
+    role: getEntrypointRole(entrypoint, sourceFile, reason),
+    source: sourceFile,
+    confidence,
+    reason
+  });
   analysis.evidence.push({
     claim: `entrypoint=${entrypoint}`,
     sourceFile,
@@ -102,4 +110,43 @@ function registerEntrypoint(
 
 function normalizePath(filePath: string): string {
   return filePath.split(path.sep).join("/");
+}
+
+function getEntrypointRole(
+  entrypoint: string,
+  sourceFile: string,
+  reason?: string
+): EntrypointRole {
+  if (reason === "bin") {
+    return "cli";
+  }
+
+  const normalized = trimLeadingDotSlash(entrypoint);
+
+  if (normalized === "src" || normalized.startsWith("src/")) {
+    return "source";
+  }
+
+  if (isGeneratedPath(normalized)) {
+    return sourceFile === "package.json" ? "package-output" : "generated";
+  }
+
+  return "other";
+}
+
+function trimLeadingDotSlash(filePath: string): string {
+  return filePath.replace(/^\.\//, "");
+}
+
+function isGeneratedPath(filePath: string): boolean {
+  return (
+    filePath === "dist" ||
+    filePath.startsWith("dist/") ||
+    filePath === "build" ||
+    filePath.startsWith("build/") ||
+    filePath === "out" ||
+    filePath.startsWith("out/") ||
+    filePath === "coverage" ||
+    filePath.startsWith("coverage/")
+  );
 }

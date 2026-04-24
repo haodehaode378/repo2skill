@@ -16,6 +16,7 @@ function createAnalysis(): RepoAnalysis {
       directories: [],
       configFiles: [],
       entrypoints: [],
+      entrypointFacts: [],
       envVars: []
     },
     evidence: []
@@ -33,6 +34,36 @@ describe("detectEntrypoints", () => {
       "./dist/index.mjs",
       "./dist/browser.js",
       "./bin/cli.js"
+    ]);
+    expect(analysis.detected.entrypointFacts).toEqual([
+      {
+        path: "./dist/index.js",
+        role: "package-output",
+        source: "package.json",
+        confidence: "high",
+        reason: "main"
+      },
+      {
+        path: "./dist/index.mjs",
+        role: "package-output",
+        source: "package.json",
+        confidence: "high",
+        reason: "module"
+      },
+      {
+        path: "./dist/browser.js",
+        role: "package-output",
+        source: "package.json",
+        confidence: "high",
+        reason: "browser"
+      },
+      {
+        path: "./bin/cli.js",
+        role: "cli",
+        source: "package.json",
+        confidence: "high",
+        reason: "bin"
+      }
     ]);
     expect(analysis.evidence).toEqual([
       {
@@ -56,6 +87,7 @@ describe("detectEntrypoints", () => {
       {
         claim: "entrypoint=./bin/cli.js",
         sourceFile: "package.json",
+        reason: "bin",
         confidence: "high"
       }
     ]);
@@ -67,6 +99,29 @@ describe("detectEntrypoints", () => {
     await detectEntrypoints(path.resolve("tests/fixtures/entrypoints/conventions"), analysis);
 
     expect(analysis.detected.entrypoints).toEqual(["src/main.ts", "src/server.ts", "index.ts"]);
+    expect(analysis.detected.entrypointFacts).toEqual([
+      {
+        path: "src/main.ts",
+        role: "source",
+        source: "src/main.ts",
+        confidence: "medium",
+        reason: undefined
+      },
+      {
+        path: "src/server.ts",
+        role: "source",
+        source: "src/server.ts",
+        confidence: "medium",
+        reason: undefined
+      },
+      {
+        path: "index.ts",
+        role: "other",
+        source: "index.ts",
+        confidence: "medium",
+        reason: undefined
+      }
+    ]);
     expect(analysis.evidence).toEqual([
       {
         claim: "entrypoint=src/main.ts",

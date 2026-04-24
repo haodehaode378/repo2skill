@@ -2,6 +2,7 @@ import path from "node:path";
 import fs from "fs-extra";
 import { RepoAnalysisSchema, type CommandCandidate, type CommandRole, type RepoAnalysis } from "../../schemas/analysis.js";
 import { renderPackageScriptCommand } from "../commands/packageScripts.js";
+import { getEntrypointFacts, isGeneratedEntrypointRole } from "../entrypoints/facts.js";
 import { getDisplayEnvVars, getOmittedEnvVarCount } from "../envVars/display.js";
 
 const VALIDATION_SCRIPT_ORDER = ["test", "lint", "typecheck", "build"] as const;
@@ -83,6 +84,19 @@ export function renderAgentsMd(analysis: RepoAnalysis): string {
     }
   }
 
+  const entrypoints = getEntrypointFacts(analysis);
+
+  if (entrypoints.length > 0) {
+    sections.push("");
+    sections.push("## Entrypoints");
+    sections.push("");
+
+    for (const entrypoint of entrypoints) {
+      const reason = entrypoint.reason ? `, ${entrypoint.reason}` : "";
+      sections.push(`- \`${entrypoint.path}\` (${entrypoint.role}, ${entrypoint.confidence}${reason})`);
+    }
+  }
+
   if (analysis.detected.configFiles.length > 0) {
     sections.push("");
     sections.push("## Key Config Files");
@@ -142,8 +156,12 @@ function getImportantDirectories(analysis: RepoAnalysis): string[] {
   const directories: string[] = [];
   const seen = new Set<string>();
 
-  for (const entrypoint of analysis.detected.entrypoints) {
-    const directory = path.posix.dirname(entrypoint);
+  for (const entrypoint of getEntrypointFacts(analysis)) {
+    if (isGeneratedEntrypointRole(entrypoint.role)) {
+      continue;
+    }
+
+    const directory = path.posix.dirname(entrypoint.path);
 
     if (directory === "." || seen.has(directory)) {
       continue;

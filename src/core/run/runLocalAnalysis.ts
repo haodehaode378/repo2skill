@@ -31,6 +31,7 @@ export async function analyzeLocalRepo(rootDir: string): Promise<RepoAnalysis> {
       directories: [],
       configFiles: [],
       entrypoints: [],
+      entrypointFacts: [],
       envVars: []
     },
     evidence: []

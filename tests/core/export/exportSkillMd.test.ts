@@ -58,7 +58,22 @@ function createFullAnalysis(): RepoAnalysis {
           confidence: "high"
         }
       ],
-      entrypoints: [],
+      entrypoints: ["src/main.ts", "./dist/index.js"],
+      entrypointFacts: [
+        {
+          path: "src/main.ts",
+          role: "source",
+          source: "src/main.ts",
+          confidence: "medium"
+        },
+        {
+          path: "./dist/index.js",
+          role: "package-output",
+          source: "package.json",
+          confidence: "high",
+          reason: "main"
+        }
+      ],
       envVars: [
         {
           name: "API_URL",
@@ -120,6 +135,8 @@ describe("renderSkillMd", () => {
     expect(markdown).toContain("- Prefer `pnpm test` before finishing changes when that check is relevant.");
     expect(markdown).toContain("## References");
     expect(markdown).toContain("- Config: `vite.config.ts` (framework, high)");
+    expect(markdown).toContain("- Entrypoint: `src/main.ts` (source, medium)");
+    expect(markdown).toContain("- Entrypoint: `./dist/index.js` (package-output, high, main)");
     expect(markdown).toContain("- Directory: `src` (source, medium)");
     expect(markdown).toContain("- Workspace signals: `pnpm-workspace.yaml` (high)");
     expect(markdown).toContain("- Workspace package globs: `apps/*`, `packages/*`");

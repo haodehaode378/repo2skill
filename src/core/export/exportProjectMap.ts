@@ -2,6 +2,7 @@ import path from "node:path";
 import fs from "fs-extra";
 import { RepoAnalysisSchema, type RepoAnalysis } from "../../schemas/analysis.js";
 import { renderPackageScriptCommand } from "../commands/packageScripts.js";
+import { getEntrypointFacts } from "../entrypoints/facts.js";
 import { getDisplayEnvVars, getOmittedEnvVarCount } from "../envVars/display.js";
 
 export async function exportProjectMap(
@@ -95,13 +96,16 @@ export function renderProjectMap(analysis: RepoAnalysis): string {
     }
   }
 
-  if (analysis.detected.entrypoints.length > 0) {
+  const entrypoints = getEntrypointFacts(analysis);
+
+  if (entrypoints.length > 0) {
     sections.push("");
     sections.push("## Entrypoints");
     sections.push("");
 
-    for (const entrypoint of analysis.detected.entrypoints) {
-      sections.push(`- \`${entrypoint}\``);
+    for (const entrypoint of entrypoints) {
+      const reason = entrypoint.reason ? `, ${entrypoint.reason}` : "";
+      sections.push(`- \`${entrypoint.path}\` (${entrypoint.role}, ${entrypoint.confidence}${reason})`);
     }
   }
 

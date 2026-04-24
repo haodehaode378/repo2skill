@@ -2,6 +2,7 @@ import path from "node:path";
 import fs from "fs-extra";
 import { RepoAnalysisSchema, type CommandCandidate, type CommandRole, type RepoAnalysis } from "../../schemas/analysis.js";
 import { renderPackageScriptCommand } from "../commands/packageScripts.js";
+import { getEntrypointFacts } from "../entrypoints/facts.js";
 import { getDisplayEnvVars, getOmittedEnvVarCount } from "../envVars/display.js";
 
 const VALIDATION_SCRIPT_ORDER = ["test", "lint", "typecheck", "build"] as const;
@@ -143,6 +144,11 @@ function getReferences(analysis: RepoAnalysis): string[] {
 
   for (const configFile of analysis.detected.configFiles) {
     references.push(`Config: \`${configFile.path}\` (${configFile.type}, ${configFile.confidence})`);
+  }
+
+  for (const entrypoint of getEntrypointFacts(analysis)) {
+    const reason = entrypoint.reason ? `, ${entrypoint.reason}` : "";
+    references.push(`Entrypoint: \`${entrypoint.path}\` (${entrypoint.role}, ${entrypoint.confidence}${reason})`);
   }
 
   for (const directory of analysis.detected.directories) {

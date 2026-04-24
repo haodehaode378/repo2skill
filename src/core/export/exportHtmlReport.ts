@@ -1,6 +1,7 @@
 import path from "node:path";
 import fs from "fs-extra";
 import { RepoAnalysisSchema, type RepoAnalysis } from "../../schemas/analysis.js";
+import { getEntrypointFacts, isGeneratedEntrypointRole } from "../entrypoints/facts.js";
 import { getDisplayEnvVars, getOmittedEnvVarCount } from "../envVars/display.js";
 
 export async function exportHtmlReport(
@@ -78,10 +79,17 @@ export function renderHtmlReport(analysis: RepoAnalysis): string {
     sections.push("</ul></section>");
   }
 
-  if (analysis.detected.entrypoints.length > 0) {
+  const entrypoints = getEntrypointFacts(analysis);
+
+  if (entrypoints.length > 0) {
     sections.push("<section><h2>Entrypoints</h2><ul>");
-    for (const entrypoint of analysis.detected.entrypoints) {
-      sections.push(`<li><code>${escapeHtml(entrypoint)}</code></li>`);
+    for (const entrypoint of entrypoints) {
+      const reason = entrypoint.reason ? `, ${entrypoint.reason}` : "";
+      sections.push(
+        `<li><code>${escapeHtml(entrypoint.path)}</code> (${escapeHtml(entrypoint.role)}, ${escapeHtml(
+          entrypoint.confidence
+        )}${escapeHtml(reason)})</li>`
+      );
     }
     sections.push("</ul></section>");
   }
@@ -188,8 +196,12 @@ function escapeHtml(value: string): string {
 function collectTopologyHints(analysis: RepoAnalysis): string[] {
   const hints = new Set<string>();
 
-  for (const entrypoint of analysis.detected.entrypoints) {
-    const directory = path.dirname(entrypoint);
+  for (const entrypoint of getEntrypointFacts(analysis)) {
+    if (isGeneratedEntrypointRole(entrypoint.role)) {
+      continue;
+    }
+
+    const directory = path.dirname(entrypoint.path);
     if (directory !== ".") {
       hints.add(directory);
     }

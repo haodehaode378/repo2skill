@@ -35,6 +35,16 @@ export const DirectoryCandidateSchema = z.object({
   confidence: ConfidenceLevelSchema
 });
 
+export const EntrypointRoleSchema = z.enum(["source", "package-output", "cli", "generated", "other"]);
+
+export const EntrypointCandidateSchema = z.object({
+  path: z.string(),
+  role: EntrypointRoleSchema,
+  source: z.string(),
+  confidence: ConfidenceLevelSchema,
+  reason: z.string().optional()
+});
+
 export const ConfigFileTypeSchema = z.enum([
   "typescript",
   "framework",
@@ -84,6 +94,7 @@ export const RepoAnalysisSchema = z.object({
     directories: z.array(DirectoryCandidateSchema).default([]),
     configFiles: z.array(ConfigFileSchema).default([]),
     entrypoints: z.array(z.string()).default([]),
+    entrypointFacts: z.array(EntrypointCandidateSchema).default([]).optional(),
     envVars: z.array(EnvVarSchema).default([])
   }),
   evidence: z.array(EvidenceRecordSchema).default([])
@@ -97,6 +108,8 @@ export type CommandRole = z.infer<typeof CommandRoleSchema>;
 export type CommandCandidate = z.infer<typeof CommandCandidateSchema>;
 export type DirectoryRole = z.infer<typeof DirectoryRoleSchema>;
 export type DirectoryCandidate = z.infer<typeof DirectoryCandidateSchema>;
+export type EntrypointRole = z.infer<typeof EntrypointRoleSchema>;
+export type EntrypointCandidate = z.infer<typeof EntrypointCandidateSchema>;
 export type ConfigFileType = z.infer<typeof ConfigFileTypeSchema>;
 export type ConfigFile = z.infer<typeof ConfigFileSchema>;
 export type EnvVar = z.infer<typeof EnvVarSchema>;

@@ -7,6 +7,7 @@ import type {
   RepoAnalysis
 } from "../../schemas/analysis.js";
 import { renderPackageScriptCommand } from "../commands/packageScripts.js";
+import { getEntrypointFacts, isGeneratedEntrypointRole } from "../entrypoints/facts.js";
 
 const KNOWN_COMMAND_ROLES = new Set<CommandRole>([
   "dev",
@@ -35,9 +36,14 @@ export function deriveCommands(analysis: RepoAnalysis): CommandCandidate[] {
 
 export function deriveDirectories(analysis: RepoAnalysis): DirectoryCandidate[] {
   const directories = new Map<string, DirectoryCandidate>();
+  const entrypointFacts = getEntrypointFacts(analysis);
 
-  for (const entrypoint of analysis.detected.entrypoints) {
-    const directoryPath = path.posix.dirname(entrypoint);
+  for (const entrypoint of entrypointFacts) {
+    if (isGeneratedEntrypointRole(entrypoint.role)) {
+      continue;
+    }
+
+    const directoryPath = path.posix.dirname(entrypoint.path);
 
     if (directoryPath === ".") {
       continue;
@@ -46,8 +52,8 @@ export function deriveDirectories(analysis: RepoAnalysis): DirectoryCandidate[] 
     registerDirectory(directories, {
       path: directoryPath,
       role: getDirectoryRole(directoryPath),
-      source: entrypoint,
-      confidence: "medium"
+      source: entrypoint.path,
+      confidence: entrypoint.confidence
     });
   }
 

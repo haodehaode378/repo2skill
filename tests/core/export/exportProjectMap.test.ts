@@ -48,6 +48,20 @@ function createFullAnalysis(): RepoAnalysis {
         }
       ],
       entrypoints: ["src/main.ts", "src/server.ts"],
+      entrypointFacts: [
+        {
+          path: "src/main.ts",
+          role: "source",
+          source: "src/main.ts",
+          confidence: "medium"
+        },
+        {
+          path: "src/server.ts",
+          role: "source",
+          source: "src/server.ts",
+          confidence: "medium"
+        }
+      ],
       envVars: [
         {
           name: "API_URL",
@@ -106,7 +120,7 @@ describe("renderProjectMap", () => {
     expect(markdown).toContain("- `dev`: `pnpm dev` (script: `vite`)");
     expect(markdown).toContain("## Key Config Files");
     expect(markdown).toContain("- `vite.config.ts` (framework, high)");
-    expect(markdown).toContain("- `src/main.ts`");
+    expect(markdown).toContain("- `src/main.ts` (source, medium)");
     expect(markdown).toContain("- `API_URL` from `.env.example` (high)");
   });
 

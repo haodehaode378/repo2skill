@@ -51,7 +51,35 @@ function createFullAnalysis(): RepoAnalysis {
           confidence: "high"
         }
       ],
-      entrypoints: ["src/main.ts", "src/server.ts", "scripts/build.ts"],
+      entrypoints: ["./dist/index.js", "src/main.ts", "src/server.ts", "scripts/build.ts"],
+      entrypointFacts: [
+        {
+          path: "./dist/index.js",
+          role: "package-output",
+          source: "package.json",
+          confidence: "high",
+          reason: "main"
+        },
+        {
+          path: "src/main.ts",
+          role: "source",
+          source: "src/main.ts",
+          confidence: "medium"
+        },
+        {
+          path: "src/server.ts",
+          role: "source",
+          source: "src/server.ts",
+          confidence: "medium"
+        },
+        {
+          path: "scripts/build.ts",
+          role: "cli",
+          source: "package.json",
+          confidence: "high",
+          reason: "bin"
+        }
+      ],
       envVars: [
         {
           name: "API_URL",
@@ -119,6 +147,10 @@ describe("renderAgentsMd", () => {
     expect(markdown).toContain("## Important Directories");
     expect(markdown).toContain("- `src`");
     expect(markdown).toContain("- `scripts`");
+    expect(markdown).not.toContain("- `dist`");
+    expect(markdown).toContain("## Entrypoints");
+    expect(markdown).toContain("- `src/main.ts` (source, medium)");
+    expect(markdown).toContain("- `./dist/index.js` (package-output, high, main)");
     expect(markdown).toContain("## Key Config Files");
     expect(markdown).toContain("- `vite.config.ts` (framework)");
     expect(markdown).toContain("## Notes and Boundaries");
