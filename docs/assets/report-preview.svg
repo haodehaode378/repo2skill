@@ -1,0 +1,33 @@
+<svg width="960" height="520" viewBox="0 0 960 520" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title desc">
+  <title id="title">repo2skill report preview</title>
+  <desc id="desc">A stylized preview of the repo2skill HTML report showing repository overview, commands, entrypoints, config files, and validation signals.</desc>
+  <rect width="960" height="520" rx="28" fill="#0F172A"/>
+  <path d="M0 130C145 65 255 72 390 116C531 162 664 145 960 36V520H0V130Z" fill="#123B45" opacity="0.72"/>
+  <path d="M0 384C152 309 284 321 432 366C579 411 729 404 960 300V520H0V384Z" fill="#B45309" opacity="0.35"/>
+  <rect x="56" y="48" width="848" height="424" rx="24" fill="#F8FAFC"/>
+  <rect x="56" y="48" width="848" height="64" rx="24" fill="#111827"/>
+  <circle cx="92" cy="80" r="8" fill="#F97316"/>
+  <circle cx="120" cy="80" r="8" fill="#FBBF24"/>
+  <circle cx="148" cy="80" r="8" fill="#22C55E"/>
+  <text x="184" y="87" fill="#E5E7EB" font-family="Verdana, sans-serif" font-size="20" font-weight="700">repo2skill report</text>
+  <text x="76" y="152" fill="#0F172A" font-family="Verdana, sans-serif" font-size="30" font-weight="800">tinybench Repository Skill</text>
+  <text x="76" y="184" fill="#475569" font-family="Verdana, sans-serif" font-size="16">Evidence-backed context for coding agents</text>
+  <rect x="76" y="216" width="248" height="96" rx="16" fill="#E0F2FE"/>
+  <text x="100" y="249" fill="#0369A1" font-family="Verdana, sans-serif" font-size="14" font-weight="700">Commands</text>
+  <text x="100" y="278" fill="#0F172A" font-family="Verdana, sans-serif" font-size="18" font-weight="700">pnpm test</text>
+  <text x="100" y="300" fill="#475569" font-family="Verdana, sans-serif" font-size="13">script: vitest run</text>
+  <rect x="356" y="216" width="248" height="96" rx="16" fill="#DCFCE7"/>
+  <text x="380" y="249" fill="#15803D" font-family="Verdana, sans-serif" font-size="14" font-weight="700">Entrypoints</text>
+  <text x="380" y="278" fill="#0F172A" font-family="Verdana, sans-serif" font-size="18" font-weight="700">src/index.ts</text>
+  <text x="380" y="300" fill="#475569" font-family="Verdana, sans-serif" font-size="13">source, medium confidence</text>
+  <rect x="636" y="216" width="248" height="96" rx="16" fill="#FEF3C7"/>
+  <text x="660" y="249" fill="#B45309" font-family="Verdana, sans-serif" font-size="14" font-weight="700">Package Output</text>
+  <text x="660" y="278" fill="#0F172A" font-family="Verdana, sans-serif" font-size="18" font-weight="700">./dist/index.js</text>
+  <text x="660" y="300" fill="#475569" font-family="Verdana, sans-serif" font-size="13">not a primary directory</text>
+  <rect x="76" y="344" width="384" height="88" rx="16" fill="#FFFFFF" stroke="#CBD5E1"/>
+  <text x="100" y="374" fill="#334155" font-family="Verdana, sans-serif" font-size="14" font-weight="700">Before Changing Code</text>
+  <text x="100" y="402" fill="#0F172A" font-family="Verdana, sans-serif" font-size="15">Start from evidenced directories: src</text>
+  <rect x="500" y="344" width="384" height="88" rx="16" fill="#FFFFFF" stroke="#CBD5E1"/>
+  <text x="524" y="374" fill="#334155" font-family="Verdana, sans-serif" font-size="14" font-weight="700">Validation</text>
+  <text x="524" y="402" fill="#0F172A" font-family="Verdana, sans-serif" font-size="15">Run pnpm test before finishing</text>
+</svg>

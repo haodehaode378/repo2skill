@@ -2,11 +2,29 @@
 
 > Turn any repository into agent-ready onboarding context.
 
-[![npm package](https://img.shields.io/badge/npm-repo2skill-cb3837?style=flat-square)](https://www.npmjs.com/package/repo2skill)
+![npm ready](https://img.shields.io/badge/npm-ready-cb3837?style=flat-square)
 [![TypeScript](https://img.shields.io/badge/TypeScript-ready-3178c6?style=flat-square)](https://www.typescriptlang.org/)
 [![License: MIT](https://img.shields.io/badge/license-MIT-111827?style=flat-square)](./LICENSE)
 
 **语言 / Language:** [简体中文](#简体中文) | [English](#english)
+
+```bash
+npm run dev -- https://github.com/tinylibs/tinybench --no-cache --out ./out-tinybench
+```
+
+```txt
+Input repository
+  -> repo2skill.json
+  -> project-map.md
+  -> AGENTS.md
+  -> SKILL.md
+  -> quickstart.windows.md / quickstart.macos.md / quickstart.linux.md
+  -> report.html
+```
+
+[View tinybench demo](./docs/demo-tinybench.md) · [Release checklist](./docs/release-checklist.md) · [Quality checks](./docs/quality-checks.md)
+
+![repo2skill report preview](./docs/assets/report-preview.svg)
 
 ---
 
@@ -63,6 +81,8 @@ npm run dev -- ./tests/fixtures/analysis-target --summary-only
 | `report.html` | `--format all` 时生成的 HTML 报告 |
 
 ### 输出示例
+
+视觉预览见 [report preview](./docs/assets/report-preview.svg)。真实仓库验证见 [tinybench demo](./docs/demo-tinybench.md)。
 
 `AGENTS.md` 会给出清晰的修改前导航和验证指令：
 
@@ -228,6 +248,8 @@ npm run dev -- ./tests/fixtures/analysis-target --summary-only
 | `report.html` | HTML report generated with `--format all` |
 
 ### Output preview
+
+See the [report preview](./docs/assets/report-preview.svg) for the visual summary, and the [tinybench demo](./docs/demo-tinybench.md) for a real repository check.
 
 `AGENTS.md` gives clear pre-change navigation and validation guidance:
 
