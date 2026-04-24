@@ -78,6 +78,14 @@
     "entrypoints": [
       "src/main.ts"
     ],
+    "entrypointFacts": [
+      {
+        "path": "src/main.ts",
+        "role": "source",
+        "source": "src/main.ts",
+        "confidence": "medium"
+      }
+    ],
     "envVars": [
       {
         "name": "API_URL",

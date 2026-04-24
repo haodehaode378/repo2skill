@@ -144,6 +144,42 @@ describe("exportAnalysisArtifacts", () => {
     await expect(fs.pathExists(path.join(outDir, "report.html"))).resolves.toBe(true);
   });
 
+  it("exports source entrypoints without promoting package output directories", async () => {
+    const outDir = await createTempDir();
+    const analysis = await analyzeLocalRepo(path.resolve("tests/fixtures/export-entrypoints"));
+
+    await exportAnalysisArtifacts(outDir, analysis, "all");
+
+    const agentsMd = await fs.readFile(path.join(outDir, "AGENTS.md"), "utf8");
+    const skillMd = await fs.readFile(path.join(outDir, "SKILL.md"), "utf8");
+    const projectMap = await fs.readFile(path.join(outDir, "project-map.md"), "utf8");
+    const json = await fs.readJson(path.join(outDir, "repo2skill.json"));
+
+    expect(json.detected.entrypointFacts).toEqual([
+      {
+        path: "./dist/index.js",
+        role: "package-output",
+        source: "package.json",
+        confidence: "high",
+        reason: "main"
+      },
+      {
+        path: "src/index.ts",
+        role: "source",
+        source: "src/index.ts",
+        confidence: "medium"
+      }
+    ]);
+    expect(agentsMd).toContain("- Start from evidenced directories: `src`.");
+    expect(agentsMd).toContain("- `./dist/index.js` (package-output, high, main)");
+    expect(agentsMd).toContain("- `src/index.ts` (source, medium)");
+    expect(agentsMd).not.toContain("- `dist`");
+    expect(skillMd).toContain("- Entrypoint: `src/index.ts` (source, medium)");
+    expect(skillMd).toContain("- Entrypoint: `./dist/index.js` (package-output, high, main)");
+    expect(projectMap).toContain("- `src` (source, medium) from `src/index.ts`");
+    expect(projectMap).not.toContain("- `dist`");
+  });
+
   it("writes only markdown output for the md format", async () => {
     const outDir = await createTempDir();
     const analysis = await analyzeLocalRepo(path.resolve("tests/fixtures/analysis-target"));

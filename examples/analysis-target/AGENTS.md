@@ -25,6 +25,10 @@
 
 - `src`
 
+## Entrypoints
+
+- `src/main.ts` (source, medium)
+
 ## Key Config Files
 
 - `.env.example` (environment)

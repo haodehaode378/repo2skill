@@ -4,7 +4,7 @@
 
 测试环境：
 
-- 路径：`E:\ai-skill\repo2skill`
+- 路径：本地 `repo2skill` 仓库目录
 - 终端：`cmd.exe`
 - 说明：以下结论仅基于已实际执行并贴出结果的命令
 
@@ -162,10 +162,10 @@ npm run dev -- https://github.com/octocat/Hello-World --summary-only
 npm run dev -- https://github.com/octocat/Hello-World --summary-only
 ```
 
-两次输出中的 `Materialized root` 均为：
+两次输出中的 `Materialized root` 均指向同一个缓存目录，例如：
 
 ```text
-C:\Users\36366\AppData\Local\Temp\repo2skill-cache\81c1d5e3fcfe\Hello-World
+<temp>\repo2skill-cache\<cache-key>\Hello-World
 ```
 
 结论：

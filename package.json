@@ -6,14 +6,23 @@
   "bin": {
     "repo2skill": "dist/index.js"
   },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
   "scripts": {
     "dev": "tsx src/cli/index.ts",
     "benchmark": "tsx src/cli/benchmark.ts",
     "build": "tsup src/cli/index.ts --format esm --dts --clean",
+    "prepack": "npm run build",
     "test": "vitest run",
     "test:watch": "vitest",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit"
+  },
+  "engines": {
+    "node": ">=20"
   },
   "keywords": [
     "codex",

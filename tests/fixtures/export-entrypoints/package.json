@@ -1,0 +1,7 @@
+{
+  "name": "export-entrypoints",
+  "main": "./dist/index.js",
+  "scripts": {
+    "test": "vitest run"
+  }
+}

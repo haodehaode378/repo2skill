@@ -1,6 +1,6 @@
 {
   "manifestName": "public-node-ts-smoke",
-  "generatedAt": "2026-04-23T04:51:43.550Z",
+  "generatedAt": "2026-04-24T07:21:38.479Z",
   "format": "all",
   "repoCount": 10,
   "successCount": 10,
@@ -12,6 +12,8 @@
       "branch": "master",
       "success": true,
       "scriptCount": 0,
+      "commandCount": 0,
+      "configFileCount": 0,
       "entrypointCount": 0,
       "envVarCount": 0
     },
@@ -20,9 +22,12 @@
       "url": "https://github.com/vitejs/vite",
       "success": true,
       "packageManager": "pnpm",
+      "workspace": true,
       "scriptCount": 6,
+      "commandCount": 6,
+      "configFileCount": 16,
       "entrypointCount": 0,
-      "envVarCount": 34
+      "envVarCount": 25
     },
     {
       "name": "nextjs",
@@ -30,24 +35,32 @@
       "branch": "canary",
       "success": true,
       "packageManager": "pnpm",
+      "workspace": true,
       "scriptCount": 4,
+      "commandCount": 4,
+      "configFileCount": 40,
       "entrypointCount": 0,
-      "envVarCount": 745
+      "envVarCount": 367
     },
     {
       "name": "astro",
       "url": "https://github.com/withastro/astro",
       "success": true,
       "packageManager": "pnpm",
+      "workspace": true,
       "scriptCount": 5,
+      "commandCount": 5,
+      "configFileCount": 26,
       "entrypointCount": 0,
-      "envVarCount": 64
+      "envVarCount": 38
     },
     {
       "name": "hono",
       "url": "https://github.com/honojs/hono",
       "success": true,
       "scriptCount": 4,
+      "commandCount": 4,
+      "configFileCount": 11,
       "entrypointCount": 3,
       "envVarCount": 1
     },
@@ -56,9 +69,12 @@
       "url": "https://github.com/colinhacks/zod",
       "success": true,
       "packageManager": "pnpm",
+      "workspace": true,
       "scriptCount": 5,
+      "commandCount": 5,
+      "configFileCount": 10,
       "entrypointCount": 0,
-      "envVarCount": 6
+      "envVarCount": 2
     },
     {
       "name": "axios",
@@ -66,35 +82,46 @@
       "success": true,
       "packageManager": "npm",
       "scriptCount": 3,
+      "commandCount": 3,
+      "configFileCount": 13,
       "entrypointCount": 3,
-      "envVarCount": 8
+      "envVarCount": 3
     },
     {
       "name": "eslint",
       "url": "https://github.com/eslint/eslint",
       "success": true,
       "projectType": "cli",
+      "workspace": true,
       "scriptCount": 2,
+      "commandCount": 2,
+      "configFileCount": 11,
       "entrypointCount": 2,
-      "envVarCount": 14
+      "envVarCount": 4
     },
     {
       "name": "pnpm",
       "url": "https://github.com/pnpm/pnpm",
       "success": true,
       "packageManager": "pnpm",
+      "workspace": true,
       "scriptCount": 1,
+      "commandCount": 1,
+      "configFileCount": 12,
       "entrypointCount": 0,
-      "envVarCount": 36
+      "envVarCount": 21
     },
     {
       "name": "turborepo",
       "url": "https://github.com/vercel/turborepo",
       "success": true,
       "packageManager": "pnpm",
+      "workspace": true,
       "scriptCount": 4,
+      "commandCount": 4,
+      "configFileCount": 16,
       "entrypointCount": 0,
-      "envVarCount": 99
+      "envVarCount": 21
     }
   ]
 }

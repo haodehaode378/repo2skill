@@ -64,6 +64,41 @@ After regenerating examples, check that local absolute paths are not committed.
 
 重新生成 examples 后，检查不要提交本机绝对路径。
 
+## npm Package / npm 包检查
+
+Before publishing, verify the package contents locally:
+
+发布前先在本地验证包内容：
+
+```bash
+npm pack
+```
+
+The packed tarball should include:
+
+打包产物应包含：
+
+- `dist/index.js`
+- `dist/index.d.ts`
+- `README.md`
+- `LICENSE`
+- `package.json`
+
+The packed tarball should not include:
+
+打包产物不应包含：
+
+- `src`
+- `tests`
+- `examples`
+- `benchmark-out`
+- `out-*`
+- `node_modules`
+
+After `npm pack`, test the generated CLI from the packed package before publishing.
+
+运行 `npm pack` 后，发布前应使用打包产物验证 CLI 可执行。
+
 ## Benchmark Checks / Benchmark 检查
 
 Smoke benchmark:
@@ -108,4 +143,3 @@ Because the README and release docs contain Chinese text, run the mojibake check
 ```bash
 python C:/Users/36366/.codex/skills/text-encoding-guard/scripts/check_mojibake.py --root .
 ```
-

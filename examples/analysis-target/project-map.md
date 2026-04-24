@@ -30,7 +30,7 @@
 
 ## Entrypoints
 
-- `src/main.ts`
+- `src/main.ts` (source, medium)
 
 ## Environment Variables
 

@@ -37,6 +37,7 @@ description: Repository-specific guidance for working in analysis-target. Use wh
 - Config: `.env.example` (environment, high)
 - Config: `package.json` (package, high)
 - Config: `vite.config.ts` (framework, high)
+- Entrypoint: `src/main.ts` (source, medium)
 - Directory: `src` (source, medium)
 - Env: `API_URL` from `.env.example` (high)
 - Env: `SECRET_TOKEN` from `src/config.ts` (medium)

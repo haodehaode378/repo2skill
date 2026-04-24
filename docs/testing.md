@@ -13,7 +13,7 @@
 ## 1. 进入项目目录
 
 ```powershell
-cd E:\ai-skill\repo2skill
+cd path\to\repo2skill
 ```
 
 ## 2. 基础工程检查
