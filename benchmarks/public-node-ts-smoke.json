@@ -1,0 +1,47 @@
+{
+  "name": "public-node-ts-smoke",
+  "repos": [
+    {
+      "name": "hello-world",
+      "url": "https://github.com/octocat/Hello-World",
+      "branch": "master"
+    },
+    {
+      "name": "vite",
+      "url": "https://github.com/vitejs/vite"
+    },
+    {
+      "name": "nextjs",
+      "url": "https://github.com/vercel/next.js",
+      "branch": "canary"
+    },
+    {
+      "name": "astro",
+      "url": "https://github.com/withastro/astro"
+    },
+    {
+      "name": "hono",
+      "url": "https://github.com/honojs/hono"
+    },
+    {
+      "name": "zod",
+      "url": "https://github.com/colinhacks/zod"
+    },
+    {
+      "name": "axios",
+      "url": "https://github.com/axios/axios"
+    },
+    {
+      "name": "eslint",
+      "url": "https://github.com/eslint/eslint"
+    },
+    {
+      "name": "pnpm",
+      "url": "https://github.com/pnpm/pnpm"
+    },
+    {
+      "name": "turborepo",
+      "url": "https://github.com/vercel/turborepo"
+    }
+  ]
+}

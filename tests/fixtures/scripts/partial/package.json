@@ -1,0 +1,9 @@
+{
+  "name": "partial-scripts-fixture",
+  "private": true,
+  "scripts": {
+    "dev": "node server.js",
+    "test": "vitest",
+    "start": "node dist/server.js"
+  }
+}

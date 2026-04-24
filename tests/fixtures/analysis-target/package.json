@@ -1,0 +1,9 @@
+{
+  "name": "analysis-target",
+  "private": true,
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "test": "vitest run"
+  }
+}

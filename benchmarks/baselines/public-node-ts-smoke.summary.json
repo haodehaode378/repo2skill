@@ -1,0 +1,100 @@
+{
+  "manifestName": "public-node-ts-smoke",
+  "generatedAt": "2026-04-23T04:51:43.550Z",
+  "format": "all",
+  "repoCount": 10,
+  "successCount": 10,
+  "failureCount": 0,
+  "repos": [
+    {
+      "name": "hello-world",
+      "url": "https://github.com/octocat/Hello-World",
+      "branch": "master",
+      "success": true,
+      "scriptCount": 0,
+      "entrypointCount": 0,
+      "envVarCount": 0
+    },
+    {
+      "name": "vite",
+      "url": "https://github.com/vitejs/vite",
+      "success": true,
+      "packageManager": "pnpm",
+      "scriptCount": 6,
+      "entrypointCount": 0,
+      "envVarCount": 34
+    },
+    {
+      "name": "nextjs",
+      "url": "https://github.com/vercel/next.js",
+      "branch": "canary",
+      "success": true,
+      "packageManager": "pnpm",
+      "scriptCount": 4,
+      "entrypointCount": 0,
+      "envVarCount": 745
+    },
+    {
+      "name": "astro",
+      "url": "https://github.com/withastro/astro",
+      "success": true,
+      "packageManager": "pnpm",
+      "scriptCount": 5,
+      "entrypointCount": 0,
+      "envVarCount": 64
+    },
+    {
+      "name": "hono",
+      "url": "https://github.com/honojs/hono",
+      "success": true,
+      "scriptCount": 4,
+      "entrypointCount": 3,
+      "envVarCount": 1
+    },
+    {
+      "name": "zod",
+      "url": "https://github.com/colinhacks/zod",
+      "success": true,
+      "packageManager": "pnpm",
+      "scriptCount": 5,
+      "entrypointCount": 0,
+      "envVarCount": 6
+    },
+    {
+      "name": "axios",
+      "url": "https://github.com/axios/axios",
+      "success": true,
+      "packageManager": "npm",
+      "scriptCount": 3,
+      "entrypointCount": 3,
+      "envVarCount": 8
+    },
+    {
+      "name": "eslint",
+      "url": "https://github.com/eslint/eslint",
+      "success": true,
+      "projectType": "cli",
+      "scriptCount": 2,
+      "entrypointCount": 2,
+      "envVarCount": 14
+    },
+    {
+      "name": "pnpm",
+      "url": "https://github.com/pnpm/pnpm",
+      "success": true,
+      "packageManager": "pnpm",
+      "scriptCount": 1,
+      "entrypointCount": 0,
+      "envVarCount": 36
+    },
+    {
+      "name": "turborepo",
+      "url": "https://github.com/vercel/turborepo",
+      "success": true,
+      "packageManager": "pnpm",
+      "scriptCount": 4,
+      "entrypointCount": 0,
+      "envVarCount": 99
+    }
+  ]
+}

@@ -1,0 +1,144 @@
+import os from "node:os";
+import path from "node:path";
+import fs from "fs-extra";
+import { afterEach, describe, expect, it } from "vitest";
+import {
+  exportSkillMd,
+  renderSkillMd
+} from "../../../src/core/export/exportSkillMd.js";
+import type { RepoAnalysis } from "../../../src/schemas/analysis.js";
+
+const tempDirs: string[] = [];
+
+function createFullAnalysis(): RepoAnalysis {
+  return {
+    repo: {
+      input: "https://github.com/example/repo",
+      rootDir: "/tmp/repo",
+      name: "repo"
+    },
+    detected: {
+      packageManager: "pnpm",
+      scripts: [
+        {
+          name: "dev",
+          command: "vite",
+          confidence: "high"
+        },
+        {
+          name: "test",
+          command: "vitest run",
+          confidence: "high"
+        },
+        {
+          name: "build",
+          command: "tsc -b",
+          confidence: "high"
+        }
+      ],
+      entrypoints: [],
+      envVars: [
+        {
+          name: "API_URL",
+          sourceFile: ".env.example",
+          confidence: "high"
+        }
+      ]
+    },
+    evidence: []
+  };
+}
+
+function createMinimalAnalysis(): RepoAnalysis {
+  return {
+    repo: {
+      input: "./fixture",
+      rootDir: "/tmp/fixture",
+      name: "fixture"
+    },
+    detected: {
+      scripts: [],
+      entrypoints: [],
+      envVars: []
+    },
+    evidence: []
+  };
+}
+
+async function createTempDir(): Promise<string> {
+  const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "repo2skill-skill-"));
+  tempDirs.push(tempDir);
+  return tempDir;
+}
+
+afterEach(async () => {
+  await Promise.all(tempDirs.splice(0).map((tempDir) => fs.remove(tempDir)));
+});
+
+describe("renderSkillMd", () => {
+  it("renders frontmatter and evidenced sections", () => {
+    const markdown = renderSkillMd(createFullAnalysis());
+
+    expect(markdown).toContain("---");
+    expect(markdown).toContain("name: repo-repo-skill");
+    expect(markdown).toContain("description: Repository-specific guidance for working in repo.");
+    expect(markdown).toContain("## Overview");
+    expect(markdown).toContain("- Detected Package Manager: `pnpm`");
+    expect(markdown).toContain("## Available Commands");
+    expect(markdown).toContain("- Run `vite` via the `dev` script.");
+    expect(markdown).toContain("## Validation");
+    expect(markdown).toContain("- Prefer `test` before finishing changes when that check is relevant.");
+    expect(markdown).toContain("## Environment Variables");
+    expect(markdown).toContain("- `API_URL` from `.env.example` (high)");
+    expect(markdown).toContain("## Boundaries");
+  });
+
+  it("omits optional sections without supporting data", () => {
+    const markdown = renderSkillMd(createMinimalAnalysis());
+
+    expect(markdown).toContain("## Overview");
+    expect(markdown).not.toContain("## Available Commands");
+    expect(markdown).not.toContain("## Validation");
+    expect(markdown).not.toContain("## Environment Variables");
+    expect(markdown).toContain("## Boundaries");
+  });
+});
+
+describe("exportSkillMd", () => {
+  it("writes SKILL.md to the output directory", async () => {
+    const outDir = path.join(await createTempDir(), "nested", "out");
+
+    await exportSkillMd(outDir, createFullAnalysis());
+
+    const outputPath = path.join(outDir, "SKILL.md");
+
+    await expect(fs.pathExists(outputPath)).resolves.toBe(true);
+    await expect(fs.readFile(outputPath, "utf8")).resolves.toContain("## Available Commands");
+  });
+
+  it("rejects invalid analysis before writing", async () => {
+    const outDir = await createTempDir();
+    const invalidAnalysis = {
+      repo: {
+        input: "./fixture",
+        rootDir: "/tmp/fixture",
+        name: "fixture"
+      },
+      detected: {
+        scripts: [],
+        entrypoints: [],
+        envVars: [
+          {
+            name: "API_URL",
+            sourceFile: ".env.example",
+            confidence: "certain"
+          }
+        ]
+      },
+      evidence: []
+    } as unknown as RepoAnalysis;
+
+    await expect(exportSkillMd(outDir, invalidAnalysis)).rejects.toThrow();
+    await expect(fs.pathExists(path.join(outDir, "SKILL.md"))).resolves.toBe(false);
+  });
+});

@@ -1,0 +1,10 @@
+node_modules
+dist
+coverage
+.temp
+.DS_Store
+*.log
+out
+out-*
+benchmark-out
+benchmark-smoke-out

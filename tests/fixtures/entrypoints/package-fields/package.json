@@ -1,0 +1,9 @@
+{
+  "name": "entrypoints-fixture",
+  "main": "./dist/index.js",
+  "module": "./dist/index.mjs",
+  "browser": "./dist/browser.js",
+  "bin": {
+    "entrypoints-fixture": "./bin/cli.js"
+  }
+}

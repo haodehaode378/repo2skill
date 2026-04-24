@@ -1,0 +1,201 @@
+{
+  "manifestName": "public-node-ts",
+  "generatedAt": "2026-04-23T05:00:06.185Z",
+  "format": "all",
+  "repoCount": 21,
+  "successCount": 21,
+  "failureCount": 0,
+  "repos": [
+    {
+      "name": "hello-world",
+      "url": "https://github.com/octocat/Hello-World",
+      "branch": "master",
+      "success": true,
+      "scriptCount": 0,
+      "entrypointCount": 0,
+      "envVarCount": 0
+    },
+    {
+      "name": "vite",
+      "url": "https://github.com/vitejs/vite",
+      "success": true,
+      "packageManager": "pnpm",
+      "scriptCount": 6,
+      "entrypointCount": 0,
+      "envVarCount": 34
+    },
+    {
+      "name": "nextjs",
+      "url": "https://github.com/vercel/next.js",
+      "branch": "canary",
+      "success": true,
+      "packageManager": "pnpm",
+      "scriptCount": 4,
+      "entrypointCount": 0,
+      "envVarCount": 745
+    },
+    {
+      "name": "astro",
+      "url": "https://github.com/withastro/astro",
+      "success": true,
+      "packageManager": "pnpm",
+      "scriptCount": 5,
+      "entrypointCount": 0,
+      "envVarCount": 64
+    },
+    {
+      "name": "remix",
+      "url": "https://github.com/remix-run/remix",
+      "success": true,
+      "packageManager": "pnpm",
+      "scriptCount": 5,
+      "entrypointCount": 0,
+      "envVarCount": 28
+    },
+    {
+      "name": "sveltekit",
+      "url": "https://github.com/sveltejs/kit",
+      "success": true,
+      "packageManager": "pnpm",
+      "scriptCount": 3,
+      "entrypointCount": 0,
+      "envVarCount": 27
+    },
+    {
+      "name": "hono",
+      "url": "https://github.com/honojs/hono",
+      "success": true,
+      "scriptCount": 4,
+      "entrypointCount": 3,
+      "envVarCount": 1
+    },
+    {
+      "name": "nestjs",
+      "url": "https://github.com/nestjs/nest",
+      "success": true,
+      "packageManager": "npm",
+      "scriptCount": 4,
+      "entrypointCount": 0,
+      "envVarCount": 6
+    },
+    {
+      "name": "nitro",
+      "url": "https://github.com/nitrojs/nitro",
+      "success": true,
+      "packageManager": "pnpm",
+      "projectType": "cli",
+      "scriptCount": 6,
+      "entrypointCount": 1,
+      "envVarCount": 38
+    },
+    {
+      "name": "zod",
+      "url": "https://github.com/colinhacks/zod",
+      "success": true,
+      "packageManager": "pnpm",
+      "scriptCount": 5,
+      "entrypointCount": 0,
+      "envVarCount": 6
+    },
+    {
+      "name": "tanstack-query",
+      "url": "https://github.com/TanStack/query",
+      "success": true,
+      "packageManager": "pnpm",
+      "scriptCount": 4,
+      "entrypointCount": 0,
+      "envVarCount": 5
+    },
+    {
+      "name": "axios",
+      "url": "https://github.com/axios/axios",
+      "success": true,
+      "packageManager": "npm",
+      "scriptCount": 3,
+      "entrypointCount": 3,
+      "envVarCount": 8
+    },
+    {
+      "name": "supabase-js",
+      "url": "https://github.com/supabase/supabase-js",
+      "success": true,
+      "packageManager": "npm",
+      "scriptCount": 0,
+      "entrypointCount": 0,
+      "envVarCount": 14
+    },
+    {
+      "name": "prettier",
+      "url": "https://github.com/prettier/prettier",
+      "success": true,
+      "packageManager": "yarn",
+      "projectType": "cli",
+      "scriptCount": 3,
+      "entrypointCount": 5,
+      "envVarCount": 76
+    },
+    {
+      "name": "eslint",
+      "url": "https://github.com/eslint/eslint",
+      "success": true,
+      "projectType": "cli",
+      "scriptCount": 2,
+      "entrypointCount": 2,
+      "envVarCount": 14
+    },
+    {
+      "name": "pnpm",
+      "url": "https://github.com/pnpm/pnpm",
+      "success": true,
+      "packageManager": "pnpm",
+      "scriptCount": 1,
+      "entrypointCount": 0,
+      "envVarCount": 36
+    },
+    {
+      "name": "yarn-berry",
+      "url": "https://github.com/yarnpkg/berry",
+      "success": true,
+      "packageManager": "yarn",
+      "scriptCount": 0,
+      "entrypointCount": 0,
+      "envVarCount": 84
+    },
+    {
+      "name": "nx",
+      "url": "https://github.com/nrwl/nx",
+      "success": true,
+      "packageManager": "pnpm",
+      "scriptCount": 2,
+      "entrypointCount": 0,
+      "envVarCount": 298
+    },
+    {
+      "name": "turborepo",
+      "url": "https://github.com/vercel/turborepo",
+      "success": true,
+      "packageManager": "pnpm",
+      "scriptCount": 4,
+      "entrypointCount": 0,
+      "envVarCount": 99
+    },
+    {
+      "name": "create-t3-app",
+      "url": "https://github.com/t3-oss/create-t3-app",
+      "success": true,
+      "packageManager": "pnpm",
+      "scriptCount": 4,
+      "entrypointCount": 0,
+      "envVarCount": 23
+    },
+    {
+      "name": "shadcn-ui",
+      "url": "https://github.com/shadcn-ui/ui",
+      "success": true,
+      "packageManager": "pnpm",
+      "scriptCount": 5,
+      "entrypointCount": 0,
+      "envVarCount": 33
+    }
+  ]
+}

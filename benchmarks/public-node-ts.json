@@ -1,0 +1,91 @@
+{
+  "name": "public-node-ts",
+  "repos": [
+    {
+      "name": "hello-world",
+      "url": "https://github.com/octocat/Hello-World",
+      "branch": "master"
+    },
+    {
+      "name": "vite",
+      "url": "https://github.com/vitejs/vite"
+    },
+    {
+      "name": "nextjs",
+      "url": "https://github.com/vercel/next.js",
+      "branch": "canary"
+    },
+    {
+      "name": "astro",
+      "url": "https://github.com/withastro/astro"
+    },
+    {
+      "name": "remix",
+      "url": "https://github.com/remix-run/remix"
+    },
+    {
+      "name": "sveltekit",
+      "url": "https://github.com/sveltejs/kit"
+    },
+    {
+      "name": "hono",
+      "url": "https://github.com/honojs/hono"
+    },
+    {
+      "name": "nestjs",
+      "url": "https://github.com/nestjs/nest"
+    },
+    {
+      "name": "nitro",
+      "url": "https://github.com/nitrojs/nitro"
+    },
+    {
+      "name": "zod",
+      "url": "https://github.com/colinhacks/zod"
+    },
+    {
+      "name": "tanstack-query",
+      "url": "https://github.com/TanStack/query"
+    },
+    {
+      "name": "axios",
+      "url": "https://github.com/axios/axios"
+    },
+    {
+      "name": "supabase-js",
+      "url": "https://github.com/supabase/supabase-js"
+    },
+    {
+      "name": "prettier",
+      "url": "https://github.com/prettier/prettier"
+    },
+    {
+      "name": "eslint",
+      "url": "https://github.com/eslint/eslint"
+    },
+    {
+      "name": "pnpm",
+      "url": "https://github.com/pnpm/pnpm"
+    },
+    {
+      "name": "yarn-berry",
+      "url": "https://github.com/yarnpkg/berry"
+    },
+    {
+      "name": "nx",
+      "url": "https://github.com/nrwl/nx"
+    },
+    {
+      "name": "turborepo",
+      "url": "https://github.com/vercel/turborepo"
+    },
+    {
+      "name": "create-t3-app",
+      "url": "https://github.com/t3-oss/create-t3-app"
+    },
+    {
+      "name": "shadcn-ui",
+      "url": "https://github.com/shadcn-ui/ui"
+    }
+  ]
+}

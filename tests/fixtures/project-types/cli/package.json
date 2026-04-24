@@ -1,0 +1,6 @@
+{
+  "name": "cli-fixture",
+  "bin": {
+    "cli-fixture": "./bin/cli.js"
+  }
+}
