@@ -19,6 +19,12 @@ function createFullAnalysis(): RepoAnalysis {
     },
     detected: {
       packageManager: "pnpm",
+      workspace: {
+        isWorkspace: true,
+        packageGlobs: ["apps/*", "packages/*"],
+        signals: ["pnpm-workspace.yaml"],
+        confidence: "high"
+      },
       scripts: [
         {
           name: "dev",
@@ -33,6 +39,15 @@ function createFullAnalysis(): RepoAnalysis {
         {
           name: "lint",
           command: "eslint .",
+          confidence: "high"
+        }
+      ],
+      commands: [],
+      directories: [],
+      configFiles: [
+        {
+          path: "vite.config.ts",
+          type: "framework",
           confidence: "high"
         }
       ],
@@ -64,6 +79,9 @@ function createMinimalAnalysis(): RepoAnalysis {
     },
     detected: {
       scripts: [],
+      commands: [],
+      directories: [],
+      configFiles: [],
       entrypoints: [],
       envVars: []
     },
@@ -89,14 +107,24 @@ describe("renderAgentsMd", () => {
     expect(markdown).toContain("- Name: `repo`");
     expect(markdown).toContain("- Detected Package Manager: `pnpm`");
     expect(markdown).toContain("## Priority Commands");
-    expect(markdown).toContain("- `dev`: `vite`");
+    expect(markdown).toContain("- `dev`: `pnpm dev` (script: `vite`)");
+    expect(markdown).toContain("## Before Changing Code");
+    expect(markdown).toContain("- Review relevant config first: `vite.config.ts`.");
+    expect(markdown).toContain("- Start from evidenced directories: `src`, `scripts`.");
+    expect(markdown).toContain("- For workspace changes, identify the affected package before editing shared files.");
     expect(markdown).toContain("## Validation Before Finishing");
-    expect(markdown).toContain("- Run `vitest run` via the `test` script.");
-    expect(markdown).toContain("- Run `eslint .` via the `lint` script.");
+    expect(markdown).toContain("- Run only the evidenced validation commands that are relevant to your change.");
+    expect(markdown).toContain("- Run `pnpm test` for the `test` command.");
+    expect(markdown).toContain("- Run `pnpm lint` for the `lint` command.");
     expect(markdown).toContain("## Important Directories");
     expect(markdown).toContain("- `src`");
     expect(markdown).toContain("- `scripts`");
+    expect(markdown).toContain("## Key Config Files");
+    expect(markdown).toContain("- `vite.config.ts` (framework)");
     expect(markdown).toContain("## Notes and Boundaries");
+    expect(markdown).toContain(
+      "- Workspace/monorepo signals detected (high confidence): `pnpm-workspace.yaml`."
+    );
     expect(markdown).toContain("- Detected environment variables: `API_URL`.");
   });
 
@@ -105,7 +133,8 @@ describe("renderAgentsMd", () => {
 
     expect(markdown).toContain("## Repository Overview");
     expect(markdown).not.toContain("## Priority Commands");
-    expect(markdown).not.toContain("## Validation Before Finishing");
+    expect(markdown).toContain("## Validation Before Finishing");
+    expect(markdown).toContain("- No validation command was detected. Do not invent one; inspect project scripts first if validation is needed.");
     expect(markdown).not.toContain("## Important Directories");
     expect(markdown).not.toContain("## Notes and Boundaries");
   });

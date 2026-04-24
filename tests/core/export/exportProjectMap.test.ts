@@ -20,6 +20,12 @@ function createFullAnalysis(): RepoAnalysis {
     detected: {
       packageManager: "pnpm",
       projectType: "vite",
+      workspace: {
+        isWorkspace: true,
+        packageGlobs: ["apps/*", "packages/*"],
+        signals: ["pnpm-workspace.yaml"],
+        confidence: "high"
+      },
       scripts: [
         {
           name: "dev",
@@ -29,6 +35,15 @@ function createFullAnalysis(): RepoAnalysis {
         {
           name: "test",
           command: "vitest run",
+          confidence: "high"
+        }
+      ],
+      commands: [],
+      directories: [],
+      configFiles: [
+        {
+          path: "vite.config.ts",
+          type: "framework",
           confidence: "high"
         }
       ],
@@ -54,6 +69,9 @@ function createMinimalAnalysis(): RepoAnalysis {
     },
     detected: {
       scripts: [],
+      commands: [],
+      directories: [],
+      configFiles: [],
       entrypoints: [],
       envVars: []
     },
@@ -81,7 +99,13 @@ describe("renderProjectMap", () => {
     expect(markdown).toContain("- `pnpm`");
     expect(markdown).toContain("## Project Type");
     expect(markdown).toContain("- `vite`");
-    expect(markdown).toContain("- `dev`: `vite`");
+    expect(markdown).toContain("## Workspace");
+    expect(markdown).toContain("- Confidence: `high`");
+    expect(markdown).toContain("- Signals: `pnpm-workspace.yaml`");
+    expect(markdown).toContain("- Package Globs: `apps/*`, `packages/*`");
+    expect(markdown).toContain("- `dev`: `pnpm dev` (script: `vite`)");
+    expect(markdown).toContain("## Key Config Files");
+    expect(markdown).toContain("- `vite.config.ts` (framework, high)");
     expect(markdown).toContain("- `src/main.ts`");
     expect(markdown).toContain("- `API_URL` from `.env.example` (high)");
   });
@@ -92,7 +116,9 @@ describe("renderProjectMap", () => {
     expect(markdown).toContain("## Repository Overview");
     expect(markdown).not.toContain("## Detected Package Manager");
     expect(markdown).not.toContain("## Project Type");
+    expect(markdown).not.toContain("## Workspace");
     expect(markdown).not.toContain("## Key Scripts");
+    expect(markdown).not.toContain("## Key Config Files");
     expect(markdown).not.toContain("## Entrypoints");
     expect(markdown).not.toContain("## Environment Variables");
   });

@@ -1,0 +1,154 @@
+{
+  "repo": {
+    "input": "./tests/fixtures/analysis-target",
+    "rootDir": "./tests/fixtures/analysis-target",
+    "name": "analysis-target"
+  },
+  "detected": {
+    "packageManager": "pnpm",
+    "projectType": "vite",
+    "scripts": [
+      {
+        "name": "dev",
+        "command": "vite",
+        "confidence": "high"
+      },
+      {
+        "name": "build",
+        "command": "vite build",
+        "confidence": "high"
+      },
+      {
+        "name": "test",
+        "command": "vitest run",
+        "confidence": "high"
+      }
+    ],
+    "commands": [
+      {
+        "name": "dev",
+        "role": "dev",
+        "command": "pnpm dev",
+        "rawScript": "vite",
+        "source": "package.json",
+        "confidence": "high"
+      },
+      {
+        "name": "build",
+        "role": "build",
+        "command": "pnpm build",
+        "rawScript": "vite build",
+        "source": "package.json",
+        "confidence": "high"
+      },
+      {
+        "name": "test",
+        "role": "test",
+        "command": "pnpm test",
+        "rawScript": "vitest run",
+        "source": "package.json",
+        "confidence": "high"
+      }
+    ],
+    "directories": [
+      {
+        "path": "src",
+        "role": "source",
+        "source": "src/main.ts",
+        "confidence": "medium"
+      }
+    ],
+    "configFiles": [
+      {
+        "path": ".env.example",
+        "type": "environment",
+        "confidence": "high"
+      },
+      {
+        "path": "package.json",
+        "type": "package",
+        "confidence": "high"
+      },
+      {
+        "path": "vite.config.ts",
+        "type": "framework",
+        "confidence": "high"
+      }
+    ],
+    "entrypoints": [
+      "src/main.ts"
+    ],
+    "envVars": [
+      {
+        "name": "API_URL",
+        "sourceFile": ".env.example",
+        "confidence": "high"
+      },
+      {
+        "name": "SECRET_TOKEN",
+        "sourceFile": "src/config.ts",
+        "confidence": "medium"
+      }
+    ]
+  },
+  "evidence": [
+    {
+      "claim": "packageManager=pnpm",
+      "sourceFile": "pnpm-lock.yaml",
+      "confidence": "high"
+    },
+    {
+      "claim": "configFile:.env.example",
+      "sourceFile": ".env.example",
+      "reason": "Detected environment configuration file",
+      "confidence": "high"
+    },
+    {
+      "claim": "configFile:package.json",
+      "sourceFile": "package.json",
+      "reason": "Detected package configuration file",
+      "confidence": "high"
+    },
+    {
+      "claim": "configFile:vite.config.ts",
+      "sourceFile": "vite.config.ts",
+      "reason": "Detected framework configuration file",
+      "confidence": "high"
+    },
+    {
+      "claim": "projectType=vite",
+      "sourceFile": "vite.config.ts",
+      "confidence": "high"
+    },
+    {
+      "claim": "script:dev=vite",
+      "sourceFile": "package.json",
+      "confidence": "high"
+    },
+    {
+      "claim": "script:build=vite build",
+      "sourceFile": "package.json",
+      "confidence": "high"
+    },
+    {
+      "claim": "script:test=vitest run",
+      "sourceFile": "package.json",
+      "confidence": "high"
+    },
+    {
+      "claim": "entrypoint=src/main.ts",
+      "sourceFile": "src/main.ts",
+      "confidence": "medium"
+    },
+    {
+      "claim": "envVar:API_URL",
+      "sourceFile": ".env.example",
+      "confidence": "high"
+    },
+    {
+      "claim": "envVar:SECRET_TOKEN",
+      "sourceFile": "src/config.ts",
+      "confidence": "medium"
+    }
+  ]
+}

@@ -18,7 +18,10 @@ export const BenchmarkBaselineRepoSchema = z.object({
   success: z.boolean(),
   packageManager: z.string().optional(),
   projectType: z.string().optional(),
+  workspace: z.boolean().optional(),
   scriptCount: z.number().int().nonnegative().optional(),
+  commandCount: z.number().int().nonnegative().optional(),
+  configFileCount: z.number().int().nonnegative().optional(),
   entrypointCount: z.number().int().nonnegative().optional(),
   envVarCount: z.number().int().nonnegative().optional(),
   error: z.string().optional()
@@ -42,7 +45,10 @@ export const BenchmarkComparisonDeltaSchema = z.object({
     "success",
     "packageManager",
     "projectType",
+    "workspace",
     "scriptCount",
+    "commandCount",
+    "configFileCount",
     "entrypointCount",
     "envVarCount"
   ]),

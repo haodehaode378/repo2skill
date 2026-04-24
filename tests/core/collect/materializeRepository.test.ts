@@ -174,6 +174,69 @@ describe("materializeRepository", () => {
     expect(runCommand).not.toHaveBeenCalled();
   });
 
+  it("refreshes an existing cached clone when requested", async () => {
+    const cacheDir = path.join(await createTempDir(), "custom-cache");
+    const cacheKey = getGitHubCacheKey("https://github.com/example/repo");
+    const cachedCloneDir = path.join(cacheDir, cacheKey, "repo");
+    const staleFile = path.join(cachedCloneDir, "stale.txt");
+    const runCommand = vi.fn(async (_command: string, args: string[]) => {
+      const cloneDir = args[args.length - 1];
+      await fs.ensureDir(path.join(cloneDir, ".git"));
+      await fs.writeFile(path.join(cloneDir, "fresh.txt"), "fresh");
+    });
+
+    await fs.ensureDir(path.join(cachedCloneDir, ".git"));
+    await fs.writeFile(staleFile, "stale");
+
+    const materialized = await materializeRepository(
+      {
+        type: "github",
+        source: "https://github.com/example/repo"
+      },
+      {
+        cacheDir,
+        refresh: true,
+        runCommand
+      }
+    );
+
+    expect(materialized.rootDir).toBe(cachedCloneDir);
+    expect(runCommand).toHaveBeenCalledTimes(1);
+    await expect(fs.pathExists(staleFile)).resolves.toBe(false);
+    await expect(fs.pathExists(path.join(cachedCloneDir, "fresh.txt"))).resolves.toBe(true);
+  });
+
+  it("uses a temporary clone and removes it on cleanup when cache is disabled", async () => {
+    const baseTempDir = await createTempDir();
+    const cacheDir = path.join(baseTempDir, "custom-cache");
+    const runCommand = vi.fn(async (_command: string, args: string[]) => {
+      const cloneDir = args[args.length - 1];
+      await fs.ensureDir(path.join(cloneDir, ".git"));
+      await fs.ensureDir(cloneDir);
+    });
+
+    const materialized = await materializeRepository(
+      {
+        type: "github",
+        source: "https://github.com/example/repo"
+      },
+      {
+        baseTempDir,
+        cacheDir,
+        noCache: true,
+        runCommand
+      }
+    );
+
+    expect(materialized.rootDir.startsWith(path.join(baseTempDir, "repo2skill-"))).toBe(true);
+    expect(materialized.rootDir.startsWith(path.resolve(cacheDir))).toBe(false);
+    await expect(fs.pathExists(materialized.rootDir)).resolves.toBe(true);
+
+    await materialized.cleanup();
+
+    await expect(fs.pathExists(materialized.rootDir)).resolves.toBe(false);
+  });
+
   it("cleans up the temp directory when clone fails", async () => {
     const cacheDir = path.join(await createTempDir(), "custom-cache");
     const runCommand = vi.fn(async () => {

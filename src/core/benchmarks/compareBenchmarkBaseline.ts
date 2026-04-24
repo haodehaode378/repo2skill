@@ -109,7 +109,10 @@ function compareSingleRepo(
   compareBooleanField(deltas, "success", baselineRepo.success, currentRepo.success);
   compareStringField(deltas, "packageManager", baselineRepo.packageManager, currentRepo.packageManager);
   compareStringField(deltas, "projectType", baselineRepo.projectType, currentRepo.projectType);
+  compareOptionalBooleanField(deltas, "workspace", baselineRepo.workspace, currentRepo.workspace);
   compareCountField(deltas, "scriptCount", baselineRepo.scriptCount, currentRepo.scriptCount);
+  compareCountField(deltas, "commandCount", baselineRepo.commandCount, currentRepo.commandCount);
+  compareCountField(deltas, "configFileCount", baselineRepo.configFileCount, currentRepo.configFileCount);
   compareCountField(deltas, "entrypointCount", baselineRepo.entrypointCount, currentRepo.entrypointCount);
   compareCountField(deltas, "envVarCount", baselineRepo.envVarCount, currentRepo.envVarCount);
 
@@ -177,6 +180,36 @@ function compareBooleanField(
     baselineValue,
     currentValue
   });
+}
+
+function compareOptionalBooleanField(
+  deltas: BenchmarkComparisonDelta[],
+  field: BenchmarkComparisonDelta["field"],
+  baselineValue?: boolean,
+  currentValue?: boolean
+): void {
+  if (baselineValue === currentValue) {
+    return;
+  }
+
+  if (typeof baselineValue === "boolean" && typeof currentValue !== "boolean") {
+    deltas.push({ field, kind: "regression", baselineValue, currentValue });
+    return;
+  }
+
+  if (typeof baselineValue !== "boolean" && typeof currentValue === "boolean") {
+    deltas.push({ field, kind: "improvement", baselineValue, currentValue });
+    return;
+  }
+
+  if (typeof baselineValue === "boolean" && typeof currentValue === "boolean") {
+    deltas.push({
+      field,
+      kind: currentValue ? "improvement" : "regression",
+      baselineValue,
+      currentValue
+    });
+  }
 }
 
 function compareCountField(

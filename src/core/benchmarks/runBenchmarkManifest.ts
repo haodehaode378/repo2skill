@@ -16,7 +16,10 @@ export type BenchmarkRepoResult = {
   outputDir: string;
   packageManager?: string;
   projectType?: string;
+  workspace?: boolean;
   scriptCount?: number;
+  commandCount?: number;
+  configFileCount?: number;
   entrypointCount?: number;
   envVarCount?: number;
   error?: string;
@@ -98,8 +101,20 @@ export function renderBenchmarkSummary(summary: BenchmarkSummary): string {
         parts.push(`type=${result.projectType}`);
       }
 
+      if (typeof result.workspace === "boolean") {
+        parts.push(`workspace=${result.workspace}`);
+      }
+
       if (typeof result.scriptCount === "number") {
         parts.push(`scripts=${result.scriptCount}`);
+      }
+
+      if (typeof result.commandCount === "number") {
+        parts.push(`commands=${result.commandCount}`);
+      }
+
+      if (typeof result.configFileCount === "number") {
+        parts.push(`configs=${result.configFileCount}`);
       }
 
       if (typeof result.entrypointCount === "number") {
@@ -179,7 +194,10 @@ function buildSuccessResult(
     outputDir,
     packageManager: analysis.detected.packageManager,
     projectType: analysis.detected.projectType,
+    workspace: analysis.detected.workspace?.isWorkspace,
     scriptCount: analysis.detected.scripts.length,
+    commandCount: analysis.detected.commands.length,
+    configFileCount: analysis.detected.configFiles.length,
     entrypointCount: analysis.detected.entrypoints.length,
     envVarCount: analysis.detected.envVars.length
   };

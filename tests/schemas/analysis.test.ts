@@ -10,6 +10,12 @@ describe("RepoAnalysisSchema", () => {
         name: "demo-repo"
       },
       detected: {
+        workspace: {
+          isWorkspace: true,
+          packageGlobs: ["packages/*"],
+          signals: ["pnpm-workspace.yaml"],
+          confidence: "high"
+        },
         scripts: [],
         entrypoints: [],
         envVars: []
@@ -18,6 +24,7 @@ describe("RepoAnalysisSchema", () => {
     });
 
     expect(result.repo.name).toBe("demo-repo");
+    expect(result.detected.workspace?.packageGlobs).toEqual(["packages/*"]);
   });
 
   it("rejects an invalid confidence level", () => {

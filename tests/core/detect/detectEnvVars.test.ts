@@ -12,6 +12,9 @@ function createAnalysis(): RepoAnalysis {
     },
     detected: {
       scripts: [],
+      commands: [],
+      directories: [],
+      configFiles: [],
       entrypoints: [],
       envVars: []
     },
@@ -107,6 +110,21 @@ describe("detectEnvVars", () => {
       },
       {
         name: "SECRET_TOKEN",
+        sourceFile: "src/config.ts",
+        confidence: "medium"
+      }
+    ]);
+  });
+
+  it("ignores noisy documentation, test, fixture, and non-source files", async () => {
+    const analysis = createAnalysis();
+    const rootDir = path.resolve("tests/fixtures/env-vars/noisy");
+
+    await detectEnvVars(rootDir, analysis);
+
+    expect(analysis.detected.envVars).toEqual([
+      {
+        name: "API_URL",
         sourceFile: "src/config.ts",
         confidence: "medium"
       }

@@ -12,6 +12,9 @@ function createAnalysis(): RepoAnalysis {
     },
     detected: {
       scripts: [],
+      commands: [],
+      directories: [],
+      configFiles: [],
       entrypoints: [],
       envVars: []
     },

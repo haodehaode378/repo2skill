@@ -32,6 +32,9 @@ function createFullAnalysis(): RepoAnalysis {
           confidence: "high"
         }
       ],
+      commands: [],
+      directories: [],
+      configFiles: [],
       entrypoints: ["src/main.ts"],
       envVars: [
         {
@@ -54,6 +57,9 @@ function createMinimalAnalysis(): RepoAnalysis {
     },
     detected: {
       scripts: [],
+      commands: [],
+      directories: [],
+      configFiles: [],
       entrypoints: [],
       envVars: []
     },
@@ -86,8 +92,9 @@ describe("renderQuickstart", () => {
     expect(markdown).toContain("- `API_URL` from `.env.example` (high)");
     expect(markdown).toContain("## Start Command");
     expect(markdown).toContain("```powershell");
-    expect(markdown).toContain("vite");
+    expect(markdown).toContain("pnpm dev");
     expect(markdown).toContain("## Available Scripts");
+    expect(markdown).toContain("- `dev`: `pnpm dev` (script: `vite`)");
   });
 
   it("omits optional sections when evidence is missing", () => {

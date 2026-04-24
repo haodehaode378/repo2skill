@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>analysis-target Report</title>
+  <style>
+    body { font-family: system-ui, sans-serif; margin: 32px; line-height: 1.5; color: #1f2937; background: #f8fafc; }
+    main { max-width: 960px; margin: 0 auto; }
+    section { background: white; border: 1px solid #dbeafe; border-radius: 12px; padding: 20px; margin-bottom: 16px; }
+    h1, h2 { margin-top: 0; }
+    code { background: #eff6ff; padding: 2px 6px; border-radius: 6px; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { text-align: left; padding: 8px; border-top: 1px solid #e5e7eb; vertical-align: top; }
+    th { background: #f9fafb; }
+  </style>
+</head>
+<body>
+<main>
+  <h1>analysis-target Report</h1>
+<section><h2>Repository Overview</h2><ul>
+<li><strong>Name:</strong> <code>analysis-target</code></li>
+<li><strong>Input:</strong> <code>./tests/fixtures/analysis-target</code></li>
+<li><strong>Root Directory:</strong> <code>./tests/fixtures/analysis-target</code></li>
+</ul></section>
+<section><h2>Detected Signals</h2><ul><li><strong>Package Manager:</strong> <code>pnpm</code></li><li><strong>Project Type:</strong> <code>vite</code></li></ul></section>
+<section><h2>Scripts</h2><table><thead><tr><th>Name</th><th>Command</th><th>Confidence</th></tr></thead><tbody>
+<tr><td><code>dev</code></td><td><code>vite</code></td><td>high</td></tr>
+<tr><td><code>build</code></td><td><code>vite build</code></td><td>high</td></tr>
+<tr><td><code>test</code></td><td><code>vitest run</code></td><td>high</td></tr>
+</tbody></table></section>
+<section><h2>Entrypoints</h2><ul>
+<li><code>src/main.ts</code></li>
+</ul></section>
+<section><h2>Key Config Files</h2><table><thead><tr><th>Path</th><th>Type</th><th>Confidence</th></tr></thead><tbody>
+<tr><td><code>.env.example</code></td><td>environment</td><td>high</td></tr>
+<tr><td><code>package.json</code></td><td>package</td><td>high</td></tr>
+<tr><td><code>vite.config.ts</code></td><td>framework</td><td>high</td></tr>
+</tbody></table></section>
+<section><h2>Repository Topology Hints</h2><ul>
+<li><code>src</code></li>
+</ul></section>
+<section><h2>Environment Variables</h2><table><thead><tr><th>Name</th><th>Source</th><th>Confidence</th></tr></thead><tbody>
+<tr><td><code>API_URL</code></td><td><code>.env.example</code></td><td>high</td></tr>
+<tr><td><code>SECRET_TOKEN</code></td><td><code>src/config.ts</code></td><td>medium</td></tr>
+</tbody></table></section>
+<section><h2>Evidence</h2><table><thead><tr><th>Claim</th><th>Source</th><th>Confidence</th></tr></thead><tbody>
+<tr><td><code>packageManager=pnpm</code></td><td><code>pnpm-lock.yaml</code></td><td>high</td></tr>
+<tr><td><code>configFile:.env.example</code></td><td><code>.env.example</code></td><td>high</td></tr>
+<tr><td><code>configFile:package.json</code></td><td><code>package.json</code></td><td>high</td></tr>
+<tr><td><code>configFile:vite.config.ts</code></td><td><code>vite.config.ts</code></td><td>high</td></tr>
+<tr><td><code>projectType=vite</code></td><td><code>vite.config.ts</code></td><td>high</td></tr>
+<tr><td><code>script:dev=vite</code></td><td><code>package.json</code></td><td>high</td></tr>
+<tr><td><code>script:build=vite build</code></td><td><code>package.json</code></td><td>high</td></tr>
+<tr><td><code>script:test=vitest run</code></td><td><code>package.json</code></td><td>high</td></tr>
+<tr><td><code>entrypoint=src/main.ts</code></td><td><code>src/main.ts</code></td><td>medium</td></tr>
+<tr><td><code>envVar:API_URL</code></td><td><code>.env.example</code></td><td>high</td></tr>
+<tr><td><code>envVar:SECRET_TOKEN</code></td><td><code>src/config.ts</code></td><td>medium</td></tr>
+</tbody></table></section>
+</main>
+</body>
+</html>

@@ -20,10 +20,25 @@ function createAnalysis(): RepoAnalysis {
     detected: {
       packageManager: "pnpm",
       projectType: "vite",
+      workspace: {
+        isWorkspace: true,
+        packageGlobs: ["apps/*", "packages/*"],
+        signals: ["pnpm-workspace.yaml"],
+        confidence: "high"
+      },
       scripts: [
         {
           name: "dev",
           command: "vite",
+          confidence: "high"
+        }
+      ],
+      commands: [],
+      directories: [],
+      configFiles: [
+        {
+          path: "vite.config.ts",
+          type: "framework",
           confidence: "high"
         }
       ],
@@ -64,6 +79,11 @@ describe("renderHtmlReport", () => {
     expect(html).toContain("<h2>Repository Overview</h2>");
     expect(html).toContain("Package Manager:");
     expect(html).toContain("Scripts</h2>");
+    expect(html).toContain("Workspace</h2>");
+    expect(html).toContain("pnpm-workspace.yaml");
+    expect(html).toContain("apps/*");
+    expect(html).toContain("Key Config Files</h2>");
+    expect(html).toContain("vite.config.ts");
     expect(html).toContain("Environment Variables</h2>");
     expect(html).toContain("Repository Topology Hints</h2>");
     expect(html).toContain("<code>src</code>");

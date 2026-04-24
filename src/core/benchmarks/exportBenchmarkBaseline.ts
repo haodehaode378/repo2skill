@@ -38,7 +38,10 @@ export function createBenchmarkBaseline(
       success: result.success,
       packageManager: result.packageManager,
       projectType: result.projectType,
+      workspace: result.workspace,
       scriptCount: result.scriptCount,
+      commandCount: result.commandCount,
+      configFileCount: result.configFileCount,
       entrypointCount: result.entrypointCount,
       envVarCount: result.envVarCount,
       error: result.error

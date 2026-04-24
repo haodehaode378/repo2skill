@@ -35,7 +35,10 @@ function createSummary(): BenchmarkSummary {
         outputDir: "benchmark-out/vite",
         packageManager: "pnpm",
         projectType: "vite",
+        workspace: true,
         scriptCount: 6,
+        commandCount: 6,
+        configFileCount: 4,
         entrypointCount: 0,
         envVarCount: 34
       },
@@ -70,7 +73,10 @@ describe("createBenchmarkBaseline", () => {
           success: true,
           packageManager: "pnpm",
           projectType: "vite",
+          workspace: true,
           scriptCount: 6,
+          commandCount: 6,
+          configFileCount: 4,
           entrypointCount: 0,
           envVarCount: 34,
           error: undefined
@@ -82,7 +88,10 @@ describe("createBenchmarkBaseline", () => {
           success: false,
           packageManager: undefined,
           projectType: undefined,
+          workspace: undefined,
           scriptCount: undefined,
+          commandCount: undefined,
+          configFileCount: undefined,
           entrypointCount: undefined,
           envVarCount: undefined,
           error: "clone failed"

@@ -3,7 +3,34 @@ import fs from "fs-extra";
 import type { ConfidenceLevel, EnvVar, RepoAnalysis } from "../../schemas/analysis.js";
 
 const ENV_EXAMPLE_FILES = [".env.example", ".env.local.example"] as const;
-const IGNORED_DIRECTORIES = new Set([".git", "coverage", "dist", "node_modules"]);
+const IGNORED_DIRECTORIES = new Set([
+  ".git",
+  ".next",
+  "__fixtures__",
+  "__tests__",
+  "build",
+  "coverage",
+  "dist",
+  "docs",
+  "e2e",
+  "examples",
+  "fixtures",
+  "node_modules",
+  "out",
+  "test",
+  "tests",
+  "vendor"
+]);
+const SOURCE_FILE_EXTENSIONS = new Set([
+  ".cjs",
+  ".cts",
+  ".js",
+  ".jsx",
+  ".mjs",
+  ".mts",
+  ".ts",
+  ".tsx"
+]);
 
 const ENV_FILE_PATTERN = /^\s*(?:export\s+)?([A-Za-z_][A-Za-z0-9_]*)\s*=/;
 const PROCESS_ENV_DOT_PATTERN = /process\.env\.([A-Za-z_][A-Za-z0-9_]*)/g;
@@ -116,8 +143,14 @@ async function walkDirectory(currentDir: string, files: string[]): Promise<void>
       continue;
     }
 
-    files.push(fullPath);
+    if (isSourceFile(fullPath)) {
+      files.push(fullPath);
+    }
   }
+}
+
+function isSourceFile(filePath: string): boolean {
+  return SOURCE_FILE_EXTENSIONS.has(path.extname(filePath));
 }
 
 function toRelativePath(rootDir: string, filePath: string): string {

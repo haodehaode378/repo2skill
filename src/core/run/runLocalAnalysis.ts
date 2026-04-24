@@ -1,10 +1,14 @@
 import path from "node:path";
 import type { RepoAnalysis } from "../../schemas/analysis.js";
+import { getDisplayEnvVars, getOmittedEnvVarCount } from "../envVars/display.js";
+import { detectConfigFiles } from "../detect/detectConfigFiles.js";
 import { detectEnvVars } from "../detect/detectEnvVars.js";
 import { detectEntrypoints } from "../detect/detectEntrypoints.js";
 import { detectPackageManager } from "../detect/detectPackageManager.js";
 import { detectProjectType } from "../detect/detectProjectType.js";
 import { detectScripts } from "../detect/detectScripts.js";
+import { detectWorkspace } from "../detect/detectWorkspace.js";
+import { deriveFacts } from "../facts/deriveFacts.js";
 import { exportAgentsMd } from "../export/exportAgentsMd.js";
 import { exportHtmlReport } from "../export/exportHtmlReport.js";
 import { exportJson } from "../export/exportJson.js";
@@ -23,6 +27,9 @@ export async function analyzeLocalRepo(rootDir: string): Promise<RepoAnalysis> {
     },
     detected: {
       scripts: [],
+      commands: [],
+      directories: [],
+      configFiles: [],
       entrypoints: [],
       envVars: []
     },
@@ -30,10 +37,13 @@ export async function analyzeLocalRepo(rootDir: string): Promise<RepoAnalysis> {
   };
 
   await detectPackageManager(rootDir, analysis);
+  await detectConfigFiles(rootDir, analysis);
+  await detectWorkspace(rootDir, analysis);
   await detectProjectType(rootDir, analysis);
   await detectScripts(rootDir, analysis);
   await detectEntrypoints(rootDir, analysis);
   await detectEnvVars(rootDir, analysis);
+  deriveFacts(analysis);
 
   return analysis;
 }
@@ -109,10 +119,13 @@ export function renderAnalysisSummary(
   }
 
   if (analysis.detected.envVars.length > 0) {
-    const envVars = analysis.detected.envVars
+    const envVars = getDisplayEnvVars(analysis.detected.envVars)
       .map((envVar) => `${envVar.name} (${envVar.confidence})`)
       .join(", ");
-    lines.push(`Environment variables: ${envVars}`);
+    const omittedCount = getOmittedEnvVarCount(analysis.detected.envVars);
+    const suffix =
+      omittedCount > 0 ? ` (${omittedCount} additional omitted from summary)` : "";
+    lines.push(`Environment variables: ${envVars}${suffix}`);
   }
 
   if (writtenFiles.length > 0) {

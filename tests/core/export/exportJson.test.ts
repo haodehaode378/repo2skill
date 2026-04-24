@@ -23,6 +23,9 @@ function createAnalysis(): RepoAnalysis {
           confidence: "high"
         }
       ],
+      commands: [],
+      directories: [],
+      configFiles: [],
       entrypoints: [],
       envVars: []
     },

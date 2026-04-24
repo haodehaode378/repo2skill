@@ -1,6 +1,7 @@
 import path from "node:path";
 import fs from "fs-extra";
 import { RepoAnalysisSchema, type RepoAnalysis } from "../../schemas/analysis.js";
+import { getDisplayEnvVars, getOmittedEnvVarCount } from "../envVars/display.js";
 
 export async function exportHtmlReport(
   outDir: string,
@@ -52,12 +53,53 @@ export function renderHtmlReport(analysis: RepoAnalysis): string {
     sections.push("</tbody></table></section>");
   }
 
+  if (analysis.detected.workspace) {
+    sections.push("<section><h2>Workspace</h2><ul>");
+    sections.push(
+      `<li><strong>Confidence:</strong> <code>${escapeHtml(analysis.detected.workspace.confidence)}</code></li>`
+    );
+
+    if (analysis.detected.workspace.signals.length > 0) {
+      sections.push(
+        `<li><strong>Signals:</strong> ${analysis.detected.workspace.signals
+          .map((signal) => `<code>${escapeHtml(signal)}</code>`)
+          .join(", ")}</li>`
+      );
+    }
+
+    if (analysis.detected.workspace.packageGlobs.length > 0) {
+      sections.push(
+        `<li><strong>Package Globs:</strong> ${analysis.detected.workspace.packageGlobs
+          .map((workspaceGlob) => `<code>${escapeHtml(workspaceGlob)}</code>`)
+          .join(", ")}</li>`
+      );
+    }
+
+    sections.push("</ul></section>");
+  }
+
   if (analysis.detected.entrypoints.length > 0) {
     sections.push("<section><h2>Entrypoints</h2><ul>");
     for (const entrypoint of analysis.detected.entrypoints) {
       sections.push(`<li><code>${escapeHtml(entrypoint)}</code></li>`);
     }
     sections.push("</ul></section>");
+  }
+
+  if (analysis.detected.configFiles.length > 0) {
+    sections.push(
+      "<section><h2>Key Config Files</h2><table><thead><tr><th>Path</th><th>Type</th><th>Confidence</th></tr></thead><tbody>"
+    );
+
+    for (const configFile of analysis.detected.configFiles) {
+      sections.push(
+        `<tr><td><code>${escapeHtml(configFile.path)}</code></td><td>${escapeHtml(
+          configFile.type
+        )}</td><td>${escapeHtml(configFile.confidence)}</td></tr>`
+      );
+    }
+
+    sections.push("</tbody></table></section>");
   }
 
   const topologyHints = collectTopologyHints(analysis);
@@ -73,13 +115,21 @@ export function renderHtmlReport(analysis: RepoAnalysis): string {
     sections.push(
       "<section><h2>Environment Variables</h2><table><thead><tr><th>Name</th><th>Source</th><th>Confidence</th></tr></thead><tbody>"
     );
-    for (const envVar of analysis.detected.envVars) {
+    for (const envVar of getDisplayEnvVars(analysis.detected.envVars)) {
       sections.push(
         `<tr><td><code>${escapeHtml(envVar.name)}</code></td><td><code>${escapeHtml(
           envVar.sourceFile
         )}</code></td><td>${escapeHtml(envVar.confidence)}</td></tr>`
       );
     }
+    const omittedCount = getOmittedEnvVarCount(analysis.detected.envVars);
+
+    if (omittedCount > 0) {
+      sections.push(
+        `<tr><td colspan="3">${omittedCount} additional environment variables omitted from this summary.</td></tr>`
+      );
+    }
+
     sections.push("</tbody></table></section>");
   }
 

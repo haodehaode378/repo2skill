@@ -18,6 +18,8 @@ program
   .argument("<input>", "GitHub repository URL or local path")
   .option("-o, --out <dir>", "Output directory", "./out")
   .option("--cache-dir <dir>", "Directory for cached GitHub clones")
+  .option("--refresh", "Refresh cached GitHub clones before analyzing")
+  .option("--no-cache", "Clone GitHub repositories into a temporary directory and remove it after analysis")
   .option("--format <format>", "json|md|all", "all")
   .option("--branch <branch>", "Git branch to clone for GitHub repository inputs")
   .option("--summary-only", "Analyze and print the summary without writing output files")
@@ -27,6 +29,8 @@ program
       options: {
         out: string;
         cacheDir?: string;
+        refresh?: boolean;
+        cache?: boolean;
         format: OutputFormat;
         branch?: string;
         summaryOnly?: boolean;
@@ -35,7 +39,9 @@ program
       const resolved = await resolveInput(input);
       const materialized = await materializeRepository(resolved, {
         branch: options.branch,
-        cacheDir: options.cacheDir
+        cacheDir: options.cacheDir,
+        refresh: options.refresh,
+        noCache: options.cache === false
       });
 
       try {

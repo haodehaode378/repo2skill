@@ -4,7 +4,7 @@
   "description": "Turn any GitHub repo into agent-ready onboarding context.",
   "type": "module",
   "bin": {
-    "repo2skill": "dist/cli/index.js"
+    "repo2skill": "dist/index.js"
   },
   "scripts": {
     "dev": "tsx src/cli/index.ts",

@@ -20,7 +20,10 @@ function createBaseline(): BenchmarkBaseline {
         url: "https://github.com/vitejs/vite",
         success: true,
         packageManager: "pnpm",
+        workspace: true,
         scriptCount: 6,
+        commandCount: 6,
+        configFileCount: 4,
         entrypointCount: 0,
         envVarCount: 34
       },
@@ -30,6 +33,8 @@ function createBaseline(): BenchmarkBaseline {
         success: true,
         packageManager: "npm",
         scriptCount: 3,
+        commandCount: 3,
+        configFileCount: 2,
         entrypointCount: 3,
         envVarCount: 8
       }
@@ -52,7 +57,10 @@ describe("compareBenchmarkToBaseline", () => {
           success: true,
           outputDir: "benchmark-out/vite",
           packageManager: "pnpm",
+          workspace: true,
           scriptCount: 6,
+          commandCount: 6,
+          configFileCount: 4,
           entrypointCount: 0,
           envVarCount: 34
         },
@@ -63,6 +71,8 @@ describe("compareBenchmarkToBaseline", () => {
           outputDir: "benchmark-out/axios",
           packageManager: "npm",
           scriptCount: 3,
+          commandCount: 3,
+          configFileCount: 2,
           entrypointCount: 3,
           envVarCount: 8
         }
@@ -90,7 +100,10 @@ describe("compareBenchmarkToBaseline", () => {
           success: true,
           outputDir: "benchmark-out/vite",
           packageManager: "pnpm",
+          workspace: true,
           scriptCount: 7,
+          commandCount: 6,
+          configFileCount: 5,
           entrypointCount: 0,
           envVarCount: 34
         },
@@ -119,6 +132,12 @@ describe("compareBenchmarkToBaseline", () => {
             kind: "improvement",
             baselineValue: 6,
             currentValue: 7
+          },
+          {
+            field: "configFileCount",
+            kind: "improvement",
+            baselineValue: 4,
+            currentValue: 5
           }
         ]
       },
@@ -142,6 +161,18 @@ describe("compareBenchmarkToBaseline", () => {
             field: "scriptCount",
             kind: "regression",
             baselineValue: 3,
+            currentValue: undefined
+          },
+          {
+            field: "commandCount",
+            kind: "regression",
+            baselineValue: 3,
+            currentValue: undefined
+          },
+          {
+            field: "configFileCount",
+            kind: "regression",
+            baselineValue: 2,
             currentValue: undefined
           },
           {

@@ -1,6 +1,8 @@
 import path from "node:path";
 import fs from "fs-extra";
 import { RepoAnalysisSchema, type RepoAnalysis } from "../../schemas/analysis.js";
+import { renderPackageScriptCommand } from "../commands/packageScripts.js";
+import { getDisplayEnvVars, getOmittedEnvVarCount } from "../envVars/display.js";
 
 export async function exportProjectMap(
   outDir: string,
@@ -36,13 +38,60 @@ export function renderProjectMap(analysis: RepoAnalysis): string {
     sections.push(`- \`${analysis.detected.projectType}\``);
   }
 
+  if (analysis.detected.workspace) {
+    sections.push("");
+    sections.push("## Workspace");
+    sections.push("");
+    sections.push(`- Confidence: \`${analysis.detected.workspace.confidence}\``);
+
+    if (analysis.detected.workspace.signals.length > 0) {
+      sections.push(`- Signals: ${analysis.detected.workspace.signals.map(formatCode).join(", ")}`);
+    }
+
+    if (analysis.detected.workspace.packageGlobs.length > 0) {
+      sections.push(
+        `- Package Globs: ${analysis.detected.workspace.packageGlobs.map(formatCode).join(", ")}`
+      );
+    }
+  }
+
   if (analysis.detected.scripts.length > 0) {
     sections.push("");
     sections.push("## Key Scripts");
     sections.push("");
 
+    const commandsByName = new Map(
+      analysis.detected.commands.map((command) => [command.name, command])
+    );
+
     for (const script of analysis.detected.scripts) {
-      sections.push(`- \`${script.name}\`: \`${script.command}\``);
+      const command = commandsByName.get(script.name)?.command ?? renderPackageScriptCommand(
+        script,
+        analysis.detected.packageManager
+      );
+      sections.push(`- \`${script.name}\`: \`${command}\` (script: \`${script.command}\`)`);
+    }
+  }
+
+  if (analysis.detected.directories.length > 0) {
+    sections.push("");
+    sections.push("## Important Directories");
+    sections.push("");
+
+    for (const directory of analysis.detected.directories) {
+      sections.push(
+        `- \`${directory.path}\` (${directory.role}, ${directory.confidence}) from \`${directory.source}\``
+      );
+    }
+  }
+
+  if (analysis.detected.configFiles.length > 0) {
+    sections.push("");
+    sections.push("## Key Config Files");
+    sections.push("");
+
+    for (const configFile of analysis.detected.configFiles) {
+      sections.push(`- \`${configFile.path}\` (${configFile.type}, ${configFile.confidence})`);
     }
   }
 
@@ -61,12 +110,22 @@ export function renderProjectMap(analysis: RepoAnalysis): string {
     sections.push("## Environment Variables");
     sections.push("");
 
-    for (const envVar of analysis.detected.envVars) {
+    for (const envVar of getDisplayEnvVars(analysis.detected.envVars)) {
       sections.push(`- \`${envVar.name}\` from \`${envVar.sourceFile}\` (${envVar.confidence})`);
+    }
+
+    const omittedCount = getOmittedEnvVarCount(analysis.detected.envVars);
+
+    if (omittedCount > 0) {
+      sections.push(`- ${omittedCount} additional environment variables omitted from this summary.`);
     }
   }
 
   sections.push("");
 
   return sections.join("\n");
+}
+
+function formatCode(value: string): string {
+  return `\`${value}\``;
 }

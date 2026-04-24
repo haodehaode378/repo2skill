@@ -50,7 +50,58 @@ describe("analyzeLocalRepo", () => {
         confidence: "high"
       }
     ]);
+    expect(analysis.detected.commands).toEqual([
+      {
+        name: "dev",
+        role: "dev",
+        command: "pnpm dev",
+        rawScript: "vite",
+        source: "package.json",
+        confidence: "high"
+      },
+      {
+        name: "build",
+        role: "build",
+        command: "pnpm build",
+        rawScript: "vite build",
+        source: "package.json",
+        confidence: "high"
+      },
+      {
+        name: "test",
+        role: "test",
+        command: "pnpm test",
+        rawScript: "vitest run",
+        source: "package.json",
+        confidence: "high"
+      }
+    ]);
     expect(analysis.detected.entrypoints).toEqual(["src/main.ts"]);
+    expect(analysis.detected.directories).toEqual([
+      {
+        path: "src",
+        role: "source",
+        source: "src/main.ts",
+        confidence: "medium"
+      }
+    ]);
+    expect(analysis.detected.configFiles).toEqual([
+      {
+        path: ".env.example",
+        type: "environment",
+        confidence: "high"
+      },
+      {
+        path: "package.json",
+        type: "package",
+        confidence: "high"
+      },
+      {
+        path: "vite.config.ts",
+        type: "framework",
+        confidence: "high"
+      }
+    ]);
     expect(analysis.detected.envVars).toEqual([
       {
         name: "API_URL",

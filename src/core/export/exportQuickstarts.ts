@@ -1,6 +1,8 @@
 import path from "node:path";
 import fs from "fs-extra";
-import { RepoAnalysisSchema, type RepoAnalysis, type ScriptCommand } from "../../schemas/analysis.js";
+import { RepoAnalysisSchema, type CommandCandidate, type CommandRole, type RepoAnalysis } from "../../schemas/analysis.js";
+import { renderPackageScriptCommand } from "../commands/packageScripts.js";
+import { getDisplayEnvVars, getOmittedEnvVarCount } from "../envVars/display.js";
 
 type QuickstartTarget = {
   fileName: string;
@@ -45,7 +47,8 @@ export function renderQuickstart(
   target: QuickstartTarget
 ): string {
   const lines: string[] = [];
-  const suggestedCommand = getSuggestedStartCommand(analysis.detected.scripts);
+  const commands = getCommands(analysis);
+  const suggestedCommand = getSuggestedStartCommand(commands);
 
   lines.push(`# ${target.title}`);
   lines.push("");
@@ -67,8 +70,14 @@ export function renderQuickstart(
     lines.push("Set these variables before running the project if they are relevant:");
     lines.push("");
 
-    for (const envVar of analysis.detected.envVars) {
+    for (const envVar of getDisplayEnvVars(analysis.detected.envVars)) {
       lines.push(`- \`${envVar.name}\` from \`${envVar.sourceFile}\` (${envVar.confidence})`);
+    }
+
+    const omittedCount = getOmittedEnvVarCount(analysis.detected.envVars);
+
+    if (omittedCount > 0) {
+      lines.push(`- ${omittedCount} additional environment variables omitted from this summary.`);
     }
   }
 
@@ -83,13 +92,14 @@ export function renderQuickstart(
     lines.push("```");
   }
 
-  if (analysis.detected.scripts.length > 0) {
+  if (commands.length > 0) {
     lines.push("");
     lines.push("## Available Scripts");
     lines.push("");
 
-    for (const script of analysis.detected.scripts) {
-      lines.push(`- \`${script.name}\`: \`${script.command}\``);
+    for (const command of commands) {
+      const rawScript = command.rawScript ? ` (script: \`${command.rawScript}\`)` : "";
+      lines.push(`- \`${command.name}\`: \`${command.command}\`${rawScript}`);
     }
   }
 
@@ -103,11 +113,24 @@ export function renderQuickstart(
   return lines.join("\n");
 }
 
-function getSuggestedStartCommand(
-  scripts: ScriptCommand[]
-): ScriptCommand | undefined {
+function getCommands(analysis: RepoAnalysis): CommandCandidate[] {
+  if (analysis.detected.commands.length > 0) {
+    return analysis.detected.commands;
+  }
+
+  return analysis.detected.scripts.map((script) => ({
+    name: script.name,
+    role: getCommandRole(script.name),
+    command: renderPackageScriptCommand(script, analysis.detected.packageManager),
+    rawScript: script.command,
+    source: "package.json",
+    confidence: script.confidence
+  }));
+}
+
+function getSuggestedStartCommand(commands: CommandCandidate[]): CommandCandidate | undefined {
   const preferredOrder = ["dev", "start", "build", "test"] as const;
-  const byName = new Map(scripts.map((script) => [script.name, script]));
+  const byName = new Map(commands.map((command) => [command.name, command]));
 
   for (const scriptName of preferredOrder) {
     const script = byName.get(scriptName);
@@ -118,4 +141,12 @@ function getSuggestedStartCommand(
   }
 
   return undefined;
+}
+
+function getCommandRole(name: string): CommandRole {
+  if (name === "dev" || name === "format" || name === "build" || name === "test" || name === "lint" || name === "typecheck") {
+    return name;
+  }
+
+  return "other";
 }

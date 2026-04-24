@@ -19,6 +19,12 @@ function createFullAnalysis(): RepoAnalysis {
     },
     detected: {
       packageManager: "pnpm",
+      workspace: {
+        isWorkspace: true,
+        packageGlobs: ["apps/*", "packages/*"],
+        signals: ["pnpm-workspace.yaml"],
+        confidence: "high"
+      },
       scripts: [
         {
           name: "dev",
@@ -33,6 +39,22 @@ function createFullAnalysis(): RepoAnalysis {
         {
           name: "build",
           command: "tsc -b",
+          confidence: "high"
+        }
+      ],
+      commands: [],
+      directories: [
+        {
+          path: "src",
+          role: "source",
+          source: "src/main.ts",
+          confidence: "medium"
+        }
+      ],
+      configFiles: [
+        {
+          path: "vite.config.ts",
+          type: "framework",
           confidence: "high"
         }
       ],
@@ -58,6 +80,9 @@ function createMinimalAnalysis(): RepoAnalysis {
     },
     detected: {
       scripts: [],
+      commands: [],
+      directories: [],
+      configFiles: [],
       entrypoints: [],
       envVars: []
     },
@@ -82,24 +107,33 @@ describe("renderSkillMd", () => {
     expect(markdown).toContain("---");
     expect(markdown).toContain("name: repo-repo-skill");
     expect(markdown).toContain("description: Repository-specific guidance for working in repo.");
-    expect(markdown).toContain("## Overview");
+    expect(markdown).toContain("## Use When");
+    expect(markdown).toContain("- You are working inside `repo`.");
     expect(markdown).toContain("- Detected Package Manager: `pnpm`");
-    expect(markdown).toContain("## Available Commands");
-    expect(markdown).toContain("- Run `vite` via the `dev` script.");
+    expect(markdown).toContain("## Steps");
+    expect(markdown).toContain("- Review relevant config files first: `vite.config.ts`.");
+    expect(markdown).toContain("- Start code navigation from evidenced directories: `src`.");
+    expect(markdown).toContain("- For workspace changes, identify the affected package before editing shared files.");
+    expect(markdown).toContain("## Commands");
+    expect(markdown).toContain("- Run `pnpm dev` for `dev` (script: `vite`).");
     expect(markdown).toContain("## Validation");
-    expect(markdown).toContain("- Prefer `test` before finishing changes when that check is relevant.");
-    expect(markdown).toContain("## Environment Variables");
-    expect(markdown).toContain("- `API_URL` from `.env.example` (high)");
+    expect(markdown).toContain("- Prefer `pnpm test` before finishing changes when that check is relevant.");
+    expect(markdown).toContain("## References");
+    expect(markdown).toContain("- Config: `vite.config.ts` (framework, high)");
+    expect(markdown).toContain("- Directory: `src` (source, medium)");
+    expect(markdown).toContain("- Workspace signals: `pnpm-workspace.yaml` (high)");
+    expect(markdown).toContain("- Workspace package globs: `apps/*`, `packages/*`");
+    expect(markdown).toContain("- Env: `API_URL` from `.env.example` (high)");
     expect(markdown).toContain("## Boundaries");
   });
 
   it("omits optional sections without supporting data", () => {
     const markdown = renderSkillMd(createMinimalAnalysis());
 
-    expect(markdown).toContain("## Overview");
-    expect(markdown).not.toContain("## Available Commands");
+    expect(markdown).toContain("## Use When");
+    expect(markdown).not.toContain("## Commands");
+    expect(markdown).not.toContain("## References");
     expect(markdown).not.toContain("## Validation");
-    expect(markdown).not.toContain("## Environment Variables");
     expect(markdown).toContain("## Boundaries");
   });
 });
@@ -113,7 +147,7 @@ describe("exportSkillMd", () => {
     const outputPath = path.join(outDir, "SKILL.md");
 
     await expect(fs.pathExists(outputPath)).resolves.toBe(true);
-    await expect(fs.readFile(outputPath, "utf8")).resolves.toContain("## Available Commands");
+    await expect(fs.readFile(outputPath, "utf8")).resolves.toContain("## Commands");
   });
 
   it("rejects invalid analysis before writing", async () => {

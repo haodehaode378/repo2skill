@@ -19,6 +19,8 @@ type MaterializeRepositoryOptions = {
   baseTempDir?: string;
   cacheDir?: string;
   branch?: string;
+  refresh?: boolean;
+  noCache?: boolean;
   runCommand?: CommandRunner;
 };
 
@@ -37,12 +39,15 @@ export async function materializeRepository(
   const branch = options.branch;
   const runCommand = options.runCommand ?? defaultRunCommand;
   const repoName = getGitHubRepoName(input.source);
-  const cacheRootDir = getCacheRootDir({
-    baseTempDir,
-    cacheDir: options.cacheDir
-  });
+  const useCache = !options.noCache;
+  const cacheRootDir = useCache
+    ? getCacheRootDir({
+        baseTempDir,
+        cacheDir: options.cacheDir
+      })
+    : await fs.mkdtemp(path.join(baseTempDir, "repo2skill-"));
   const cacheKey = getGitHubCacheKey(input.source, branch);
-  const repoCacheDir = path.join(cacheRootDir, cacheKey);
+  const repoCacheDir = useCache ? path.join(cacheRootDir, cacheKey) : cacheRootDir;
   const cloneDir = path.join(repoCacheDir, repoName);
   const cloneArgs = ["clone", "--depth", "1"] as string[];
 
@@ -52,7 +57,11 @@ export async function materializeRepository(
 
   cloneArgs.push(input.source, cloneDir);
 
-  if (await fs.pathExists(path.join(cloneDir, ".git"))) {
+  if (useCache && options.refresh) {
+    await fs.remove(repoCacheDir);
+  }
+
+  if (useCache && (await fs.pathExists(path.join(cloneDir, ".git")))) {
     return {
       rootDir: cloneDir,
       cleanup: async () => {}
@@ -66,7 +75,7 @@ export async function materializeRepository(
 
     return {
       rootDir: cloneDir,
-      cleanup: async () => {}
+      cleanup: useCache ? async () => {} : async () => fs.remove(repoCacheDir)
     };
   } catch (error) {
     await fs.remove(repoCacheDir);
