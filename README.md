@@ -2,7 +2,15 @@
 
 Turn a repository into agent-ready onboarding context.
 
-## What it generates today
+`repo2skill` analyzes a local repository or public GitHub repo and turns it into structured onboarding artifacts for coding agents and humans.
+
+## Quick Start
+
+```bash
+npm run dev -- https://github.com/octocat/Hello-World --out ./out
+```
+
+## What It Produces
 
 Given a local repository path or public GitHub URL, `repo2skill` currently writes:
 
@@ -17,7 +25,30 @@ Given a local repository path or public GitHub URL, `repo2skill` currently write
 
 All generated files derive from the same structured analysis object.
 
-## What it detects today
+## Why It Exists
+
+Coding agents work better when a repository has:
+
+- a clear command surface
+- a concise project map
+- evidence-backed environment and entrypoint hints
+- stable onboarding documents instead of guessed prose
+
+`repo2skill` is built to generate that layer automatically.
+
+## Current Status
+
+- local and public GitHub analysis paths implemented
+- benchmark runner with smoke and full baselines
+- compare mode for regression checks
+- schema-first and evidence-first output pipeline
+
+Current benchmark baselines:
+
+- smoke set: 10 public repositories
+- full set: 21 public repositories
+
+## What It Detects Today
 
 The current MVP can extract:
 
@@ -30,7 +61,7 @@ The current MVP can extract:
 Current outputs are evidence-backed and intentionally narrow.
 The project also now includes a benchmark manifest plus a runnable benchmark command for regression work.
 
-## Current scope
+## Current Scope
 
 Supported now:
 
