@@ -1,8 +1,4 @@
-import type {
-  EntrypointCandidate,
-  EntrypointRole,
-  RepoAnalysis
-} from "../../schemas/analysis.js";
+import type { EntrypointCandidate, EntrypointRole, RepoAnalysis } from "../../schemas/analysis.js";
 
 export function getEntrypointFacts(analysis: RepoAnalysis): EntrypointCandidate[] {
   if (analysis.detected.entrypointFacts && analysis.detected.entrypointFacts.length > 0) {

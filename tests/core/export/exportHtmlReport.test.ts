@@ -2,10 +2,7 @@ import os from "node:os";
 import path from "node:path";
 import fs from "fs-extra";
 import { afterEach, describe, expect, it } from "vitest";
-import {
-  exportHtmlReport,
-  renderHtmlReport
-} from "../../../src/core/export/exportHtmlReport.js";
+import { exportHtmlReport, renderHtmlReport } from "../../../src/core/export/exportHtmlReport.js";
 import type { RepoAnalysis } from "../../../src/schemas/analysis.js";
 
 const tempDirs: string[] = [];

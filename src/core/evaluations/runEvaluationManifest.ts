@@ -1,9 +1,6 @@
 import path from "node:path";
 import fs from "fs-extra";
-import type {
-  EvaluationCase,
-  EvaluationManifest
-} from "../../schemas/evaluation.js";
+import type { EvaluationCase, EvaluationManifest } from "../../schemas/evaluation.js";
 import { materializeRepository } from "../collect/materializeRepository.js";
 import { resolveInput } from "../collect/resolveInput.js";
 import {

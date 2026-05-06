@@ -15,7 +15,15 @@ export const ScriptCommandSchema = z.object({
   confidence: ConfidenceLevelSchema
 });
 
-export const CommandRoleSchema = z.enum(["dev", "build", "test", "lint", "typecheck", "format", "other"]);
+export const CommandRoleSchema = z.enum([
+  "dev",
+  "build",
+  "test",
+  "lint",
+  "typecheck",
+  "format",
+  "other"
+]);
 
 export const CommandCandidateSchema = z.object({
   name: z.string(),
@@ -35,7 +43,13 @@ export const DirectoryCandidateSchema = z.object({
   confidence: ConfidenceLevelSchema
 });
 
-export const EntrypointRoleSchema = z.enum(["source", "package-output", "cli", "generated", "other"]);
+export const EntrypointRoleSchema = z.enum([
+  "source",
+  "package-output",
+  "cli",
+  "generated",
+  "other"
+]);
 
 export const EntrypointCandidateSchema = z.object({
   path: z.string(),

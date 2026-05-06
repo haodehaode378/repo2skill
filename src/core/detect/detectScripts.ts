@@ -2,23 +2,13 @@ import path from "node:path";
 import fs from "fs-extra";
 import type { RepoAnalysis, ScriptCommand } from "../../schemas/analysis.js";
 
-const CANONICAL_SCRIPT_NAMES = [
-  "dev",
-  "build",
-  "test",
-  "lint",
-  "typecheck",
-  "format"
-] as const;
+const CANONICAL_SCRIPT_NAMES = ["dev", "build", "test", "lint", "typecheck", "format"] as const;
 
 type PackageJsonWithScripts = {
   scripts?: Record<string, unknown>;
 };
 
-export async function detectScripts(
-  rootDir: string,
-  analysis: RepoAnalysis
-): Promise<void> {
+export async function detectScripts(rootDir: string, analysis: RepoAnalysis): Promise<void> {
   const packageJsonPath = path.join(rootDir, "package.json");
   const exists = await fs.pathExists(packageJsonPath);
 

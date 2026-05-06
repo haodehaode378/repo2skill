@@ -1,7 +1,10 @@
 #!/usr/bin/env node
 
 import { Command } from "commander";
-import { compareBenchmarkToBaseline, renderBenchmarkComparison } from "../core/benchmarks/compareBenchmarkBaseline.js";
+import {
+  compareBenchmarkToBaseline,
+  renderBenchmarkComparison
+} from "../core/benchmarks/compareBenchmarkBaseline.js";
 import { exportBenchmarkBaseline } from "../core/benchmarks/exportBenchmarkBaseline.js";
 import { exportBenchmarkComparison } from "../core/benchmarks/exportBenchmarkComparison.js";
 import { loadBenchmarkBaseline } from "../core/benchmarks/loadBenchmarkBaseline.js";

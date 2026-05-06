@@ -2,10 +2,7 @@ import os from "node:os";
 import path from "node:path";
 import fs from "fs-extra";
 import { afterEach, describe, expect, it } from "vitest";
-import {
-  exportProjectMap,
-  renderProjectMap
-} from "../../../src/core/export/exportProjectMap.js";
+import { exportProjectMap, renderProjectMap } from "../../../src/core/export/exportProjectMap.js";
 import type { RepoAnalysis } from "../../../src/schemas/analysis.js";
 
 const tempDirs: string[] = [];

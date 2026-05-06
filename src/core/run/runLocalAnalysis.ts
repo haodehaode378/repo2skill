@@ -124,8 +124,7 @@ export function renderAnalysisSummary(
       .map((envVar) => `${envVar.name} (${envVar.confidence})`)
       .join(", ");
     const omittedCount = getOmittedEnvVarCount(analysis.detected.envVars);
-    const suffix =
-      omittedCount > 0 ? ` (${omittedCount} additional omitted from summary)` : "";
+    const suffix = omittedCount > 0 ? ` (${omittedCount} additional omitted from summary)` : "";
     lines.push(`Environment variables: ${envVars}${suffix}`);
   }
 

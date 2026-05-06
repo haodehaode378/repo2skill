@@ -1,9 +1,6 @@
 import path from "node:path";
 import fs from "fs-extra";
-import {
-  BenchmarkBaselineSchema,
-  type BenchmarkBaseline
-} from "../../schemas/benchmark.js";
+import { BenchmarkBaselineSchema, type BenchmarkBaseline } from "../../schemas/benchmark.js";
 import type { BenchmarkSummary } from "./runBenchmarkManifest.js";
 
 export async function exportBenchmarkBaseline(

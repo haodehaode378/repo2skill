@@ -70,4 +70,3 @@ Expected agent answer:
 `repo2skill` does not make the agent smarter by adding guesses. It narrows the starting context to facts that were detected from repository files, then keeps source navigation separate from package output metadata.
 
 `repo2skill` 不是靠猜测让 agent 看起来更聪明，而是把起始上下文压缩到仓库文件中检测到的事实，并明确区分源码导航和发布产物元数据。
-

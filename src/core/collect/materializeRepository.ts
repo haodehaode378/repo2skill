@@ -100,10 +100,12 @@ export function getGitHubCacheKey(url: string, branch?: string): string {
   return createHash("sha1").update(keySource).digest("hex").slice(0, 12);
 }
 
-export function getCacheRootDir(options: {
-  baseTempDir?: string;
-  cacheDir?: string;
-} = {}): string {
+export function getCacheRootDir(
+  options: {
+    baseTempDir?: string;
+    cacheDir?: string;
+  } = {}
+): string {
   if (options.cacheDir) {
     return path.resolve(options.cacheDir);
   }

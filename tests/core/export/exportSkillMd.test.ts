@@ -2,10 +2,7 @@ import os from "node:os";
 import path from "node:path";
 import fs from "fs-extra";
 import { afterEach, describe, expect, it } from "vitest";
-import {
-  exportSkillMd,
-  renderSkillMd
-} from "../../../src/core/export/exportSkillMd.js";
+import { exportSkillMd, renderSkillMd } from "../../../src/core/export/exportSkillMd.js";
 import type { RepoAnalysis } from "../../../src/schemas/analysis.js";
 
 const tempDirs: string[] = [];
@@ -128,11 +125,15 @@ describe("renderSkillMd", () => {
     expect(markdown).toContain("## Steps");
     expect(markdown).toContain("- Review relevant config files first: `vite.config.ts`.");
     expect(markdown).toContain("- Start code navigation from evidenced directories: `src`.");
-    expect(markdown).toContain("- For workspace changes, identify the affected package before editing shared files.");
+    expect(markdown).toContain(
+      "- For workspace changes, identify the affected package before editing shared files."
+    );
     expect(markdown).toContain("## Commands");
     expect(markdown).toContain("- Run `pnpm dev` for `dev` (script: `vite`).");
     expect(markdown).toContain("## Validation");
-    expect(markdown).toContain("- Prefer `pnpm test` before finishing changes when that check is relevant.");
+    expect(markdown).toContain(
+      "- Prefer `pnpm test` before finishing changes when that check is relevant."
+    );
     expect(markdown).toContain("## References");
     expect(markdown).toContain("- Config: `vite.config.ts` (framework, high)");
     expect(markdown).toContain("- Entrypoint: `src/main.ts` (source, medium)");

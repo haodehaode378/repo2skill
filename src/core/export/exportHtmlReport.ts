@@ -4,10 +4,7 @@ import { RepoAnalysisSchema, type RepoAnalysis } from "../../schemas/analysis.js
 import { getEntrypointFacts, isGeneratedEntrypointRole } from "../entrypoints/facts.js";
 import { getDisplayEnvVars, getOmittedEnvVarCount } from "../envVars/display.js";
 
-export async function exportHtmlReport(
-  outDir: string,
-  analysis: RepoAnalysis
-): Promise<void> {
+export async function exportHtmlReport(outDir: string, analysis: RepoAnalysis): Promise<void> {
   const validatedAnalysis = RepoAnalysisSchema.parse(analysis);
   const html = renderHtmlReport(validatedAnalysis);
 
@@ -43,7 +40,9 @@ export function renderHtmlReport(analysis: RepoAnalysis): string {
   }
 
   if (analysis.detected.scripts.length > 0) {
-    sections.push("<section><h2>Scripts</h2><table><thead><tr><th>Name</th><th>Command</th><th>Confidence</th></tr></thead><tbody>");
+    sections.push(
+      "<section><h2>Scripts</h2><table><thead><tr><th>Name</th><th>Command</th><th>Confidence</th></tr></thead><tbody>"
+    );
     for (const script of analysis.detected.scripts) {
       sections.push(
         `<tr><td><code>${escapeHtml(script.name)}</code></td><td><code>${escapeHtml(

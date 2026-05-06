@@ -1,9 +1,6 @@
 import type { ScriptCommand } from "../../schemas/analysis.js";
 
-export function renderPackageScriptCommand(
-  script: ScriptCommand,
-  packageManager?: string
-): string {
+export function renderPackageScriptCommand(script: ScriptCommand, packageManager?: string): string {
   switch (packageManager) {
     case "pnpm":
       return `pnpm ${script.name}`;

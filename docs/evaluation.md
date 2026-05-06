@@ -70,9 +70,7 @@ Results:
         },
         {
           "artifact": "AGENTS.md",
-          "excludes": [
-            "- `dist`"
-          ]
+          "excludes": ["- `dist`"]
         }
       ]
     }

@@ -23,9 +23,7 @@
             "`./dist/index.js` (package-output, high, main)",
             "`src/index.ts` (source, medium)"
           ],
-          "excludes": [
-            "- `dist`"
-          ]
+          "excludes": ["- `dist`"]
         }
       ]
     }

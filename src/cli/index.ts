@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 
 import { Command } from "commander";
+import { auditRepository, renderAuditReport } from "../core/audit/auditRepository.js";
 import { materializeRepository } from "../core/collect/materializeRepository.js";
 import { resolveInput } from "../core/collect/resolveInput.js";
 import {
@@ -19,10 +20,14 @@ program
   .option("-o, --out <dir>", "Output directory", "./out")
   .option("--cache-dir <dir>", "Directory for cached GitHub clones")
   .option("--refresh", "Refresh cached GitHub clones before analyzing")
-  .option("--no-cache", "Clone GitHub repositories into a temporary directory and remove it after analysis")
+  .option(
+    "--no-cache",
+    "Clone GitHub repositories into a temporary directory and remove it after analysis"
+  )
   .option("--format <format>", "json|md|all", "all")
   .option("--branch <branch>", "Git branch to clone for GitHub repository inputs")
   .option("--summary-only", "Analyze and print the summary without writing output files")
+  .option("--audit-only", "Run trust and safety checks without generating artifacts")
   .action(
     async (
       input: string,
@@ -34,6 +39,7 @@ program
         format: OutputFormat;
         branch?: string;
         summaryOnly?: boolean;
+        auditOnly?: boolean;
       }
     ) => {
       const resolved = await resolveInput(input);
@@ -45,6 +51,12 @@ program
       });
 
       try {
+        if (options.auditOnly) {
+          const findings = await auditRepository(materialized.rootDir);
+          console.log(renderAuditReport(materialized.rootDir, findings));
+          return;
+        }
+
         const analysis = await analyzeLocalRepo(materialized.rootDir);
         const writtenFiles = options.summaryOnly
           ? []

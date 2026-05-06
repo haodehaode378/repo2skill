@@ -1,16 +1,18 @@
 import path from "node:path";
 import fs from "fs-extra";
-import { RepoAnalysisSchema, type CommandCandidate, type CommandRole, type RepoAnalysis } from "../../schemas/analysis.js";
+import {
+  RepoAnalysisSchema,
+  type CommandCandidate,
+  type CommandRole,
+  type RepoAnalysis
+} from "../../schemas/analysis.js";
 import { renderPackageScriptCommand } from "../commands/packageScripts.js";
 import { getEntrypointFacts, isGeneratedEntrypointRole } from "../entrypoints/facts.js";
 import { getDisplayEnvVars, getOmittedEnvVarCount } from "../envVars/display.js";
 
 const VALIDATION_SCRIPT_ORDER = ["test", "lint", "typecheck", "build"] as const;
 
-export async function exportAgentsMd(
-  outDir: string,
-  analysis: RepoAnalysis
-): Promise<void> {
+export async function exportAgentsMd(outDir: string, analysis: RepoAnalysis): Promise<void> {
   const validatedAnalysis = RepoAnalysisSchema.parse(analysis);
   const markdown = renderAgentsMd(validatedAnalysis);
 
@@ -71,7 +73,9 @@ export function renderAgentsMd(analysis: RepoAnalysis): string {
     sections.push("");
     sections.push("## Validation Before Finishing");
     sections.push("");
-    sections.push("- No validation command was detected. Do not invent one; inspect project scripts first if validation is needed.");
+    sections.push(
+      "- No validation command was detected. Do not invent one; inspect project scripts first if validation is needed."
+    );
   }
 
   if (importantDirectories.length > 0) {
@@ -93,7 +97,9 @@ export function renderAgentsMd(analysis: RepoAnalysis): string {
 
     for (const entrypoint of entrypoints) {
       const reason = entrypoint.reason ? `, ${entrypoint.reason}` : "";
-      sections.push(`- \`${entrypoint.path}\` (${entrypoint.role}, ${entrypoint.confidence}${reason})`);
+      sections.push(
+        `- \`${entrypoint.path}\` (${entrypoint.role}, ${entrypoint.confidence}${reason})`
+      );
     }
   }
 
@@ -186,11 +192,15 @@ function getBeforeChangingInstructions(
   }
 
   if (importantDirectories.length > 0) {
-    instructions.push(`Start from evidenced directories: ${importantDirectories.map(formatCode).join(", ")}.`);
+    instructions.push(
+      `Start from evidenced directories: ${importantDirectories.map(formatCode).join(", ")}.`
+    );
   }
 
   if (analysis.detected.workspace) {
-    instructions.push("For workspace changes, identify the affected package before editing shared files.");
+    instructions.push(
+      "For workspace changes, identify the affected package before editing shared files."
+    );
   }
 
   return instructions;
@@ -222,7 +232,11 @@ function getConfigFilesByPriority(analysis: RepoAnalysis): string[] {
 }
 
 function getCommandRole(name: string): CommandRole {
-  if (name === "dev" || name === "format" || VALIDATION_SCRIPT_ORDER.includes(name as (typeof VALIDATION_SCRIPT_ORDER)[number])) {
+  if (
+    name === "dev" ||
+    name === "format" ||
+    VALIDATION_SCRIPT_ORDER.includes(name as (typeof VALIDATION_SCRIPT_ORDER)[number])
+  ) {
     return name as CommandRole;
   }
 
@@ -254,7 +268,9 @@ function getNotesAndBoundaries(analysis: RepoAnalysis): string[] {
   }
 
   if (analysis.evidence.length > 0) {
-    notes.push(`This file reflects ${analysis.evidence.length} evidenced findings from the repository analysis.`);
+    notes.push(
+      `This file reflects ${analysis.evidence.length} evidenced findings from the repository analysis.`
+    );
   }
 
   return notes;

@@ -2,10 +2,7 @@ import os from "node:os";
 import path from "node:path";
 import fs from "fs-extra";
 import { afterEach, describe, expect, it } from "vitest";
-import {
-  exportAgentsMd,
-  renderAgentsMd
-} from "../../../src/core/export/exportAgentsMd.js";
+import { exportAgentsMd, renderAgentsMd } from "../../../src/core/export/exportAgentsMd.js";
 import type { RepoAnalysis } from "../../../src/schemas/analysis.js";
 
 const tempDirs: string[] = [];
@@ -139,9 +136,13 @@ describe("renderAgentsMd", () => {
     expect(markdown).toContain("## Before Changing Code");
     expect(markdown).toContain("- Review relevant config first: `vite.config.ts`.");
     expect(markdown).toContain("- Start from evidenced directories: `src`, `scripts`.");
-    expect(markdown).toContain("- For workspace changes, identify the affected package before editing shared files.");
+    expect(markdown).toContain(
+      "- For workspace changes, identify the affected package before editing shared files."
+    );
     expect(markdown).toContain("## Validation Before Finishing");
-    expect(markdown).toContain("- Run only the evidenced validation commands that are relevant to your change.");
+    expect(markdown).toContain(
+      "- Run only the evidenced validation commands that are relevant to your change."
+    );
     expect(markdown).toContain("- Run `pnpm test` for the `test` command.");
     expect(markdown).toContain("- Run `pnpm lint` for the `lint` command.");
     expect(markdown).toContain("## Important Directories");
@@ -166,7 +167,9 @@ describe("renderAgentsMd", () => {
     expect(markdown).toContain("## Repository Overview");
     expect(markdown).not.toContain("## Priority Commands");
     expect(markdown).toContain("## Validation Before Finishing");
-    expect(markdown).toContain("- No validation command was detected. Do not invent one; inspect project scripts first if validation is needed.");
+    expect(markdown).toContain(
+      "- No validation command was detected. Do not invent one; inspect project scripts first if validation is needed."
+    );
     expect(markdown).not.toContain("## Important Directories");
     expect(markdown).not.toContain("## Notes and Boundaries");
   });

@@ -1,9 +1,6 @@
 import path from "node:path";
 import fs from "fs-extra";
-import {
-  BenchmarkComparisonSchema,
-  type BenchmarkComparison
-} from "../../schemas/benchmark.js";
+import { BenchmarkComparisonSchema, type BenchmarkComparison } from "../../schemas/benchmark.js";
 
 export async function exportBenchmarkComparison(
   filePath: string,

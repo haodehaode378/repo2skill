@@ -1,5 +1,9 @@
 import { describe, expect, it } from "vitest";
-import { deriveCommands, deriveDirectories, deriveFacts } from "../../../src/core/facts/deriveFacts.js";
+import {
+  deriveCommands,
+  deriveDirectories,
+  deriveFacts
+} from "../../../src/core/facts/deriveFacts.js";
 import type { RepoAnalysis } from "../../../src/schemas/analysis.js";
 
 function createAnalysis(): RepoAnalysis {

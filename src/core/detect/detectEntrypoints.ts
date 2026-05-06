@@ -26,10 +26,7 @@ type PackageJsonWithEntrypoints = {
   bin?: unknown;
 };
 
-export async function detectEntrypoints(
-  rootDir: string,
-  analysis: RepoAnalysis
-): Promise<void> {
+export async function detectEntrypoints(rootDir: string, analysis: RepoAnalysis): Promise<void> {
   const found = new Set<string>();
   const packageJsonPath = path.join(rootDir, "package.json");
   const hasPackageJson = await fs.pathExists(packageJsonPath);
@@ -42,7 +39,14 @@ export async function detectEntrypoints(
     registerPackageEntrypoint(found, analysis, packageJson.browser, "browser");
 
     if (typeof packageJson.bin === "string") {
-      registerEntrypoint(found, analysis, normalizePath(packageJson.bin), "package.json", "high", "bin");
+      registerEntrypoint(
+        found,
+        analysis,
+        normalizePath(packageJson.bin),
+        "package.json",
+        "high",
+        "bin"
+      );
     } else if (packageJson.bin != null && typeof packageJson.bin === "object") {
       for (const value of Object.values(packageJson.bin)) {
         if (typeof value !== "string") {

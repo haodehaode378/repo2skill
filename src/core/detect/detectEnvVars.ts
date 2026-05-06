@@ -34,8 +34,7 @@ const SOURCE_FILE_EXTENSIONS = new Set([
 
 const ENV_FILE_PATTERN = /^\s*(?:export\s+)?([A-Za-z_][A-Za-z0-9_]*)\s*=/;
 const PROCESS_ENV_DOT_PATTERN = /process\.env\.([A-Za-z_][A-Za-z0-9_]*)/g;
-const PROCESS_ENV_BRACKET_PATTERN =
-  /process\.env\[(["'])([A-Za-z_][A-Za-z0-9_]*)\1\]/g;
+const PROCESS_ENV_BRACKET_PATTERN = /process\.env\[(["'])([A-Za-z_][A-Za-z0-9_]*)\1\]/g;
 
 const CONFIDENCE_RANK: Record<ConfidenceLevel, number> = {
   low: 0,
@@ -43,10 +42,7 @@ const CONFIDENCE_RANK: Record<ConfidenceLevel, number> = {
   high: 2
 };
 
-export async function detectEnvVars(
-  rootDir: string,
-  analysis: RepoAnalysis
-): Promise<void> {
+export async function detectEnvVars(rootDir: string, analysis: RepoAnalysis): Promise<void> {
   const found = new Map<string, EnvVar>();
 
   for (const envFileName of ENV_EXAMPLE_FILES) {

@@ -4,9 +4,7 @@ import { loadBenchmarkManifest } from "../../../src/core/benchmarks/loadBenchmar
 
 describe("loadBenchmarkManifest", () => {
   it("loads and validates the benchmark manifest", async () => {
-    const manifest = await loadBenchmarkManifest(
-      path.resolve("benchmarks/public-node-ts.json")
-    );
+    const manifest = await loadBenchmarkManifest(path.resolve("benchmarks/public-node-ts.json"));
 
     expect(manifest.name).toBe("public-node-ts");
     expect(manifest.repos.length).toBeGreaterThan(0);

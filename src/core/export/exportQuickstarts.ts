@@ -1,6 +1,11 @@
 import path from "node:path";
 import fs from "fs-extra";
-import { RepoAnalysisSchema, type CommandCandidate, type CommandRole, type RepoAnalysis } from "../../schemas/analysis.js";
+import {
+  RepoAnalysisSchema,
+  type CommandCandidate,
+  type CommandRole,
+  type RepoAnalysis
+} from "../../schemas/analysis.js";
 import { renderPackageScriptCommand } from "../commands/packageScripts.js";
 import { getDisplayEnvVars, getOmittedEnvVarCount } from "../envVars/display.js";
 
@@ -28,10 +33,7 @@ const QUICKSTART_TARGETS: QuickstartTarget[] = [
   }
 ];
 
-export async function exportQuickstarts(
-  outDir: string,
-  analysis: RepoAnalysis
-): Promise<void> {
+export async function exportQuickstarts(outDir: string, analysis: RepoAnalysis): Promise<void> {
   const validatedAnalysis = RepoAnalysisSchema.parse(analysis);
 
   await fs.ensureDir(outDir);
@@ -42,10 +44,7 @@ export async function exportQuickstarts(
   }
 }
 
-export function renderQuickstart(
-  analysis: RepoAnalysis,
-  target: QuickstartTarget
-): string {
+export function renderQuickstart(analysis: RepoAnalysis, target: QuickstartTarget): string {
   const lines: string[] = [];
   const commands = getCommands(analysis);
   const suggestedCommand = getSuggestedStartCommand(commands);
@@ -144,7 +143,14 @@ function getSuggestedStartCommand(commands: CommandCandidate[]): CommandCandidat
 }
 
 function getCommandRole(name: string): CommandRole {
-  if (name === "dev" || name === "format" || name === "build" || name === "test" || name === "lint" || name === "typecheck") {
+  if (
+    name === "dev" ||
+    name === "format" ||
+    name === "build" ||
+    name === "test" ||
+    name === "lint" ||
+    name === "typecheck"
+  ) {
     return name;
   }
 

@@ -9,10 +9,7 @@ const PACKAGE_MANAGER_LOCKFILES = [
   ["bun.lockb", "bun"]
 ] as const;
 
-export async function detectPackageManager(
-  rootDir: string,
-  analysis: RepoAnalysis
-): Promise<void> {
+export async function detectPackageManager(rootDir: string, analysis: RepoAnalysis): Promise<void> {
   for (const [lockfile, packageManager] of PACKAGE_MANAGER_LOCKFILES) {
     const lockfilePath = path.join(rootDir, lockfile);
     const exists = await fs.pathExists(lockfilePath);

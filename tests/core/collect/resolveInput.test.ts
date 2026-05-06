@@ -4,9 +4,7 @@ import { resolveInput } from "../../../src/core/collect/resolveInput.js";
 
 describe("resolveInput", () => {
   it("classifies GitHub URLs without touching the filesystem", async () => {
-    await expect(
-      resolveInput("https://github.com/example/repo")
-    ).resolves.toEqual({
+    await expect(resolveInput("https://github.com/example/repo")).resolves.toEqual({
       type: "github",
       source: "https://github.com/example/repo"
     });

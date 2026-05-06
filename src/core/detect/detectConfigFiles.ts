@@ -37,10 +37,7 @@ const ROOT_CONFIG_FILES: Array<{
   { fileName: ".env.local.example", type: "environment" }
 ];
 
-export async function detectConfigFiles(
-  rootDir: string,
-  analysis: RepoAnalysis
-): Promise<void> {
+export async function detectConfigFiles(rootDir: string, analysis: RepoAnalysis): Promise<void> {
   const found = new Map<string, ConfigFileType>();
 
   for (const configFile of ROOT_CONFIG_FILES) {

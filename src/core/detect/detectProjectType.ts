@@ -19,10 +19,7 @@ type PackageJsonWithBin = {
   bin?: string | Record<string, unknown>;
 };
 
-export async function detectProjectType(
-  rootDir: string,
-  analysis: RepoAnalysis
-): Promise<void> {
+export async function detectProjectType(rootDir: string, analysis: RepoAnalysis): Promise<void> {
   for (const signal of PROJECT_TYPE_SIGNALS) {
     for (const fileName of signal.files) {
       const exists = await fs.pathExists(path.join(rootDir, fileName));

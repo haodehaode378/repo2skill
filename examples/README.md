@@ -26,4 +26,3 @@ Generated artifacts:
 - `quickstart.macos.md`
 - `quickstart.linux.md`
 - `report.html`
-

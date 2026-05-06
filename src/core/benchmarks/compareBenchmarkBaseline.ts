@@ -36,9 +36,15 @@ export function compareBenchmarkToBaseline(
     }
   }
 
-  const unchangedCount = comparisons.filter((comparison) => comparison.status === "unchanged").length;
-  const regressionCount = comparisons.filter((comparison) => comparison.status === "regression").length;
-  const improvementCount = comparisons.filter((comparison) => comparison.status === "improvement").length;
+  const unchangedCount = comparisons.filter(
+    (comparison) => comparison.status === "unchanged"
+  ).length;
+  const regressionCount = comparisons.filter(
+    (comparison) => comparison.status === "regression"
+  ).length;
+  const improvementCount = comparisons.filter(
+    (comparison) => comparison.status === "improvement"
+  ).length;
 
   return {
     manifestName: current.manifestName,
@@ -107,13 +113,28 @@ function compareSingleRepo(
   compareStringField(deltas, "url", baselineRepo.url, currentRepo.url);
   compareStringField(deltas, "branch", baselineRepo.branch, currentRepo.branch);
   compareBooleanField(deltas, "success", baselineRepo.success, currentRepo.success);
-  compareStringField(deltas, "packageManager", baselineRepo.packageManager, currentRepo.packageManager);
+  compareStringField(
+    deltas,
+    "packageManager",
+    baselineRepo.packageManager,
+    currentRepo.packageManager
+  );
   compareStringField(deltas, "projectType", baselineRepo.projectType, currentRepo.projectType);
   compareOptionalBooleanField(deltas, "workspace", baselineRepo.workspace, currentRepo.workspace);
   compareCountField(deltas, "scriptCount", baselineRepo.scriptCount, currentRepo.scriptCount);
   compareCountField(deltas, "commandCount", baselineRepo.commandCount, currentRepo.commandCount);
-  compareCountField(deltas, "configFileCount", baselineRepo.configFileCount, currentRepo.configFileCount);
-  compareCountField(deltas, "entrypointCount", baselineRepo.entrypointCount, currentRepo.entrypointCount);
+  compareCountField(
+    deltas,
+    "configFileCount",
+    baselineRepo.configFileCount,
+    currentRepo.configFileCount
+  );
+  compareCountField(
+    deltas,
+    "entrypointCount",
+    baselineRepo.entrypointCount,
+    currentRepo.entrypointCount
+  );
   compareCountField(deltas, "envVarCount", baselineRepo.envVarCount, currentRepo.envVarCount);
 
   if (deltas.some((delta) => delta.kind === "regression")) {

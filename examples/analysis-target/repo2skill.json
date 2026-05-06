@@ -75,9 +75,7 @@
         "confidence": "high"
       }
     ],
-    "entrypoints": [
-      "src/main.ts"
-    ],
+    "entrypoints": ["src/main.ts"],
     "entrypointFacts": [
       {
         "path": "src/main.ts",

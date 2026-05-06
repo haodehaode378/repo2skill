@@ -28,24 +28,21 @@ describe("detectPackageManager", () => {
     ["npm", "package-lock.json", "npm"],
     ["yarn", "yarn.lock", "yarn"],
     ["bun", "bun.lockb", "bun"]
-  ])(
-    "detects %s from its lockfile",
-    async (fixtureName, expectedSourceFile, expectedManager) => {
-      const analysis = createAnalysis();
-      const rootDir = path.resolve(`tests/fixtures/package-managers/${fixtureName}`);
+  ])("detects %s from its lockfile", async (fixtureName, expectedSourceFile, expectedManager) => {
+    const analysis = createAnalysis();
+    const rootDir = path.resolve(`tests/fixtures/package-managers/${fixtureName}`);
 
-      await detectPackageManager(rootDir, analysis);
+    await detectPackageManager(rootDir, analysis);
 
-      expect(analysis.detected.packageManager).toBe(expectedManager);
-      expect(analysis.evidence).toEqual([
-        {
-          claim: `packageManager=${expectedManager}`,
-          sourceFile: expectedSourceFile,
-          confidence: "high"
-        }
-      ]);
-    }
-  );
+    expect(analysis.detected.packageManager).toBe(expectedManager);
+    expect(analysis.evidence).toEqual([
+      {
+        claim: `packageManager=${expectedManager}`,
+        sourceFile: expectedSourceFile,
+        confidence: "high"
+      }
+    ]);
+  });
 
   it("does nothing when no supported lockfile exists", async () => {
     const analysis = createAnalysis();

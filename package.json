@@ -27,6 +27,8 @@
     "prepack": "npm run build",
     "test": "vitest run",
     "test:watch": "vitest",
+    "format": "prettier --write \"**/*.{ts,md,yml,yaml,json}\"",
+    "format:check": "prettier --check \"**/*.{ts,md,yml,yaml,json}\"",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit"
   },
@@ -56,6 +58,7 @@
     "@types/node": "^22.15.3",
     "eslint": "^9.26.0",
     "globals": "^16.0.0",
+    "prettier": "^3.8.3",
     "tsup": "^8.5.0",
     "tsx": "^4.19.4",
     "typescript": "^5.8.3",

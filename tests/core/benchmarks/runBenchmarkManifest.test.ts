@@ -71,12 +71,10 @@ function createAnalysis(): RepoAnalysis {
 
 describe("runBenchmarkManifest", () => {
   it("runs each repository and returns a summary", async () => {
-    const materializeRepositoryFn = vi
-      .fn()
-      .mockResolvedValue({
-        rootDir: "/tmp/repo",
-        cleanup: vi.fn().mockResolvedValue(undefined)
-      });
+    const materializeRepositoryFn = vi.fn().mockResolvedValue({
+      rootDir: "/tmp/repo",
+      cleanup: vi.fn().mockResolvedValue(undefined)
+    });
     const analyzeLocalRepoFn = vi.fn().mockResolvedValue(createAnalysis());
     const exportAnalysisArtifactsFn = vi.fn().mockResolvedValue([]);
 
@@ -141,19 +139,21 @@ describe("runBenchmarkManifest", () => {
   });
 
   it("captures repository failures without aborting the whole run", async () => {
-    const materializeRepositoryFn = vi.fn().mockImplementation(async (input: { source: string }) => {
-      if (input.source.endsWith("repo-two")) {
+    const materializeRepositoryFn = vi
+      .fn()
+      .mockImplementation(async (input: { source: string }) => {
+        if (input.source.endsWith("repo-two")) {
+          return {
+            rootDir: "/tmp/repo-two",
+            cleanup: vi.fn().mockResolvedValue(undefined)
+          };
+        }
+
         return {
-          rootDir: "/tmp/repo-two",
+          rootDir: "/tmp/repo-one",
           cleanup: vi.fn().mockResolvedValue(undefined)
         };
-      }
-
-      return {
-        rootDir: "/tmp/repo-one",
-        cleanup: vi.fn().mockResolvedValue(undefined)
-      };
-    });
+      });
     const analyzeLocalRepoFn = vi
       .fn()
       .mockResolvedValueOnce(createAnalysis())
@@ -246,7 +246,9 @@ describe("renderBenchmarkSummary", () => {
     expect(text).toContain("Benchmark manifest: fixture-benchmark");
     expect(text).toContain("Succeeded: 1");
     expect(text).toContain("Failed: 1");
-    expect(text).toContain("OK | repo-one | pm=pnpm | type=vite | workspace=true | scripts=3 | commands=3 | configs=2 | entrypoints=1 | env=2");
+    expect(text).toContain(
+      "OK | repo-one | pm=pnpm | type=vite | workspace=true | scripts=3 | commands=3 | configs=2 | entrypoints=1 | env=2"
+    );
     expect(text).toContain("FAIL | repo-two | error=analysis failed");
   });
 });

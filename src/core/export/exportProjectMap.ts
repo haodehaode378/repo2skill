@@ -5,10 +5,7 @@ import { renderPackageScriptCommand } from "../commands/packageScripts.js";
 import { getEntrypointFacts } from "../entrypoints/facts.js";
 import { getDisplayEnvVars, getOmittedEnvVarCount } from "../envVars/display.js";
 
-export async function exportProjectMap(
-  outDir: string,
-  analysis: RepoAnalysis
-): Promise<void> {
+export async function exportProjectMap(outDir: string, analysis: RepoAnalysis): Promise<void> {
   const validatedAnalysis = RepoAnalysisSchema.parse(analysis);
   const markdown = renderProjectMap(validatedAnalysis);
 
@@ -66,10 +63,9 @@ export function renderProjectMap(analysis: RepoAnalysis): string {
     );
 
     for (const script of analysis.detected.scripts) {
-      const command = commandsByName.get(script.name)?.command ?? renderPackageScriptCommand(
-        script,
-        analysis.detected.packageManager
-      );
+      const command =
+        commandsByName.get(script.name)?.command ??
+        renderPackageScriptCommand(script, analysis.detected.packageManager);
       sections.push(`- \`${script.name}\`: \`${command}\` (script: \`${script.command}\`)`);
     }
   }
@@ -105,7 +101,9 @@ export function renderProjectMap(analysis: RepoAnalysis): string {
 
     for (const entrypoint of entrypoints) {
       const reason = entrypoint.reason ? `, ${entrypoint.reason}` : "";
-      sections.push(`- \`${entrypoint.path}\` (${entrypoint.role}, ${entrypoint.confidence}${reason})`);
+      sections.push(
+        `- \`${entrypoint.path}\` (${entrypoint.role}, ${entrypoint.confidence}${reason})`
+      );
     }
   }
 
@@ -121,7 +119,9 @@ export function renderProjectMap(analysis: RepoAnalysis): string {
     const omittedCount = getOmittedEnvVarCount(analysis.detected.envVars);
 
     if (omittedCount > 0) {
-      sections.push(`- ${omittedCount} additional environment variables omitted from this summary.`);
+      sections.push(
+        `- ${omittedCount} additional environment variables omitted from this summary.`
+      );
     }
   }
 

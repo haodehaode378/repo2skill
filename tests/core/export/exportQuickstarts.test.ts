@@ -2,10 +2,7 @@ import os from "node:os";
 import path from "node:path";
 import fs from "fs-extra";
 import { afterEach, describe, expect, it } from "vitest";
-import {
-  exportQuickstarts,
-  renderQuickstart
-} from "../../../src/core/export/exportQuickstarts.js";
+import { exportQuickstarts, renderQuickstart } from "../../../src/core/export/exportQuickstarts.js";
 import type { RepoAnalysis } from "../../../src/schemas/analysis.js";
 
 const tempDirs: string[] = [];

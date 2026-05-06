@@ -9,10 +9,7 @@ type PackageJsonWithWorkspaces = {
 const TOOLING_SIGNAL_FILES = ["turbo.json", "nx.json"] as const;
 const CONVENTIONAL_WORKSPACE_DIRS = ["apps", "packages"] as const;
 
-export async function detectWorkspace(
-  rootDir: string,
-  analysis: RepoAnalysis
-): Promise<void> {
+export async function detectWorkspace(rootDir: string, analysis: RepoAnalysis): Promise<void> {
   const packageGlobs = new Set<string>();
   const signals = new Set<string>();
 

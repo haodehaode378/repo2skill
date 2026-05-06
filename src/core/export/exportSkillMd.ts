@@ -1,16 +1,18 @@
 import path from "node:path";
 import fs from "fs-extra";
-import { RepoAnalysisSchema, type CommandCandidate, type CommandRole, type RepoAnalysis } from "../../schemas/analysis.js";
+import {
+  RepoAnalysisSchema,
+  type CommandCandidate,
+  type CommandRole,
+  type RepoAnalysis
+} from "../../schemas/analysis.js";
 import { renderPackageScriptCommand } from "../commands/packageScripts.js";
 import { getEntrypointFacts } from "../entrypoints/facts.js";
 import { getDisplayEnvVars, getOmittedEnvVarCount } from "../envVars/display.js";
 
 const VALIDATION_SCRIPT_ORDER = ["test", "lint", "typecheck", "build"] as const;
 
-export async function exportSkillMd(
-  outDir: string,
-  analysis: RepoAnalysis
-): Promise<void> {
+export async function exportSkillMd(outDir: string, analysis: RepoAnalysis): Promise<void> {
   const validatedAnalysis = RepoAnalysisSchema.parse(analysis);
   const markdown = renderSkillMd(validatedAnalysis);
 
@@ -33,8 +35,12 @@ export function renderSkillMd(analysis: RepoAnalysis): string {
   lines.push("## Use When");
   lines.push("");
   lines.push(`- You are working inside \`${analysis.repo.name}\`.`);
-  lines.push("- You need repository-specific commands, validation checks, or configuration references.");
-  lines.push("- You want evidence-backed onboarding context instead of inferred workflow assumptions.");
+  lines.push(
+    "- You need repository-specific commands, validation checks, or configuration references."
+  );
+  lines.push(
+    "- You want evidence-backed onboarding context instead of inferred workflow assumptions."
+  );
   lines.push("");
   lines.push(`- Root Directory: \`${analysis.repo.rootDir}\``);
 
@@ -73,7 +79,9 @@ export function renderSkillMd(analysis: RepoAnalysis): string {
     lines.push("");
 
     for (const command of validationCommands) {
-      lines.push(`- Prefer \`${command.command}\` before finishing changes when that check is relevant.`);
+      lines.push(
+        `- Prefer \`${command.command}\` before finishing changes when that check is relevant.`
+      );
     }
   }
 
@@ -92,7 +100,9 @@ export function renderSkillMd(analysis: RepoAnalysis): string {
   lines.push("");
   lines.push("## Boundaries");
   lines.push("");
-  lines.push("- Treat this skill as evidence-backed repository guidance, not a complete architecture document.");
+  lines.push(
+    "- Treat this skill as evidence-backed repository guidance, not a complete architecture document."
+  );
   lines.push("- Omitted sections mean no supporting repository evidence was detected.");
 
   lines.push("");
@@ -143,35 +153,49 @@ function getReferences(analysis: RepoAnalysis): string[] {
   const references: string[] = [];
 
   for (const configFile of analysis.detected.configFiles) {
-    references.push(`Config: \`${configFile.path}\` (${configFile.type}, ${configFile.confidence})`);
+    references.push(
+      `Config: \`${configFile.path}\` (${configFile.type}, ${configFile.confidence})`
+    );
   }
 
   for (const entrypoint of getEntrypointFacts(analysis)) {
     const reason = entrypoint.reason ? `, ${entrypoint.reason}` : "";
-    references.push(`Entrypoint: \`${entrypoint.path}\` (${entrypoint.role}, ${entrypoint.confidence}${reason})`);
+    references.push(
+      `Entrypoint: \`${entrypoint.path}\` (${entrypoint.role}, ${entrypoint.confidence}${reason})`
+    );
   }
 
   for (const directory of analysis.detected.directories) {
-    references.push(`Directory: \`${directory.path}\` (${directory.role}, ${directory.confidence})`);
+    references.push(
+      `Directory: \`${directory.path}\` (${directory.role}, ${directory.confidence})`
+    );
   }
 
   if (analysis.detected.workspace) {
-    references.push(`Workspace signals: ${analysis.detected.workspace.signals.map(formatCode).join(", ")} (${analysis.detected.workspace.confidence})`);
+    references.push(
+      `Workspace signals: ${analysis.detected.workspace.signals.map(formatCode).join(", ")} (${analysis.detected.workspace.confidence})`
+    );
 
     if (analysis.detected.workspace.packageGlobs.length > 0) {
-      references.push(`Workspace package globs: ${analysis.detected.workspace.packageGlobs.map(formatCode).join(", ")}`);
+      references.push(
+        `Workspace package globs: ${analysis.detected.workspace.packageGlobs.map(formatCode).join(", ")}`
+      );
     }
   }
 
   if (analysis.detected.envVars.length > 0) {
     for (const envVar of getDisplayEnvVars(analysis.detected.envVars)) {
-      references.push(`Env: \`${envVar.name}\` from \`${envVar.sourceFile}\` (${envVar.confidence})`);
+      references.push(
+        `Env: \`${envVar.name}\` from \`${envVar.sourceFile}\` (${envVar.confidence})`
+      );
     }
 
     const omittedCount = getOmittedEnvVarCount(analysis.detected.envVars);
 
     if (omittedCount > 0) {
-      references.push(`${omittedCount} additional environment variables omitted from this summary.`);
+      references.push(
+        `${omittedCount} additional environment variables omitted from this summary.`
+      );
     }
   }
 
@@ -203,7 +227,11 @@ function getValidationCommands(commands: CommandCandidate[]): CommandCandidate[]
 }
 
 function getCommandRole(name: string): CommandRole {
-  if (name === "dev" || name === "format" || VALIDATION_SCRIPT_ORDER.includes(name as (typeof VALIDATION_SCRIPT_ORDER)[number])) {
+  if (
+    name === "dev" ||
+    name === "format" ||
+    VALIDATION_SCRIPT_ORDER.includes(name as (typeof VALIDATION_SCRIPT_ORDER)[number])
+  ) {
     return name as CommandRole;
   }
 

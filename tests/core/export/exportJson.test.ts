@@ -89,8 +89,6 @@ describe("exportJson", () => {
     } as unknown as RepoAnalysis;
 
     await expect(exportJson(outDir, invalidAnalysis)).rejects.toThrow();
-    await expect(
-      fs.pathExists(path.join(outDir, "repo2skill.json"))
-    ).resolves.toBe(false);
+    await expect(fs.pathExists(path.join(outDir, "repo2skill.json"))).resolves.toBe(false);
   });
 });
