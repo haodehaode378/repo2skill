@@ -10,6 +10,7 @@ import {
   renderAnalysisSummary,
   type OutputFormat
 } from "../core/run/runLocalAnalysis.js";
+import { parseOutputFormat } from "./options.js";
 
 const program = new Command();
 
@@ -24,7 +25,7 @@ program
     "--no-cache",
     "Clone GitHub repositories into a temporary directory and remove it after analysis"
   )
-  .option("--format <format>", "json|md|all", "all")
+  .option("--format <format>", "json|md|all", parseOutputFormat, "all")
   .option("--branch <branch>", "Git branch to clone for GitHub repository inputs")
   .option("--summary-only", "Analyze and print the summary without writing output files")
   .option("--audit-only", "Run trust and safety checks without generating artifacts")

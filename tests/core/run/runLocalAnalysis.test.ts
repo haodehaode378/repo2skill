@@ -123,6 +123,7 @@ describe("exportAnalysisArtifacts", () => {
     const analysis = await analyzeLocalRepo(path.resolve("tests/fixtures/analysis-target"));
 
     const writtenFiles = await exportAnalysisArtifacts(outDir, analysis, "all");
+    const json = await fs.readJson(path.join(outDir, "repo2skill.json"));
 
     expect(writtenFiles).toEqual([
       path.join(outDir, "repo2skill.json"),
@@ -142,6 +143,7 @@ describe("exportAnalysisArtifacts", () => {
     await expect(fs.pathExists(path.join(outDir, "quickstart.macos.md"))).resolves.toBe(true);
     await expect(fs.pathExists(path.join(outDir, "quickstart.linux.md"))).resolves.toBe(true);
     await expect(fs.pathExists(path.join(outDir, "report.html"))).resolves.toBe(true);
+    expect(json.repo.rootDir).toBe("./tests/fixtures/analysis-target");
   });
 
   it("exports source entrypoints without promoting package output directories", async () => {
@@ -201,6 +203,18 @@ describe("exportAnalysisArtifacts", () => {
     await expect(fs.pathExists(path.join(outDir, "quickstart.windows.md"))).resolves.toBe(true);
     await expect(fs.pathExists(path.join(outDir, "quickstart.macos.md"))).resolves.toBe(true);
     await expect(fs.pathExists(path.join(outDir, "quickstart.linux.md"))).resolves.toBe(true);
+  });
+
+  it("writes only JSON output for the json format", async () => {
+    const outDir = await createTempDir();
+    const analysis = await analyzeLocalRepo(path.resolve("tests/fixtures/analysis-target"));
+
+    const writtenFiles = await exportAnalysisArtifacts(outDir, analysis, "json");
+
+    expect(writtenFiles).toEqual([path.join(outDir, "repo2skill.json")]);
+    await expect(fs.pathExists(path.join(outDir, "repo2skill.json"))).resolves.toBe(true);
+    await expect(fs.pathExists(path.join(outDir, "AGENTS.md"))).resolves.toBe(false);
+    await expect(fs.pathExists(path.join(outDir, "report.html"))).resolves.toBe(false);
   });
 });
 

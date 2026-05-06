@@ -21,6 +21,12 @@ npm install
 npm run dev -- https://github.com/tinylibs/tinybench --no-cache --out ./out-tinybench
 ```
 
+Package usage after npm publication:
+
+```bash
+npx @haodehaode378/repo2skill https://github.com/tinylibs/tinybench --out ./out-tinybench
+```
+
 ```txt
 Input repository
   -> repo2skill.json
@@ -50,9 +56,31 @@ Input repository
 - 所有 JSON、Markdown、HTML 产物来自同一个分析对象，减少文档漂移。
 - 通过 benchmark 和 evaluation fixture 保护仓库分析质量。
 
+### 适合什么场景
+
+- 你要把一个陌生仓库交给 Codex、Claude Code、Cursor 或其他 coding agent。
+- 你想在 agent 修改代码前，先给它明确的“先看哪里、跑什么检查、哪些内容不应猜测”。
+- 你维护开源项目，希望为贡献者和 AI 工具提供可审查的 onboarding 文件。
+- 你需要一份可提交到 PR 或 release notes 的仓库分析报告，而不是一次性的聊天总结。
+
+### 它如何保持可信
+
+`repo2skill` 不运行目标仓库的 package scripts。它读取文件、检测信号，并把每个结论尽量绑定到真实来源：
+
+| 信号                      | 示例来源                                                        |
+| ------------------------- | --------------------------------------------------------------- |
+| 包管理器                  | `pnpm-lock.yaml`、`package-lock.json`、`yarn.lock`、`bun.lockb` |
+| 验证命令                  | `package.json` scripts                                          |
+| 入口文件                  | `package.json` `main` / `bin`、`src/main.ts`、`src/index.ts`    |
+| 配置文件                  | `tsconfig.json`、`vite.config.ts`、`.github/workflows/*.yml`    |
+| 环境变量                  | `.env.example`、`.env.local.example`、`process.env.*`           |
+| workspace / monorepo 信号 | `pnpm-workspace.yaml`、`package.json workspaces`、`turbo.json`  |
+
+如果没有证据，相关段落会被省略，而不是用通用建议填充。
+
 ### 快速开始
 
-优先从源码运行。公开 npm registry 上的 `repo2skill` 包名已经被其他项目占用，并且指向不同仓库；在本项目拿到可控包名和发布方案前，不建议默认使用 `npx repo2skill`。
+可以从源码运行，也可以使用 scoped npm 包。公开 npm registry 上的非 scoped `repo2skill` 包名可能被其他项目占用；本项目使用 `@haodehaode378/repo2skill` 作为发布包名，CLI bin 仍为 `repo2skill`。
 
 ```bash
 git clone https://github.com/haodehaode378/repo2skill.git
@@ -83,14 +111,14 @@ npm run dev -- https://github.com/tinylibs/tinybench --no-cache --audit-only
 
 当前 `package.json` 声明：
 
-- package name: `repo2skill`;
+- package name: `@haodehaode378/repo2skill`;
 - CLI bin: `repo2skill -> dist/index.js`;
 - publish files: `dist`, `README.md`, `LICENSE`。
 
-但公开 npm 名称 `repo2skill` 已经被其他包占用。因此当前 README 优先推荐源码运行。如果后续改用已控制的包名，预期 npm 运行方式是：
+但公开 npm 名称 `repo2skill` 可能被其他包占用。因此本项目使用 scoped package，命令行 bin 保留为 `repo2skill`：
 
 ```bash
-npx <owned-package-name> https://github.com/tinylibs/tinybench --out ./out-tinybench
+npx @haodehaode378/repo2skill https://github.com/tinylibs/tinybench --out ./out-tinybench
 ```
 
 ### 生成产物
@@ -105,6 +133,14 @@ npx <owned-package-name> https://github.com/tinylibs/tinybench --out ./out-tinyb
 | `quickstart.macos.md`   | macOS 快速开始                           |
 | `quickstart.linux.md`   | Linux 快速开始                           |
 | `report.html`           | 使用 `--format all` 时生成的 HTML report |
+
+导出格式：
+
+| 参数            | 生成内容                                                           |
+| --------------- | ------------------------------------------------------------------ |
+| `--format json` | 只生成 `repo2skill.json`                                           |
+| `--format md`   | 生成 `project-map.md`、`AGENTS.md`、`SKILL.md` 和三平台 quickstart |
+| `--format all`  | 生成全部 Markdown、JSON 和 `report.html`                           |
 
 `AGENTS.md` 会给出清晰的修改前导航和验证指令：
 
@@ -132,6 +168,21 @@ npx <owned-package-name> https://github.com/tinylibs/tinybench --out ./out-tinyb
 ```
 
 完整示例见 [examples/analysis-target](./examples/analysis-target)。
+
+### 推荐工作流
+
+```bash
+# 1. 先查看风险提示，不生成产物
+npm run dev -- https://github.com/tinylibs/tinybench --no-cache --audit-only
+
+# 2. 生成 agent onboarding 产物
+npm run dev -- https://github.com/tinylibs/tinybench --no-cache --out ./out-tinybench
+
+# 3. 先人工审阅，再交给 agent 使用
+ls ./out-tinybench
+```
+
+把 `AGENTS.md` 放在仓库根目录可以给 coding agent 提供项目级约束；把 `SKILL.md` 复制到支持 skill 的 agent 环境中，可以把同一套证据复用到后续会话。
 
 ### 当前可检测内容
 
@@ -205,6 +256,10 @@ npm run build
 - 广泛多语言仓库的深度语义分析。
 - 针对不可信仓库的完整 sandbox 或 malware detection。
 
+### 信任边界
+
+`repo2skill` 会读取陌生仓库内容，因此生成文件仍应先审阅再交给 agent 当作指令。`--audit-only` 是轻量风险提示，不是完整安全扫描。更多细节见 [Security model](./docs/security-model.md)。
+
 [Back to top](#repo2skill)
 
 ---
@@ -222,9 +277,31 @@ Most repository summaries tell an agent what a project appears to be. `repo2skil
 - repeatable JSON/Markdown/HTML artifacts derived from the same analysis object;
 - benchmark and evaluation fixtures that make regressions visible.
 
+### Use Cases
+
+- You are handing an unfamiliar repository to Codex, Claude Code, Cursor, or another coding agent.
+- You want the agent to know what to inspect and validate before editing, without inventing workflows.
+- You maintain an open-source project and want reviewable onboarding files for contributors and AI tools.
+- You need a release or PR artifact that documents detected repository facts, not a one-off chat summary.
+
+### How It Stays Grounded
+
+`repo2skill` does not run target repository package scripts. It reads files, detects signals, and ties conclusions back to repository evidence:
+
+| Signal                | Example sources                                                 |
+| --------------------- | --------------------------------------------------------------- |
+| Package manager       | `pnpm-lock.yaml`, `package-lock.json`, `yarn.lock`, `bun.lockb` |
+| Validation commands   | `package.json` scripts                                          |
+| Entrypoints           | `package.json` `main` / `bin`, `src/main.ts`, `src/index.ts`    |
+| Config files          | `tsconfig.json`, `vite.config.ts`, `.github/workflows/*.yml`    |
+| Environment variables | `.env.example`, `.env.local.example`, `process.env.*`           |
+| Workspace / monorepo  | `pnpm-workspace.yaml`, `package.json workspaces`, `turbo.json`  |
+
+If there is no supporting evidence, the relevant section is omitted instead of filled with generic advice.
+
 ### Quick Start
 
-Run from source first. The `repo2skill` npm package name already exists on the public registry and points to a different repository, so this repo does not recommend `npx repo2skill` until publication happens under a controlled package name and bin plan.
+Run from source today. After npm publication, use the scoped package. The unscoped `repo2skill` npm package name may be occupied by another project, so this repo uses `@haodehaode378/repo2skill` as the package identity while keeping the CLI bin name `repo2skill`.
 
 ```bash
 git clone https://github.com/haodehaode378/repo2skill.git
@@ -251,18 +328,24 @@ Run the audit-only skeleton before generating artifacts:
 npm run dev -- https://github.com/tinylibs/tinybench --no-cache --audit-only
 ```
 
+After npm publication, run:
+
+```bash
+npx @haodehaode378/repo2skill https://github.com/tinylibs/tinybench --out ./out-tinybench
+```
+
 ### npm Status
 
 `package.json` currently declares:
 
-- package name: `repo2skill`;
+- package name: `@haodehaode378/repo2skill`;
 - CLI bin: `repo2skill -> dist/index.js`;
 - publish files: `dist`, `README.md`, `LICENSE`.
 
-The public npm name `repo2skill` is already occupied by another package. Until this project is published under an owned name, prefer source usage. If the package name is later secured or renamed, the intended package flow is:
+The unscoped npm name `repo2skill` may be occupied by another package, so the package identity is scoped while the executable command remains `repo2skill` after npm publication:
 
 ```bash
-npx <owned-package-name> https://github.com/tinylibs/tinybench --out ./out-tinybench
+npx @haodehaode378/repo2skill https://github.com/tinylibs/tinybench --out ./out-tinybench
 ```
 
 ### Generated Artifacts
@@ -277,6 +360,14 @@ npx <owned-package-name> https://github.com/tinylibs/tinybench --out ./out-tinyb
 | `quickstart.macos.md`   | macOS quickstart                                          |
 | `quickstart.linux.md`   | Linux quickstart                                          |
 | `report.html`           | HTML report generated with `--format all`                 |
+
+Export formats:
+
+| Flag            | Generated files                                               |
+| --------------- | ------------------------------------------------------------- |
+| `--format json` | `repo2skill.json` only                                        |
+| `--format md`   | `project-map.md`, `AGENTS.md`, `SKILL.md`, and OS quickstarts |
+| `--format all`  | all Markdown artifacts, JSON, and `report.html`               |
 
 `AGENTS.md` gives clear pre-change navigation and validation guidance:
 
@@ -304,6 +395,21 @@ npx <owned-package-name> https://github.com/tinylibs/tinybench --out ./out-tinyb
 ```
 
 See [examples/analysis-target](./examples/analysis-target) for committed sample output.
+
+### Recommended Workflow
+
+```bash
+# 1. Inspect lightweight risk hints without generating artifacts
+npm run dev -- https://github.com/tinylibs/tinybench --no-cache --audit-only
+
+# 2. Generate agent onboarding artifacts
+npm run dev -- https://github.com/tinylibs/tinybench --no-cache --out ./out-tinybench
+
+# 3. Review before handing the artifacts to an agent
+ls ./out-tinybench
+```
+
+Put `AGENTS.md` at a repository root to provide project-level constraints for coding agents. Copy `SKILL.md` into a skill-capable agent environment when you want to reuse the same evidence-backed context across sessions.
 
 ### What It Detects Today
 
@@ -376,5 +482,9 @@ Not implemented yet:
 - Private repository authentication.
 - Deep semantic analysis for broad multi-language repositories.
 - Full sandboxing or malware detection for untrusted repositories.
+
+### Trust Boundary
+
+`repo2skill` reads unfamiliar repository content, so generated files should still be reviewed before they are treated as agent instructions. `--audit-only` is a lightweight risk hint, not a complete security scanner. See the [Security model](./docs/security-model.md) for details.
 
 [Back to top](#repo2skill)

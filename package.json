@@ -1,7 +1,7 @@
 {
-  "name": "repo2skill",
-  "version": "0.1.0",
-  "description": "Turn any GitHub repo into agent-ready onboarding context.",
+  "name": "@haodehaode378/repo2skill",
+  "version": "0.2.0",
+  "description": "Generate evidence-backed agent onboarding artifacts from real repository signals.",
   "type": "module",
   "homepage": "https://github.com/haodehaode378/repo2skill#readme",
   "repository": {

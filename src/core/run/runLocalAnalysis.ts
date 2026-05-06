@@ -15,6 +15,7 @@ import { exportJson } from "../export/exportJson.js";
 import { exportProjectMap } from "../export/exportProjectMap.js";
 import { exportQuickstarts } from "../export/exportQuickstarts.js";
 import { exportSkillMd } from "../export/exportSkillMd.js";
+import { createShareableAnalysis } from "../export/shareableAnalysis.js";
 
 export type OutputFormat = "json" | "md" | "all";
 
@@ -55,30 +56,31 @@ export async function exportAnalysisArtifacts(
   format: OutputFormat
 ): Promise<string[]> {
   const writtenFiles: string[] = [];
+  const exportedAnalysis = createShareableAnalysis(analysis);
 
   if (format === "json" || format === "all") {
-    await exportJson(outDir, analysis);
+    await exportJson(outDir, exportedAnalysis);
     writtenFiles.push(path.join(outDir, "repo2skill.json"));
   }
 
   if (format === "md" || format === "all") {
-    await exportProjectMap(outDir, analysis);
+    await exportProjectMap(outDir, exportedAnalysis);
     writtenFiles.push(path.join(outDir, "project-map.md"));
 
-    await exportAgentsMd(outDir, analysis);
+    await exportAgentsMd(outDir, exportedAnalysis);
     writtenFiles.push(path.join(outDir, "AGENTS.md"));
 
-    await exportSkillMd(outDir, analysis);
+    await exportSkillMd(outDir, exportedAnalysis);
     writtenFiles.push(path.join(outDir, "SKILL.md"));
 
-    await exportQuickstarts(outDir, analysis);
+    await exportQuickstarts(outDir, exportedAnalysis);
     writtenFiles.push(path.join(outDir, "quickstart.windows.md"));
     writtenFiles.push(path.join(outDir, "quickstart.macos.md"));
     writtenFiles.push(path.join(outDir, "quickstart.linux.md"));
   }
 
   if (format === "all") {
-    await exportHtmlReport(outDir, analysis);
+    await exportHtmlReport(outDir, exportedAnalysis);
     writtenFiles.push(path.join(outDir, "report.html"));
   }
 

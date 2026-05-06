@@ -1,8 +1,8 @@
-# v0.1 Release Checklist / v0.1 发布检查清单
+# v0.2 Release Checklist / v0.2 发布检查清单
 
 This checklist keeps the release focused on a stable, evidence-first MVP.
 
-这份清单用于确保 v0.1 仍然聚焦在稳定、证据优先的 MVP。
+这份清单用于确保 v0.2 仍然聚焦在稳定、证据优先的 MVP。
 
 ## Scope / 范围
 
