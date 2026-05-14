@@ -3,11 +3,10 @@ import fs from "fs-extra";
 import {
   RepoAnalysisSchema,
   type CommandCandidate,
-  type CommandRole,
   type RepoAnalysis
 } from "../../schemas/analysis.js";
-import { renderPackageScriptCommand } from "../commands/packageScripts.js";
 import { getDisplayEnvVars, getOmittedEnvVarCount } from "../envVars/display.js";
+import { getCommands } from "./commandHelpers.js";
 
 type QuickstartTarget = {
   fileName: string;
@@ -112,21 +111,6 @@ export function renderQuickstart(analysis: RepoAnalysis, target: QuickstartTarge
   return lines.join("\n");
 }
 
-function getCommands(analysis: RepoAnalysis): CommandCandidate[] {
-  if (analysis.detected.commands.length > 0) {
-    return analysis.detected.commands;
-  }
-
-  return analysis.detected.scripts.map((script) => ({
-    name: script.name,
-    role: getCommandRole(script.name),
-    command: renderPackageScriptCommand(script, analysis.detected.packageManager),
-    rawScript: script.command,
-    source: "package.json",
-    confidence: script.confidence
-  }));
-}
-
 function getSuggestedStartCommand(commands: CommandCandidate[]): CommandCandidate | undefined {
   const preferredOrder = ["dev", "start", "build", "test"] as const;
   const byName = new Map(commands.map((command) => [command.name, command]));
@@ -140,19 +124,4 @@ function getSuggestedStartCommand(commands: CommandCandidate[]): CommandCandidat
   }
 
   return undefined;
-}
-
-function getCommandRole(name: string): CommandRole {
-  if (
-    name === "dev" ||
-    name === "format" ||
-    name === "build" ||
-    name === "test" ||
-    name === "lint" ||
-    name === "typecheck"
-  ) {
-    return name;
-  }
-
-  return "other";
 }

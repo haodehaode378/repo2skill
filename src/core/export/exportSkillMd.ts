@@ -3,14 +3,11 @@ import fs from "fs-extra";
 import {
   RepoAnalysisSchema,
   type CommandCandidate,
-  type CommandRole,
   type RepoAnalysis
 } from "../../schemas/analysis.js";
-import { renderPackageScriptCommand } from "../commands/packageScripts.js";
 import { getEntrypointFacts } from "../entrypoints/facts.js";
 import { getDisplayEnvVars, getOmittedEnvVarCount } from "../envVars/display.js";
-
-const VALIDATION_SCRIPT_ORDER = ["test", "lint", "typecheck", "build"] as const;
+import { formatCode, getCommands, getValidationCommands } from "./commandHelpers.js";
 
 export async function exportSkillMd(outDir: string, analysis: RepoAnalysis): Promise<void> {
   const validatedAnalysis = RepoAnalysisSchema.parse(analysis);
@@ -202,42 +199,6 @@ function getReferences(analysis: RepoAnalysis): string[] {
   return references;
 }
 
-function getCommands(analysis: RepoAnalysis): CommandCandidate[] {
-  if (analysis.detected.commands.length > 0) {
-    return analysis.detected.commands;
-  }
-
-  return analysis.detected.scripts.map((script) => ({
-    name: script.name,
-    role: getCommandRole(script.name),
-    command: renderPackageScriptCommand(script, analysis.detected.packageManager),
-    rawScript: script.command,
-    source: "package.json",
-    confidence: script.confidence
-  }));
-}
-
-function getValidationCommands(commands: CommandCandidate[]): CommandCandidate[] {
-  const byRole = new Map(commands.map((command) => [command.role, command]));
-
-  return VALIDATION_SCRIPT_ORDER.flatMap((scriptName) => {
-    const command = byRole.get(scriptName);
-    return command ? [command] : [];
-  });
-}
-
-function getCommandRole(name: string): CommandRole {
-  if (
-    name === "dev" ||
-    name === "format" ||
-    VALIDATION_SCRIPT_ORDER.includes(name as (typeof VALIDATION_SCRIPT_ORDER)[number])
-  ) {
-    return name as CommandRole;
-  }
-
-  return "other";
-}
-
 function createSkillName(repoName: string): string {
   const normalized = repoName
     .toLowerCase()
@@ -251,6 +212,3 @@ function createDescription(repoName: string): string {
   return `Repository-specific guidance for working in ${repoName}. Use when modifying this repository and you need the detected commands, validation checks, and environment-variable hints.`;
 }
 
-function formatCode(value: string): string {
-  return `\`${value}\``;
-}

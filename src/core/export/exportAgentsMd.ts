@@ -2,15 +2,11 @@ import path from "node:path";
 import fs from "fs-extra";
 import {
   RepoAnalysisSchema,
-  type CommandCandidate,
-  type CommandRole,
   type RepoAnalysis
 } from "../../schemas/analysis.js";
-import { renderPackageScriptCommand } from "../commands/packageScripts.js";
 import { getEntrypointFacts, isGeneratedEntrypointRole } from "../entrypoints/facts.js";
 import { getDisplayEnvVars, getOmittedEnvVarCount } from "../envVars/display.js";
-
-const VALIDATION_SCRIPT_ORDER = ["test", "lint", "typecheck", "build"] as const;
+import { formatCode, getCommands, getValidationCommands } from "./commandHelpers.js";
 
 export async function exportAgentsMd(outDir: string, analysis: RepoAnalysis): Promise<void> {
   const validatedAnalysis = RepoAnalysisSchema.parse(analysis);
@@ -130,30 +126,6 @@ export function renderAgentsMd(analysis: RepoAnalysis): string {
   return sections.join("\n");
 }
 
-function getCommands(analysis: RepoAnalysis): CommandCandidate[] {
-  if (analysis.detected.commands.length > 0) {
-    return analysis.detected.commands;
-  }
-
-  return analysis.detected.scripts.map((script) => ({
-    name: script.name,
-    role: getCommandRole(script.name),
-    command: renderPackageScriptCommand(script, analysis.detected.packageManager),
-    rawScript: script.command,
-    source: "package.json",
-    confidence: script.confidence
-  }));
-}
-
-function getValidationCommands(commands: CommandCandidate[]): CommandCandidate[] {
-  const byRole = new Map(commands.map((command) => [command.role, command]));
-
-  return VALIDATION_SCRIPT_ORDER.flatMap((scriptName) => {
-    const command = byRole.get(scriptName);
-    return command ? [command] : [];
-  });
-}
-
 function getImportantDirectories(analysis: RepoAnalysis): string[] {
   if (analysis.detected.directories.length > 0) {
     return analysis.detected.directories.map((directory) => directory.path);
@@ -229,22 +201,6 @@ function getConfigFilesByPriority(analysis: RepoAnalysis): string[] {
     })
     .slice(0, 6)
     .map((configFile) => configFile.path);
-}
-
-function getCommandRole(name: string): CommandRole {
-  if (
-    name === "dev" ||
-    name === "format" ||
-    VALIDATION_SCRIPT_ORDER.includes(name as (typeof VALIDATION_SCRIPT_ORDER)[number])
-  ) {
-    return name as CommandRole;
-  }
-
-  return "other";
-}
-
-function formatCode(value: string): string {
-  return `\`${value}\``;
 }
 
 function getNotesAndBoundaries(analysis: RepoAnalysis): string[] {
