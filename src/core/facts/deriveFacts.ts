@@ -1,22 +1,13 @@
 import path from "node:path";
 import type {
   CommandCandidate,
-  CommandRole,
   DirectoryCandidate,
   DirectoryRole,
   RepoAnalysis
 } from "../../schemas/analysis.js";
 import { renderPackageScriptCommand } from "../commands/packageScripts.js";
 import { getEntrypointFacts, isGeneratedEntrypointRole } from "../entrypoints/facts.js";
-
-const KNOWN_COMMAND_ROLES = new Set<CommandRole>([
-  "dev",
-  "build",
-  "test",
-  "lint",
-  "typecheck",
-  "format"
-]);
+import { getCommandRole } from "../export/commandHelpers.js";
 
 export function deriveFacts(analysis: RepoAnalysis): void {
   analysis.detected.commands = deriveCommands(analysis);
@@ -75,10 +66,6 @@ export function deriveDirectories(analysis: RepoAnalysis): DirectoryCandidate[] 
   }
 
   return [...directories.values()].sort((left, right) => left.path.localeCompare(right.path));
-}
-
-function getCommandRole(name: string): CommandRole {
-  return KNOWN_COMMAND_ROLES.has(name as CommandRole) ? (name as CommandRole) : "other";
 }
 
 function getDirectoryRole(directoryPath: string): DirectoryRole {

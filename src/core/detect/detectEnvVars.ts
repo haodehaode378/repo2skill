@@ -62,10 +62,14 @@ export async function detectEnvVars(
     preloadedSourceFiles ??
     (await walkDirectory(rootDir, { fileExtensions: SOURCE_FILE_EXTENSIONS }));
 
-  for (const relativePath of sourceFiles) {
-    const absolutePath = path.join(rootDir, relativePath);
-    const content = await fs.readFile(absolutePath, "utf8");
+  const fileContents = await Promise.all(
+    sourceFiles.map(async (relativePath) => ({
+      relativePath,
+      content: await fs.readFile(path.join(rootDir, relativePath), "utf8")
+    }))
+  );
 
+  for (const { relativePath, content } of fileContents) {
     for (const match of content.matchAll(PROCESS_ENV_DOT_PATTERN)) {
       registerEnvVar(found, {
         name: match[1],

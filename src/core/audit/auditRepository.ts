@@ -100,12 +100,20 @@ async function auditPackageJsonFiles(
   files: string[],
   findings: AuditFinding[]
 ): Promise<void> {
-  for (const filePath of files.filter((candidate) => path.basename(candidate) === "package.json")) {
-    const absolutePath = path.join(rootDir, filePath);
-    const packageJson = (await fs.readJson(absolutePath)) as {
-      scripts?: Record<string, unknown>;
-    };
+  const packageJsonPaths = files.filter(
+    (candidate) => path.basename(candidate) === "package.json"
+  );
 
+  const contents = await Promise.all(
+    packageJsonPaths.map(async (filePath) => ({
+      filePath,
+      packageJson: (await fs.readJson(path.join(rootDir, filePath))) as {
+        scripts?: Record<string, unknown>;
+      }
+    }))
+  );
+
+  for (const { filePath, packageJson } of contents) {
     for (const [scriptName, scriptCommand] of Object.entries(packageJson.scripts ?? {})) {
       if (typeof scriptCommand !== "string") {
         continue;
@@ -141,9 +149,14 @@ async function auditWorkflowFiles(
     /^\.github\/workflows\/[^/]+\.ya?ml$/i.test(filePath)
   );
 
-  for (const filePath of workflowFiles) {
-    const content = await fs.readFile(path.join(rootDir, filePath), "utf8");
+  const contents = await Promise.all(
+    workflowFiles.map(async (filePath) => ({
+      filePath,
+      content: await fs.readFile(path.join(rootDir, filePath), "utf8")
+    }))
+  );
 
+  for (const { filePath, content } of contents) {
     findings.push({
       category: "workflow",
       severity: "low",
@@ -244,19 +257,26 @@ async function auditSuspectedSecrets(
   files: string[],
   findings: AuditFinding[]
 ): Promise<void> {
-  for (const filePath of files) {
-    if (!shouldScanForSecrets(filePath)) {
-      continue;
-    }
+  const scannableFiles = files.filter(shouldScanForSecrets);
 
-    const absolutePath = path.join(rootDir, filePath);
-    const stat = await fs.stat(absolutePath);
+  const loaded = await Promise.all(
+    scannableFiles.map(async (filePath) => {
+      const absolutePath = path.join(rootDir, filePath);
+      const stat = await fs.stat(absolutePath);
+      return { filePath, stat };
+    })
+  );
 
-    if (stat.size > MAX_SECRET_SCAN_BYTES) {
-      continue;
-    }
+  const underLimit = loaded.filter(({ stat }) => stat.size <= MAX_SECRET_SCAN_BYTES);
 
-    const content = await fs.readFile(absolutePath, "utf8");
+  const contents = await Promise.all(
+    underLimit.map(async ({ filePath }) => ({
+      filePath,
+      content: await fs.readFile(path.join(rootDir, filePath), "utf8")
+    }))
+  );
+
+  for (const { filePath, content } of contents) {
     const assignmentMatches = [...content.matchAll(SECRET_ASSIGNMENT_PATTERN)];
 
     for (const match of assignmentMatches.slice(0, 3)) {

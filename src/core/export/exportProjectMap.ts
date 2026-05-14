@@ -4,6 +4,7 @@ import { RepoAnalysisSchema, type RepoAnalysis } from "../../schemas/analysis.js
 import { renderPackageScriptCommand } from "../commands/packageScripts.js";
 import { getEntrypointFacts } from "../entrypoints/facts.js";
 import { getDisplayEnvVars, getOmittedEnvVarCount } from "../envVars/display.js";
+import { formatCode } from "./commandHelpers.js";
 
 export async function exportProjectMap(outDir: string, analysis: RepoAnalysis): Promise<void> {
   const validatedAnalysis = RepoAnalysisSchema.parse(analysis);
@@ -128,8 +129,4 @@ export function renderProjectMap(analysis: RepoAnalysis): string {
   sections.push("");
 
   return sections.join("\n");
-}
-
-function formatCode(value: string): string {
-  return `\`${value}\``;
 }

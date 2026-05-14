@@ -40,8 +40,15 @@ const ROOT_CONFIG_FILES: Array<{
 export async function detectConfigFiles(rootDir: string, analysis: RepoAnalysis): Promise<void> {
   const found = new Map<string, ConfigFileType>();
 
-  for (const configFile of ROOT_CONFIG_FILES) {
-    if (await fs.pathExists(path.join(rootDir, configFile.fileName))) {
+  const existenceChecks = await Promise.all(
+    ROOT_CONFIG_FILES.map(async (configFile) => ({
+      ...configFile,
+      exists: await fs.pathExists(path.join(rootDir, configFile.fileName))
+    }))
+  );
+
+  for (const configFile of existenceChecks) {
+    if (configFile.exists) {
       found.set(configFile.fileName, configFile.type);
     }
   }
