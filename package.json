@@ -1,7 +1,7 @@
 {
   "name": "@haodehaode378/repo2skill",
   "version": "0.2.0",
-  "description": "Generate evidence-backed agent onboarding artifacts from real repository signals.",
+  "description": "Analyze any repository into agent-ready onboarding context: commands, entrypoints, security audit, quickstarts, and SKILL.md.",
   "type": "module",
   "homepage": "https://github.com/haodehaode378/repo2skill#readme",
   "repository": {
@@ -38,13 +38,17 @@
   },
   "keywords": [
     "codex",
+    "claude",
     "agent",
+    "ai-agents",
     "skills",
     "onboarding",
     "github",
     "cli",
     "agents-md",
     "repository-analysis",
+    "security-audit",
+    "supply-chain",
     "developer-tools"
   ],
   "license": "MIT",
