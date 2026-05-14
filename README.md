@@ -1,8 +1,8 @@
 # repo2skill
 
-> Generate evidence-backed `AGENTS.md` and `SKILL.md` files from real repository signals.
+> Analyze any repository into agent-ready onboarding context: commands, entrypoints, security audit, quickstarts, and SKILL.md.
 >
-> 从真实仓库证据生成可追溯的 `AGENTS.md` 和 `SKILL.md`。
+> 将任意仓库分析为 agent-ready 的 onboarding 上下文：命令、入口文件、安全审计、quickstart 和 SKILL.md。
 
 ![npm caution](https://img.shields.io/badge/npm-name%20caution-f59e0b?style=flat-square)
 [![TypeScript](https://img.shields.io/badge/TypeScript-ready-3178c6?style=flat-square)](https://www.typescriptlang.org/)
