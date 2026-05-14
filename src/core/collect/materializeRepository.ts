@@ -8,6 +8,8 @@ import type { ResolvedInput } from "./resolveInput.js";
 
 const execFile = promisify(execFileCallback);
 
+const SAFE_BRANCH_PATTERN = /^[a-zA-Z0-9._/-]+$/;
+
 export type MaterializedRepository = {
   rootDir: string;
   cleanup: () => Promise<void>;
@@ -37,6 +39,13 @@ export async function materializeRepository(
 
   const baseTempDir = options.baseTempDir ?? os.tmpdir();
   const branch = options.branch;
+
+  if (branch && !SAFE_BRANCH_PATTERN.test(branch)) {
+    throw new Error(
+      `Invalid branch name: "${branch}". Only alphanumeric characters, dots, slashes, hyphens, and underscores are allowed.`
+    );
+  }
+
   const runCommand = options.runCommand ?? defaultRunCommand;
   const repoName = getGitHubRepoName(input.source);
   const useCache = !options.noCache;

@@ -11,8 +11,10 @@ export type ResolvedInput =
       source: string;
     };
 
+const GITHUB_URL_PATTERN = /^https?:\/\/github\.com\/[^/]+\/[^/]+(?:\.git)?\/?$/;
+
 export async function resolveInput(input: string): Promise<ResolvedInput> {
-  const isGitHub = /^https?:\/\/github\.com\/[^/]+\/[^/]+/.test(input);
+  const isGitHub = GITHUB_URL_PATTERN.test(input);
 
   if (isGitHub) {
     return {
