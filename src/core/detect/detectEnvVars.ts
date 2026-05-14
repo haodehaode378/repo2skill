@@ -1,26 +1,9 @@
 import path from "node:path";
 import fs from "fs-extra";
 import type { ConfidenceLevel, EnvVar, RepoAnalysis } from "../../schemas/analysis.js";
+import { walkDirectory } from "../collect/sharedWalker.js";
 
 const ENV_EXAMPLE_FILES = [".env.example", ".env.local.example"] as const;
-const IGNORED_DIRECTORIES = new Set([
-  ".git",
-  ".next",
-  "__fixtures__",
-  "__tests__",
-  "build",
-  "coverage",
-  "dist",
-  "docs",
-  "e2e",
-  "examples",
-  "fixtures",
-  "node_modules",
-  "out",
-  "test",
-  "tests",
-  "vendor"
-]);
 const SOURCE_FILE_EXTENSIONS = new Set([
   ".cjs",
   ".cts",
@@ -42,7 +25,11 @@ const CONFIDENCE_RANK: Record<ConfidenceLevel, number> = {
   high: 2
 };
 
-export async function detectEnvVars(rootDir: string, analysis: RepoAnalysis): Promise<void> {
+export async function detectEnvVars(
+  rootDir: string,
+  analysis: RepoAnalysis,
+  preloadedSourceFiles?: string[]
+): Promise<void> {
   const found = new Map<string, EnvVar>();
 
   for (const envFileName of ENV_EXAMPLE_FILES) {
@@ -54,7 +41,7 @@ export async function detectEnvVars(rootDir: string, analysis: RepoAnalysis): Pr
     }
 
     const fileContent = await fs.readFile(envFilePath, "utf8");
-    const filePath = toRelativePath(rootDir, envFilePath);
+    const filePath = path.relative(rootDir, envFilePath).split(path.sep).join("/");
 
     for (const line of fileContent.split(/\r?\n/)) {
       const match = line.match(ENV_FILE_PATTERN);
@@ -71,11 +58,13 @@ export async function detectEnvVars(rootDir: string, analysis: RepoAnalysis): Pr
     }
   }
 
-  const sourceFiles = await listSourceFiles(rootDir);
+  const sourceFiles =
+    preloadedSourceFiles ??
+    (await walkDirectory(rootDir, { fileExtensions: SOURCE_FILE_EXTENSIONS }));
 
-  for (const sourceFile of sourceFiles) {
-    const content = await fs.readFile(sourceFile, "utf8");
-    const relativePath = toRelativePath(rootDir, sourceFile);
+  for (const relativePath of sourceFiles) {
+    const absolutePath = path.join(rootDir, relativePath);
+    const content = await fs.readFile(absolutePath, "utf8");
 
     for (const match of content.matchAll(PROCESS_ENV_DOT_PATTERN)) {
       registerEnvVar(found, {
@@ -116,39 +105,4 @@ function registerEnvVar(found: Map<string, EnvVar>, candidate: EnvVar): void {
   if (CONFIDENCE_RANK[candidate.confidence] > CONFIDENCE_RANK[existing.confidence]) {
     found.set(candidate.name, candidate);
   }
-}
-
-async function listSourceFiles(rootDir: string): Promise<string[]> {
-  const files: string[] = [];
-  await walkDirectory(rootDir, files);
-  return files.sort();
-}
-
-async function walkDirectory(currentDir: string, files: string[]): Promise<void> {
-  const entries = await fs.readdir(currentDir, { withFileTypes: true });
-
-  for (const entry of entries) {
-    if (IGNORED_DIRECTORIES.has(entry.name)) {
-      continue;
-    }
-
-    const fullPath = path.join(currentDir, entry.name);
-
-    if (entry.isDirectory()) {
-      await walkDirectory(fullPath, files);
-      continue;
-    }
-
-    if (isSourceFile(fullPath)) {
-      files.push(fullPath);
-    }
-  }
-}
-
-function isSourceFile(filePath: string): boolean {
-  return SOURCE_FILE_EXTENSIONS.has(path.extname(filePath));
-}
-
-function toRelativePath(rootDir: string, filePath: string): string {
-  return path.relative(rootDir, filePath).split(path.sep).join("/");
 }

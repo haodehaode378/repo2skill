@@ -9,12 +9,16 @@ type PackageJsonWithWorkspaces = {
 const TOOLING_SIGNAL_FILES = ["turbo.json", "nx.json"] as const;
 const CONVENTIONAL_WORKSPACE_DIRS = ["apps", "packages"] as const;
 
-export async function detectWorkspace(rootDir: string, analysis: RepoAnalysis): Promise<void> {
+export async function detectWorkspace(
+  rootDir: string,
+  analysis: RepoAnalysis,
+  preloadedPackageJson?: Record<string, unknown>
+): Promise<void> {
   const packageGlobs = new Set<string>();
   const signals = new Set<string>();
 
   await detectPnpmWorkspace(rootDir, packageGlobs, signals);
-  await detectPackageJsonWorkspaces(rootDir, packageGlobs, signals);
+  await detectPackageJsonWorkspaces(rootDir, packageGlobs, signals, preloadedPackageJson);
   await detectToolingSignals(rootDir, signals);
   await detectConventionalWorkspaceDirs(rootDir, packageGlobs, signals);
 
@@ -91,15 +95,22 @@ function parsePnpmWorkspaceGlobs(content: string): string[] {
 async function detectPackageJsonWorkspaces(
   rootDir: string,
   packageGlobs: Set<string>,
-  signals: Set<string>
+  signals: Set<string>,
+  preloadedPackageJson?: Record<string, unknown>
 ): Promise<void> {
-  const packageJsonPath = path.join(rootDir, "package.json");
+  let packageJson: PackageJsonWithWorkspaces;
 
-  if (!(await fs.pathExists(packageJsonPath))) {
-    return;
+  if (preloadedPackageJson) {
+    packageJson = preloadedPackageJson;
+  } else {
+    const packageJsonPath = path.join(rootDir, "package.json");
+
+    if (!(await fs.pathExists(packageJsonPath))) {
+      return;
+    }
+
+    packageJson = (await fs.readJson(packageJsonPath)) as PackageJsonWithWorkspaces;
   }
-
-  const packageJson = (await fs.readJson(packageJsonPath)) as PackageJsonWithWorkspaces;
   const workspaces = packageJson.workspaces;
   const detectedGlobs = parsePackageJsonWorkspaces(workspaces);
 

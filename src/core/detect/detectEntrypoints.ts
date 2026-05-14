@@ -26,14 +26,28 @@ type PackageJsonWithEntrypoints = {
   bin?: unknown;
 };
 
-export async function detectEntrypoints(rootDir: string, analysis: RepoAnalysis): Promise<void> {
+export async function detectEntrypoints(
+  rootDir: string,
+  analysis: RepoAnalysis,
+  preloadedPackageJson?: Record<string, unknown>,
+  sourceFiles?: string[]
+): Promise<void> {
   const found = new Set<string>();
-  const packageJsonPath = path.join(rootDir, "package.json");
-  const hasPackageJson = await fs.pathExists(packageJsonPath);
 
-  if (hasPackageJson) {
-    const packageJson = (await fs.readJson(packageJsonPath)) as PackageJsonWithEntrypoints;
+  let packageJson: PackageJsonWithEntrypoints | undefined;
 
+  if (preloadedPackageJson) {
+    packageJson = preloadedPackageJson;
+  } else {
+    const packageJsonPath = path.join(rootDir, "package.json");
+    const hasPackageJson = await fs.pathExists(packageJsonPath);
+
+    if (hasPackageJson) {
+      packageJson = (await fs.readJson(packageJsonPath)) as PackageJsonWithEntrypoints;
+    }
+  }
+
+  if (packageJson) {
     registerPackageEntrypoint(found, analysis, packageJson.main, "main");
     registerPackageEntrypoint(found, analysis, packageJson.module, "module");
     registerPackageEntrypoint(found, analysis, packageJson.browser, "browser");
@@ -58,14 +72,26 @@ export async function detectEntrypoints(rootDir: string, analysis: RepoAnalysis)
     }
   }
 
-  for (const candidate of CONVENTIONAL_ENTRYPOINTS) {
-    const exists = await fs.pathExists(path.join(rootDir, candidate));
+  if (sourceFiles) {
+    const sourceFileSet = new Set(sourceFiles);
 
-    if (!exists) {
-      continue;
+    for (const candidate of CONVENTIONAL_ENTRYPOINTS) {
+      if (!sourceFileSet.has(candidate)) {
+        continue;
+      }
+
+      registerEntrypoint(found, analysis, candidate, candidate, "medium");
     }
+  } else {
+    for (const candidate of CONVENTIONAL_ENTRYPOINTS) {
+      const exists = await fs.pathExists(path.join(rootDir, candidate));
 
-    registerEntrypoint(found, analysis, candidate, candidate, "medium");
+      if (!exists) {
+        continue;
+      }
+
+      registerEntrypoint(found, analysis, candidate, candidate, "medium");
+    }
   }
 }
 

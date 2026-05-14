@@ -19,7 +19,11 @@ type PackageJsonWithBin = {
   bin?: string | Record<string, unknown>;
 };
 
-export async function detectProjectType(rootDir: string, analysis: RepoAnalysis): Promise<void> {
+export async function detectProjectType(
+  rootDir: string,
+  analysis: RepoAnalysis,
+  preloadedPackageJson?: Record<string, unknown>
+): Promise<void> {
   for (const signal of PROJECT_TYPE_SIGNALS) {
     for (const fileName of signal.files) {
       const exists = await fs.pathExists(path.join(rootDir, fileName));
@@ -39,14 +43,20 @@ export async function detectProjectType(rootDir: string, analysis: RepoAnalysis)
     }
   }
 
-  const packageJsonPath = path.join(rootDir, "package.json");
-  const exists = await fs.pathExists(packageJsonPath);
+  let packageJson: PackageJsonWithBin;
 
-  if (!exists) {
-    return;
+  if (preloadedPackageJson) {
+    packageJson = preloadedPackageJson;
+  } else {
+    const packageJsonPath = path.join(rootDir, "package.json");
+    const exists = await fs.pathExists(packageJsonPath);
+
+    if (!exists) {
+      return;
+    }
+
+    packageJson = (await fs.readJson(packageJsonPath)) as PackageJsonWithBin;
   }
-
-  const packageJson = (await fs.readJson(packageJsonPath)) as PackageJsonWithBin;
   const hasBin =
     typeof packageJson.bin === "string" ||
     (packageJson.bin != null &&

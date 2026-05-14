@@ -1,5 +1,7 @@
 import path from "node:path";
+import fs from "fs-extra";
 import type { RepoAnalysis } from "../../schemas/analysis.js";
+import { walkDirectory } from "../collect/sharedWalker.js";
 import { getDisplayEnvVars, getOmittedEnvVarCount } from "../envVars/display.js";
 import { detectConfigFiles } from "../detect/detectConfigFiles.js";
 import { detectEnvVars } from "../detect/detectEnvVars.js";
@@ -18,6 +20,17 @@ import { exportSkillMd } from "../export/exportSkillMd.js";
 import { createShareableAnalysis } from "../export/shareableAnalysis.js";
 
 export type OutputFormat = "json" | "md" | "all";
+
+const SOURCE_FILE_EXTENSIONS = new Set([
+  ".cjs",
+  ".cts",
+  ".js",
+  ".jsx",
+  ".mjs",
+  ".mts",
+  ".ts",
+  ".tsx"
+]);
 
 export async function analyzeLocalRepo(rootDir: string): Promise<RepoAnalysis> {
   const analysis: RepoAnalysis = {
@@ -38,13 +51,23 @@ export async function analyzeLocalRepo(rootDir: string): Promise<RepoAnalysis> {
     evidence: []
   };
 
-  await detectPackageManager(rootDir, analysis);
-  await detectConfigFiles(rootDir, analysis);
-  await detectWorkspace(rootDir, analysis);
-  await detectProjectType(rootDir, analysis);
-  await detectScripts(rootDir, analysis);
-  await detectEntrypoints(rootDir, analysis);
-  await detectEnvVars(rootDir, analysis);
+  const packageJsonPath = path.join(rootDir, "package.json");
+  const packageJson = (await fs.pathExists(packageJsonPath))
+    ? ((await fs.readJson(packageJsonPath)) as Record<string, unknown>)
+    : undefined;
+
+  const sourceFiles = await walkDirectory(rootDir, { fileExtensions: SOURCE_FILE_EXTENSIONS });
+
+  await Promise.all([
+    detectPackageManager(rootDir, analysis),
+    detectConfigFiles(rootDir, analysis),
+    detectWorkspace(rootDir, analysis, packageJson),
+    detectProjectType(rootDir, analysis, packageJson),
+    detectScripts(rootDir, analysis, packageJson),
+    detectEntrypoints(rootDir, analysis, packageJson, sourceFiles),
+    detectEnvVars(rootDir, analysis, sourceFiles)
+  ]);
+
   deriveFacts(analysis);
 
   return analysis;

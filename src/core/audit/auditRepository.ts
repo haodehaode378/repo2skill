@@ -1,5 +1,6 @@
 import path from "node:path";
 import fs from "fs-extra";
+import { walkDirectory } from "../collect/sharedWalker.js";
 
 export type AuditSeverity = "info" | "low" | "medium" | "high";
 
@@ -20,17 +21,6 @@ const LIFECYCLE_SCRIPTS = new Set([
   "postpack",
   "prepublish",
   "prepublishOnly"
-]);
-
-const IGNORED_DIRECTORIES = new Set([
-  ".git",
-  ".next",
-  "build",
-  "coverage",
-  "dist",
-  "node_modules",
-  "out",
-  "vendor"
 ]);
 
 const TEXT_EXTENSIONS = new Set([
@@ -62,7 +52,7 @@ const SECRET_ASSIGNMENT_PATTERN =
 const HIGH_ENTROPY_PATTERN = /(?:^|[\s"'`])([A-Za-z0-9+/=_-]{32,})(?=$|[\s"'`,])/g;
 
 export async function auditRepository(rootDir: string): Promise<AuditFinding[]> {
-  const files = await listFiles(rootDir);
+  const files = await walkDirectory(rootDir, { skipSymlinks: true });
   const findings: AuditFinding[] = [];
 
   await auditPackageJsonFiles(rootDir, files, findings);
@@ -290,34 +280,6 @@ async function auditSuspectedSecrets(
         evidence: redact(value)
       });
       break;
-    }
-  }
-}
-
-async function listFiles(rootDir: string): Promise<string[]> {
-  const files: string[] = [];
-  await walkDirectory(rootDir, "", files);
-  return files.sort();
-}
-
-async function walkDirectory(rootDir: string, relativeDir: string, files: string[]): Promise<void> {
-  const absoluteDir = path.join(rootDir, relativeDir);
-  const entries = await fs.readdir(absoluteDir, { withFileTypes: true });
-
-  for (const entry of entries) {
-    if (entry.isDirectory() && IGNORED_DIRECTORIES.has(entry.name)) {
-      continue;
-    }
-
-    const relativePath = path.posix.join(relativeDir.split(path.sep).join("/"), entry.name);
-
-    if (entry.isDirectory()) {
-      await walkDirectory(rootDir, relativePath, files);
-      continue;
-    }
-
-    if (entry.isFile()) {
-      files.push(relativePath);
     }
   }
 }

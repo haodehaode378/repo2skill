@@ -8,15 +8,25 @@ type PackageJsonWithScripts = {
   scripts?: Record<string, unknown>;
 };
 
-export async function detectScripts(rootDir: string, analysis: RepoAnalysis): Promise<void> {
-  const packageJsonPath = path.join(rootDir, "package.json");
-  const exists = await fs.pathExists(packageJsonPath);
+export async function detectScripts(
+  rootDir: string,
+  analysis: RepoAnalysis,
+  preloadedPackageJson?: Record<string, unknown>
+): Promise<void> {
+  let packageJson: PackageJsonWithScripts;
 
-  if (!exists) {
-    return;
+  if (preloadedPackageJson) {
+    packageJson = preloadedPackageJson;
+  } else {
+    const packageJsonPath = path.join(rootDir, "package.json");
+    const exists = await fs.pathExists(packageJsonPath);
+
+    if (!exists) {
+      return;
+    }
+
+    packageJson = (await fs.readJson(packageJsonPath)) as PackageJsonWithScripts;
   }
-
-  const packageJson = (await fs.readJson(packageJsonPath)) as PackageJsonWithScripts;
   const nextScripts: ScriptCommand[] = [];
 
   for (const scriptName of CANONICAL_SCRIPT_NAMES) {
