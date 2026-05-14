@@ -2,6 +2,7 @@ import path from "node:path";
 import fs from "fs-extra";
 import {
   RepoAnalysisSchema,
+  type CommandCandidate,
   type RepoAnalysis
 } from "../../schemas/analysis.js";
 import { getEntrypointFacts, isGeneratedEntrypointRole } from "../entrypoints/facts.js";
@@ -19,111 +20,173 @@ export async function exportAgentsMd(outDir: string, analysis: RepoAnalysis): Pr
 export function renderAgentsMd(analysis: RepoAnalysis): string {
   const sections: string[] = [];
 
-  sections.push("## Repository Overview");
-  sections.push("");
-  sections.push(`- Name: \`${analysis.repo.name}\``);
-  sections.push(`- Root Directory: \`${analysis.repo.rootDir}\``);
-
-  if (analysis.detected.packageManager) {
-    sections.push(`- Detected Package Manager: \`${analysis.detected.packageManager}\``);
-  }
+  sections.push(renderAgentsOverview(analysis));
 
   const commands = getCommands(analysis);
   const importantDirectories = getImportantDirectories(analysis);
 
-  if (commands.length > 0) {
-    sections.push("");
-    sections.push("## Priority Commands");
-    sections.push("");
-
-    for (const command of commands) {
-      const rawScript = command.rawScript ? ` (script: \`${command.rawScript}\`)` : "";
-      sections.push(`- \`${command.name}\`: \`${command.command}\`${rawScript}`);
-    }
-  }
-
-  const beforeChanging = getBeforeChangingInstructions(analysis, importantDirectories);
-
-  if (beforeChanging.length > 0) {
-    sections.push("");
-    sections.push("## Before Changing Code");
-    sections.push("");
-
-    for (const instruction of beforeChanging) {
-      sections.push(`- ${instruction}`);
-    }
-  }
-
-  const validationCommands = getValidationCommands(commands);
-
-  if (validationCommands.length > 0) {
-    sections.push("");
-    sections.push("## Validation Before Finishing");
-    sections.push("");
-    sections.push("- Run only the evidenced validation commands that are relevant to your change.");
-
-    for (const command of validationCommands) {
-      sections.push(`- Run \`${command.command}\` for the \`${command.name}\` command.`);
-    }
-  } else {
-    sections.push("");
-    sections.push("## Validation Before Finishing");
-    sections.push("");
-    sections.push(
-      "- No validation command was detected. Do not invent one; inspect project scripts first if validation is needed."
-    );
-  }
-
-  if (importantDirectories.length > 0) {
-    sections.push("");
-    sections.push("## Important Directories");
-    sections.push("");
-
-    for (const directory of importantDirectories) {
-      sections.push(`- \`${directory}\``);
-    }
-  }
-
-  const entrypoints = getEntrypointFacts(analysis);
-
-  if (entrypoints.length > 0) {
-    sections.push("");
-    sections.push("## Entrypoints");
-    sections.push("");
-
-    for (const entrypoint of entrypoints) {
-      const reason = entrypoint.reason ? `, ${entrypoint.reason}` : "";
-      sections.push(
-        `- \`${entrypoint.path}\` (${entrypoint.role}, ${entrypoint.confidence}${reason})`
-      );
-    }
-  }
-
-  if (analysis.detected.configFiles.length > 0) {
-    sections.push("");
-    sections.push("## Key Config Files");
-    sections.push("");
-
-    for (const configFile of analysis.detected.configFiles) {
-      sections.push(`- \`${configFile.path}\` (${configFile.type})`);
-    }
-  }
-
-  const notes = getNotesAndBoundaries(analysis);
-
-  if (notes.length > 0) {
-    sections.push("");
-    sections.push("## Notes and Boundaries");
-    sections.push("");
-
-    for (const note of notes) {
-      sections.push(`- ${note}`);
-    }
-  }
+  sections.push(...renderAgentsCommands(commands));
+  sections.push(...renderAgentsBeforeChanging(analysis, importantDirectories));
+  sections.push(...renderAgentsValidation(commands));
+  sections.push(...renderAgentsDirectories(importantDirectories));
+  sections.push(...renderAgentsEntrypoints(analysis));
+  sections.push(...renderAgentsConfigFiles(analysis));
+  sections.push(...renderAgentsNotes(analysis));
 
   sections.push("");
 
   return sections.join("\n");
+}
+
+function renderAgentsOverview(analysis: RepoAnalysis): string {
+  const lines: string[] = [];
+
+  lines.push("## Repository Overview");
+  lines.push("");
+  lines.push(`- Name: \`${analysis.repo.name}\``);
+  lines.push(`- Root Directory: \`${analysis.repo.rootDir}\``);
+
+  if (analysis.detected.packageManager) {
+    lines.push(`- Detected Package Manager: \`${analysis.detected.packageManager}\``);
+  }
+
+  return lines.join("\n");
+}
+
+function renderAgentsCommands(commands: CommandCandidate[]): string[] {
+  if (commands.length === 0) {
+    return [];
+  }
+
+  const lines: string[] = [];
+  lines.push("");
+  lines.push("## Priority Commands");
+  lines.push("");
+
+  for (const command of commands) {
+    const rawScript = command.rawScript ? ` (script: \`${command.rawScript}\`)` : "";
+    lines.push(`- \`${command.name}\`: \`${command.command}\`${rawScript}`);
+  }
+
+  return lines;
+}
+
+function renderAgentsBeforeChanging(
+  analysis: RepoAnalysis,
+  importantDirectories: string[]
+): string[] {
+  const instructions = getBeforeChangingInstructions(analysis, importantDirectories);
+
+  if (instructions.length === 0) {
+    return [];
+  }
+
+  const lines: string[] = [];
+  lines.push("");
+  lines.push("## Before Changing Code");
+  lines.push("");
+
+  for (const instruction of instructions) {
+    lines.push(`- ${instruction}`);
+  }
+
+  return lines;
+}
+
+function renderAgentsValidation(commands: CommandCandidate[]): string[] {
+  const validationCommands = getValidationCommands(commands);
+  const lines: string[] = [];
+
+  lines.push("");
+  lines.push("## Validation Before Finishing");
+  lines.push("");
+
+  if (validationCommands.length > 0) {
+    lines.push("- Run only the evidenced validation commands that are relevant to your change.");
+
+    for (const command of validationCommands) {
+      lines.push(`- Run \`${command.command}\` for the \`${command.name}\` command.`);
+    }
+  } else {
+    lines.push(
+      "- No validation command was detected. Do not invent one; inspect project scripts first if validation is needed."
+    );
+  }
+
+  return lines;
+}
+
+function renderAgentsDirectories(importantDirectories: string[]): string[] {
+  if (importantDirectories.length === 0) {
+    return [];
+  }
+
+  const lines: string[] = [];
+  lines.push("");
+  lines.push("## Important Directories");
+  lines.push("");
+
+  for (const directory of importantDirectories) {
+    lines.push(`- \`${directory}\``);
+  }
+
+  return lines;
+}
+
+function renderAgentsEntrypoints(analysis: RepoAnalysis): string[] {
+  const entrypoints = getEntrypointFacts(analysis);
+
+  if (entrypoints.length === 0) {
+    return [];
+  }
+
+  const lines: string[] = [];
+  lines.push("");
+  lines.push("## Entrypoints");
+  lines.push("");
+
+  for (const entrypoint of entrypoints) {
+    const reason = entrypoint.reason ? `, ${entrypoint.reason}` : "";
+    lines.push(`- \`${entrypoint.path}\` (${entrypoint.role}, ${entrypoint.confidence}${reason})`);
+  }
+
+  return lines;
+}
+
+function renderAgentsConfigFiles(analysis: RepoAnalysis): string[] {
+  if (analysis.detected.configFiles.length === 0) {
+    return [];
+  }
+
+  const lines: string[] = [];
+  lines.push("");
+  lines.push("## Key Config Files");
+  lines.push("");
+
+  for (const configFile of analysis.detected.configFiles) {
+    lines.push(`- \`${configFile.path}\` (${configFile.type})`);
+  }
+
+  return lines;
+}
+
+function renderAgentsNotes(analysis: RepoAnalysis): string[] {
+  const notes = getNotesAndBoundaries(analysis);
+
+  if (notes.length === 0) {
+    return [];
+  }
+
+  const lines: string[] = [];
+  lines.push("");
+  lines.push("## Notes and Boundaries");
+  lines.push("");
+
+  for (const note of notes) {
+    lines.push(`- ${note}`);
+  }
+
+  return lines;
 }
 
 function getImportantDirectories(analysis: RepoAnalysis): string[] {

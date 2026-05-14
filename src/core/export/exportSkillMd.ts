@@ -29,6 +29,23 @@ export function renderSkillMd(analysis: RepoAnalysis): string {
   lines.push("");
   lines.push(`# ${analysis.repo.name} Repository Skill`);
   lines.push("");
+
+  const commands = getCommands(analysis);
+  const validationCommands = getValidationCommands(commands);
+
+  lines.push(renderSkillUseWhen(analysis));
+  lines.push(...renderSkillSteps(analysis, commands, validationCommands));
+  lines.push(...renderSkillCommandsSection(commands));
+  lines.push(...renderSkillValidationSection(validationCommands));
+  lines.push(...renderSkillReferences(analysis));
+  lines.push(...renderSkillBoundaries());
+
+  return lines.join("\n");
+}
+
+function renderSkillUseWhen(analysis: RepoAnalysis): string {
+  const lines: string[] = [];
+
   lines.push("## Use When");
   lines.push("");
   lines.push(`- You are working inside \`${analysis.repo.name}\`.`);
@@ -45,66 +62,97 @@ export function renderSkillMd(analysis: RepoAnalysis): string {
     lines.push(`- Detected Package Manager: \`${analysis.detected.packageManager}\``);
   }
 
-  const commands = getCommands(analysis);
-  const validationCommands = getValidationCommands(commands);
+  return lines.join("\n");
+}
+
+function renderSkillSteps(
+  analysis: RepoAnalysis,
+  commands: CommandCandidate[],
+  validationCommands: CommandCandidate[]
+): string[] {
   const steps = getSteps(analysis, commands, validationCommands);
 
-  if (steps.length > 0) {
-    lines.push("");
-    lines.push("## Steps");
-    lines.push("");
-
-    for (const step of steps) {
-      lines.push(`- ${step}`);
-    }
+  if (steps.length === 0) {
+    return [];
   }
 
-  if (commands.length > 0) {
-    lines.push("");
-    lines.push("## Commands");
-    lines.push("");
+  const lines: string[] = [];
+  lines.push("");
+  lines.push("## Steps");
+  lines.push("");
 
-    for (const command of commands) {
-      const rawScript = command.rawScript ? ` (script: \`${command.rawScript}\`)` : "";
-      lines.push(`- Run \`${command.command}\` for \`${command.name}\`${rawScript}.`);
-    }
+  for (const step of steps) {
+    lines.push(`- ${step}`);
   }
 
-  if (validationCommands.length > 0) {
-    lines.push("");
-    lines.push("## Validation");
-    lines.push("");
+  return lines;
+}
 
-    for (const command of validationCommands) {
-      lines.push(
-        `- Prefer \`${command.command}\` before finishing changes when that check is relevant.`
-      );
-    }
+function renderSkillCommandsSection(commands: CommandCandidate[]): string[] {
+  if (commands.length === 0) {
+    return [];
   }
 
+  const lines: string[] = [];
+  lines.push("");
+  lines.push("## Commands");
+  lines.push("");
+
+  for (const command of commands) {
+    const rawScript = command.rawScript ? ` (script: \`${command.rawScript}\`)` : "";
+    lines.push(`- Run \`${command.command}\` for \`${command.name}\`${rawScript}.`);
+  }
+
+  return lines;
+}
+
+function renderSkillValidationSection(validationCommands: CommandCandidate[]): string[] {
+  if (validationCommands.length === 0) {
+    return [];
+  }
+
+  const lines: string[] = [];
+  lines.push("");
+  lines.push("## Validation");
+  lines.push("");
+
+  for (const command of validationCommands) {
+    lines.push(
+      `- Prefer \`${command.command}\` before finishing changes when that check is relevant.`
+    );
+  }
+
+  return lines;
+}
+
+function renderSkillReferences(analysis: RepoAnalysis): string[] {
   const references = getReferences(analysis);
 
-  if (references.length > 0) {
-    lines.push("");
-    lines.push("## References");
-    lines.push("");
-
-    for (const reference of references) {
-      lines.push(`- ${reference}`);
-    }
+  if (references.length === 0) {
+    return [];
   }
 
+  const lines: string[] = [];
   lines.push("");
-  lines.push("## Boundaries");
-  lines.push("");
-  lines.push(
-    "- Treat this skill as evidence-backed repository guidance, not a complete architecture document."
-  );
-  lines.push("- Omitted sections mean no supporting repository evidence was detected.");
-
+  lines.push("## References");
   lines.push("");
 
-  return lines.join("\n");
+  for (const reference of references) {
+    lines.push(`- ${reference}`);
+  }
+
+  return lines;
+}
+
+function renderSkillBoundaries(): string[] {
+  return [
+    "",
+    "## Boundaries",
+    "",
+    "- Treat this skill as evidence-backed repository guidance, not a complete architecture document.",
+    "- Omitted sections mean no supporting repository evidence was detected.",
+    ""
+  ];
 }
 
 function getSteps(
@@ -211,4 +259,3 @@ function createSkillName(repoName: string): string {
 function createDescription(repoName: string): string {
   return `Repository-specific guidance for working in ${repoName}. Use when modifying this repository and you need the detected commands, validation checks, and environment-variable hints.`;
 }
-
