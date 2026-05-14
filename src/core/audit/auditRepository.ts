@@ -44,11 +44,19 @@ const TEXT_EXTENSIONS = new Set([
 ]);
 
 const MAX_SECRET_SCAN_BYTES = 256_000;
+
+// Detects shell/network patterns in npm scripts — common supply-chain attack vector
 const SUSPICIOUS_SCRIPT_PATTERN =
   /\b(curl|wget|Invoke-WebRequest|iwr)\b|(\|\s*(sh|bash|pwsh|powershell)\b)|\b(base64\s+-d|eval)\b/i;
+
+// Catches `curl | sh` patterns that execute remote code during install
 const PIPE_TO_SHELL_PATTERN = /\b(curl|wget)\b[^\n|;]*\|\s*(sh|bash|pwsh|powershell)\b/i;
+
+// Matches variable assignments where name contains secret-like keywords and value is 20+ chars
 const SECRET_ASSIGNMENT_PATTERN =
   /\b([A-Za-z0-9_-]*(?:api[_-]?key|secret|token|password|private[_-]?key)[A-Za-z0-9_-]*)\b\s*[:=]\s*["']?([A-Za-z0-9_./+=-]{20,})/gi;
+
+// Catches long base64-like strings — real tokens have mixed case + digits, hashes usually don't
 const HIGH_ENTROPY_PATTERN = /(?:^|[\s"'`])([A-Za-z0-9+/=_-]{32,})(?=$|[\s"'`,])/g;
 
 export async function auditRepository(rootDir: string): Promise<AuditFinding[]> {

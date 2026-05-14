@@ -16,144 +16,197 @@ export function renderHtmlReport(analysis: RepoAnalysis): string {
   const title = escapeHtml(`${analysis.repo.name} Report`);
   const sections: string[] = [];
 
-  sections.push(`<section><h2>Repository Overview</h2><ul>`);
-  sections.push(`<li><strong>Name:</strong> <code>${escapeHtml(analysis.repo.name)}</code></li>`);
-  sections.push(`<li><strong>Input:</strong> <code>${escapeHtml(analysis.repo.input)}</code></li>`);
-  sections.push(
-    `<li><strong>Root Directory:</strong> <code>${escapeHtml(analysis.repo.rootDir)}</code></li>`
-  );
-  sections.push(`</ul></section>`);
+  sections.push(renderOverview(analysis));
+  sections.push(...renderDetectedSignals(analysis));
+  sections.push(...renderScriptsSection(analysis));
+  sections.push(...renderWorkspaceSection(analysis));
+  sections.push(...renderEntrypointsSection(analysis));
+  sections.push(...renderConfigFilesSection(analysis));
+  sections.push(...renderTopologySection(analysis));
+  sections.push(...renderEnvVarsSection(analysis));
+  sections.push(...renderEvidenceSection(analysis));
 
-  const detectedItems: string[] = [];
+  return wrapHtmlShell(title, sections);
+}
+
+function renderOverview(analysis: RepoAnalysis): string {
+  return [
+    `<section><h2>Repository Overview</h2><ul>`,
+    `<li><strong>Name:</strong> <code>${escapeHtml(analysis.repo.name)}</code></li>`,
+    `<li><strong>Input:</strong> <code>${escapeHtml(analysis.repo.input)}</code></li>`,
+    `<li><strong>Root Directory:</strong> <code>${escapeHtml(analysis.repo.rootDir)}</code></li>`,
+    `</ul></section>`
+  ].join("");
+}
+
+function renderDetectedSignals(analysis: RepoAnalysis): string[] {
+  const items: string[] = [];
+
   if (analysis.detected.packageManager) {
-    detectedItems.push(
+    items.push(
       `<li><strong>Package Manager:</strong> <code>${escapeHtml(analysis.detected.packageManager)}</code></li>`
     );
   }
+
   if (analysis.detected.projectType) {
-    detectedItems.push(
+    items.push(
       `<li><strong>Project Type:</strong> <code>${escapeHtml(analysis.detected.projectType)}</code></li>`
     );
   }
-  if (detectedItems.length > 0) {
-    sections.push(`<section><h2>Detected Signals</h2><ul>${detectedItems.join("")}</ul></section>`);
+
+  return items.length > 0
+    ? [`<section><h2>Detected Signals</h2><ul>${items.join("")}</ul></section>`]
+    : [];
+}
+
+function renderScriptsSection(analysis: RepoAnalysis): string[] {
+  if (analysis.detected.scripts.length === 0) {
+    return [];
   }
 
-  if (analysis.detected.scripts.length > 0) {
-    sections.push(
-      "<section><h2>Scripts</h2><table><thead><tr><th>Name</th><th>Command</th><th>Confidence</th></tr></thead><tbody>"
+  const rows = analysis.detected.scripts
+    .map(
+      (script) =>
+        `<tr><td><code>${escapeHtml(script.name)}</code></td>` +
+        `<td><code>${escapeHtml(script.command)}</code></td>` +
+        `<td>${escapeHtml(script.confidence)}</td></tr>`
+    )
+    .join("");
+
+  return [
+    `<section><h2>Scripts</h2>` +
+      `<table><thead><tr><th>Name</th><th>Command</th><th>Confidence</th></tr></thead>` +
+      `<tbody>${rows}</tbody></table></section>`
+  ];
+}
+
+function renderWorkspaceSection(analysis: RepoAnalysis): string[] {
+  if (!analysis.detected.workspace) {
+    return [];
+  }
+
+  const items: string[] = [];
+  items.push(
+    `<li><strong>Confidence:</strong> <code>${escapeHtml(analysis.detected.workspace.confidence)}</code></li>`
+  );
+
+  if (analysis.detected.workspace.signals.length > 0) {
+    items.push(
+      `<li><strong>Signals:</strong> ${analysis.detected.workspace.signals.map((signal) => `<code>${escapeHtml(signal)}</code>`).join(", ")}</li>`
     );
-    for (const script of analysis.detected.scripts) {
-      sections.push(
-        `<tr><td><code>${escapeHtml(script.name)}</code></td><td><code>${escapeHtml(
-          script.command
-        )}</code></td><td>${escapeHtml(script.confidence)}</td></tr>`
-      );
-    }
-    sections.push("</tbody></table></section>");
   }
 
-  if (analysis.detected.workspace) {
-    sections.push("<section><h2>Workspace</h2><ul>");
-    sections.push(
-      `<li><strong>Confidence:</strong> <code>${escapeHtml(analysis.detected.workspace.confidence)}</code></li>`
+  if (analysis.detected.workspace.packageGlobs.length > 0) {
+    items.push(
+      `<li><strong>Package Globs:</strong> ${analysis.detected.workspace.packageGlobs.map((glob) => `<code>${escapeHtml(glob)}</code>`).join(", ")}</li>`
     );
-
-    if (analysis.detected.workspace.signals.length > 0) {
-      sections.push(
-        `<li><strong>Signals:</strong> ${analysis.detected.workspace.signals
-          .map((signal) => `<code>${escapeHtml(signal)}</code>`)
-          .join(", ")}</li>`
-      );
-    }
-
-    if (analysis.detected.workspace.packageGlobs.length > 0) {
-      sections.push(
-        `<li><strong>Package Globs:</strong> ${analysis.detected.workspace.packageGlobs
-          .map((workspaceGlob) => `<code>${escapeHtml(workspaceGlob)}</code>`)
-          .join(", ")}</li>`
-      );
-    }
-
-    sections.push("</ul></section>");
   }
 
+  return [`<section><h2>Workspace</h2><ul>${items.join("")}</ul></section>`];
+}
+
+function renderEntrypointsSection(analysis: RepoAnalysis): string[] {
   const entrypoints = getEntrypointFacts(analysis);
 
-  if (entrypoints.length > 0) {
-    sections.push("<section><h2>Entrypoints</h2><ul>");
-    for (const entrypoint of entrypoints) {
+  if (entrypoints.length === 0) {
+    return [];
+  }
+
+  const items = entrypoints
+    .map((entrypoint) => {
       const reason = entrypoint.reason ? `, ${entrypoint.reason}` : "";
-      sections.push(
-        `<li><code>${escapeHtml(entrypoint.path)}</code> (${escapeHtml(entrypoint.role)}, ${escapeHtml(
-          entrypoint.confidence
-        )}${escapeHtml(reason)})</li>`
+      return (
+        `<li><code>${escapeHtml(entrypoint.path)}</code> ` +
+        `(${escapeHtml(entrypoint.role)}, ${escapeHtml(entrypoint.confidence)}${escapeHtml(reason)})</li>`
       );
-    }
-    sections.push("</ul></section>");
+    })
+    .join("");
+
+  return [`<section><h2>Entrypoints</h2><ul>${items}</ul></section>`];
+}
+
+function renderConfigFilesSection(analysis: RepoAnalysis): string[] {
+  if (analysis.detected.configFiles.length === 0) {
+    return [];
   }
 
-  if (analysis.detected.configFiles.length > 0) {
-    sections.push(
-      "<section><h2>Key Config Files</h2><table><thead><tr><th>Path</th><th>Type</th><th>Confidence</th></tr></thead><tbody>"
-    );
+  const rows = analysis.detected.configFiles
+    .map(
+      (configFile) =>
+        `<tr><td><code>${escapeHtml(configFile.path)}</code></td>` +
+        `<td>${escapeHtml(configFile.type)}</td>` +
+        `<td>${escapeHtml(configFile.confidence)}</td></tr>`
+    )
+    .join("");
 
-    for (const configFile of analysis.detected.configFiles) {
-      sections.push(
-        `<tr><td><code>${escapeHtml(configFile.path)}</code></td><td>${escapeHtml(
-          configFile.type
-        )}</td><td>${escapeHtml(configFile.confidence)}</td></tr>`
-      );
-    }
+  return [
+    `<section><h2>Key Config Files</h2>` +
+      `<table><thead><tr><th>Path</th><th>Type</th><th>Confidence</th></tr></thead>` +
+      `<tbody>${rows}</tbody></table></section>`
+  ];
+}
 
-    sections.push("</tbody></table></section>");
+function renderTopologySection(analysis: RepoAnalysis): string[] {
+  const hints = collectTopologyHints(analysis);
+
+  if (hints.length === 0) {
+    return [];
   }
 
-  const topologyHints = collectTopologyHints(analysis);
-  if (topologyHints.length > 0) {
-    sections.push("<section><h2>Repository Topology Hints</h2><ul>");
-    for (const topologyHint of topologyHints) {
-      sections.push(`<li><code>${escapeHtml(topologyHint)}</code></li>`);
-    }
-    sections.push("</ul></section>");
+  const items = hints.map((hint) => `<li><code>${escapeHtml(hint)}</code></li>`).join("");
+
+  return [`<section><h2>Repository Topology Hints</h2><ul>${items}</ul></section>`];
+}
+
+function renderEnvVarsSection(analysis: RepoAnalysis): string[] {
+  if (analysis.detected.envVars.length === 0) {
+    return [];
   }
 
-  if (analysis.detected.envVars.length > 0) {
-    sections.push(
-      "<section><h2>Environment Variables</h2><table><thead><tr><th>Name</th><th>Source</th><th>Confidence</th></tr></thead><tbody>"
-    );
-    for (const envVar of getDisplayEnvVars(analysis.detected.envVars)) {
-      sections.push(
-        `<tr><td><code>${escapeHtml(envVar.name)}</code></td><td><code>${escapeHtml(
-          envVar.sourceFile
-        )}</code></td><td>${escapeHtml(envVar.confidence)}</td></tr>`
-      );
-    }
-    const omittedCount = getOmittedEnvVarCount(analysis.detected.envVars);
+  const rows = getDisplayEnvVars(analysis.detected.envVars)
+    .map(
+      (envVar) =>
+        `<tr><td><code>${escapeHtml(envVar.name)}</code></td>` +
+        `<td><code>${escapeHtml(envVar.sourceFile)}</code></td>` +
+        `<td>${escapeHtml(envVar.confidence)}</td></tr>`
+    )
+    .join("");
 
-    if (omittedCount > 0) {
-      sections.push(
-        `<tr><td colspan="3">${omittedCount} additional environment variables omitted from this summary.</td></tr>`
-      );
-    }
+  const omittedCount = getOmittedEnvVarCount(analysis.detected.envVars);
+  const omittedRow =
+    omittedCount > 0
+      ? `<tr><td colspan="3">${omittedCount} additional environment variables omitted from this summary.</td></tr>`
+      : "";
 
-    sections.push("</tbody></table></section>");
+  return [
+    `<section><h2>Environment Variables</h2>` +
+      `<table><thead><tr><th>Name</th><th>Source</th><th>Confidence</th></tr></thead>` +
+      `<tbody>${rows}${omittedRow}</tbody></table></section>`
+  ];
+}
+
+function renderEvidenceSection(analysis: RepoAnalysis): string[] {
+  if (analysis.evidence.length === 0) {
+    return [];
   }
 
-  if (analysis.evidence.length > 0) {
-    sections.push(
-      "<section><h2>Evidence</h2><table><thead><tr><th>Claim</th><th>Source</th><th>Confidence</th></tr></thead><tbody>"
-    );
-    for (const evidence of analysis.evidence) {
-      sections.push(
-        `<tr><td><code>${escapeHtml(evidence.claim)}</code></td><td><code>${escapeHtml(
-          evidence.sourceFile
-        )}</code></td><td>${escapeHtml(evidence.confidence)}</td></tr>`
-      );
-    }
-    sections.push("</tbody></table></section>");
-  }
+  const rows = analysis.evidence
+    .map(
+      (evidence) =>
+        `<tr><td><code>${escapeHtml(evidence.claim)}</code></td>` +
+        `<td><code>${escapeHtml(evidence.sourceFile)}</code></td>` +
+        `<td>${escapeHtml(evidence.confidence)}</td></tr>`
+    )
+    .join("");
 
+  return [
+    `<section><h2>Evidence</h2>` +
+      `<table><thead><tr><th>Claim</th><th>Source</th><th>Confidence</th></tr></thead>` +
+      `<tbody>${rows}</tbody></table></section>`
+  ];
+}
+
+function wrapHtmlShell(title: string, sections: string[]): string {
   return [
     "<!doctype html>",
     '<html lang="en">',
@@ -183,8 +236,8 @@ export function renderHtmlReport(analysis: RepoAnalysis): string {
   ].join("\n");
 }
 
-function escapeHtml(value: string): string {
-  return value
+function escapeHtml(raw: string): string {
+  return raw
     .replaceAll("&", "&amp;")
     .replaceAll("<", "&lt;")
     .replaceAll(">", "&gt;")
