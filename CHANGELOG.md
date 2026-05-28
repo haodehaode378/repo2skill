@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+No changes yet.
+
+## [0.2.0] - 2026-05-28
+
 ### Performance
 
 - Extract shared directory walker (`sharedWalker.ts`) eliminating duplicated traversal logic across detect and audit modules
@@ -38,8 +42,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Configure coverage thresholds: 80% lines, 80% statements, 75% branches, 80% functions
 - Add `test:coverage` npm script
 - Add coverage step to GitHub Actions CI pipeline
-
-## [0.2.0] - 2025-05-01
 
 ### Added
 

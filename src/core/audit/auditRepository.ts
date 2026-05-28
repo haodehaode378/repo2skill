@@ -100,9 +100,7 @@ async function auditPackageJsonFiles(
   files: string[],
   findings: AuditFinding[]
 ): Promise<void> {
-  const packageJsonPaths = files.filter(
-    (candidate) => path.basename(candidate) === "package.json"
-  );
+  const packageJsonPaths = files.filter((candidate) => path.basename(candidate) === "package.json");
 
   const contents = await Promise.all(
     packageJsonPaths.map(async (filePath) => ({

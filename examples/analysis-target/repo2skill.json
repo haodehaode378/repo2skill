@@ -99,6 +99,26 @@
   },
   "evidence": [
     {
+      "claim": "script:dev=vite",
+      "sourceFile": "package.json",
+      "confidence": "high"
+    },
+    {
+      "claim": "script:build=vite build",
+      "sourceFile": "package.json",
+      "confidence": "high"
+    },
+    {
+      "claim": "script:test=vitest run",
+      "sourceFile": "package.json",
+      "confidence": "high"
+    },
+    {
+      "claim": "entrypoint=src/main.ts",
+      "sourceFile": "src/main.ts",
+      "confidence": "medium"
+    },
+    {
       "claim": "packageManager=pnpm",
       "sourceFile": "pnpm-lock.yaml",
       "confidence": "high"
@@ -125,26 +145,6 @@
       "claim": "projectType=vite",
       "sourceFile": "vite.config.ts",
       "confidence": "high"
-    },
-    {
-      "claim": "script:dev=vite",
-      "sourceFile": "package.json",
-      "confidence": "high"
-    },
-    {
-      "claim": "script:build=vite build",
-      "sourceFile": "package.json",
-      "confidence": "high"
-    },
-    {
-      "claim": "script:test=vitest run",
-      "sourceFile": "package.json",
-      "confidence": "high"
-    },
-    {
-      "claim": "entrypoint=src/main.ts",
-      "sourceFile": "src/main.ts",
-      "confidence": "medium"
     },
     {
       "claim": "envVar:API_URL",

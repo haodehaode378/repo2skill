@@ -1,30 +1,42 @@
-# v0.1 Release Verification / v0.1 发布验证
+# v0.2 Release Verification
 
-Date: 2026-04-24
+Date: 2026-05-28
 
-This file records the concrete checks run before the v0.1 release candidate.
+This file records the concrete checks run before the v0.2 release candidate.
 
-这份文件记录 v0.1 release candidate 发布前实际跑过的验证。
-
-## Local Quality Gates / 本地质量门禁
+## Local Quality Gates
 
 ```bash
+npm run format:check
 npm run lint
 npm run typecheck
 npm test
 npm run build
+npm audit
+python C:/Users/36366/.codex/skills/text-encoding-guard/scripts/check_mojibake.py --root .
 ```
 
 Result:
 
-结果：
-
+- `npm run format:check`: passed
 - `npm run lint`: passed
 - `npm run typecheck`: passed
-- `npm test`: 27 test files passed, 94 tests passed
+- `npm test`: 29 test files passed, 102 tests passed
 - `npm run build`: passed
+- `npm audit`: passed, 0 vulnerabilities
+- Encoding check: passed, no suspicious mojibake patterns found
 
-## Smoke Benchmark / Smoke Benchmark
+## Stable Fixture Export
+
+```bash
+npm run dev -- ./tests/fixtures/analysis-target --out ./examples/analysis-target
+```
+
+Result:
+
+- Generated `repo2skill.json`, `project-map.md`, `AGENTS.md`, `SKILL.md`, OS quickstarts, and `report.html`.
+
+## Smoke Benchmark
 
 ```bash
 npm run benchmark -- ./benchmarks/public-node-ts-smoke.json --cache-dir E:/r2s-cache --out ./benchmark-smoke-out --compare ./benchmarks/baselines/public-node-ts-smoke.summary.json
@@ -32,15 +44,13 @@ npm run benchmark -- ./benchmarks/public-node-ts-smoke.json --cache-dir E:/r2s-c
 
 Result:
 
-结果：
-
 - Repositories: 10
 - Succeeded: 10
 - Failed: 0
 - Regressions: 0
 - Improvements: 0
 
-## Context Evaluation / 上下文评估
+## Context Evaluation
 
 ```bash
 npm run evaluate -- ./evaluations/tinybench.json --cache-dir E:/r2s-cache --out ./evaluation-out
@@ -48,23 +58,21 @@ npm run evaluate -- ./evaluations/tinybench.json --cache-dir E:/r2s-cache --out 
 
 Result:
 
-结果：
-
 - Cases: 1
 - Succeeded: 1
 - Failed: 0
 
-## npm Package Check / npm 包检查
+## npm Package Check
 
 ```bash
 npm pack --dry-run
+npm pack
+npm exec --yes --package ./haodehaode378-repo2skill-0.2.0.tgz -- repo2skill --help
 ```
 
 Result:
 
-结果：
-
-- Package: `repo2skill@0.1.0`
+- Package: `@haodehaode378/repo2skill@0.2.0`
 - Total files: 5
 - Included files:
   - `dist/index.js`
@@ -75,29 +83,4 @@ Result:
 
 The packed package did not include `src`, `tests`, `examples`, benchmark output, local `out-*` directories, or `node_modules`.
 
-打包产物没有包含 `src`、`tests`、`examples`、benchmark 输出、本地 `out-*` 目录或 `node_modules`。
-
-## Packed CLI Check / 打包 CLI 检查
-
-```bash
-npm exec --yes --package ./repo2skill-0.1.0.tgz -- repo2skill --help
-```
-
-Result:
-
-结果：
-
-- The packed CLI started successfully.
-- `repo2skill --help` displayed the expected command options.
-
-## Encoding Check / 编码检查
-
-```bash
-python C:/Users/36366/.codex/skills/text-encoding-guard/scripts/check_mojibake.py --root .
-```
-
-Result:
-
-结果：
-
-- No suspicious mojibake patterns found.
+The packed CLI started successfully and displayed the expected command options. The temporary tarball was removed after verification.
