@@ -1,0 +1,23 @@
+{
+  "name": "collaboration-target",
+  "version": "1.2.3",
+  "description": "Fixture for collaboration profile outputs.",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/example/collaboration-target.git"
+  },
+  "bugs": {
+    "url": "https://github.com/example/collaboration-target/issues"
+  },
+  "homepage": "https://example.com/collaboration-target",
+  "bin": {
+    "collaboration-target": "./dist/index.js"
+  },
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "test": "vitest run",
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit"
+  }
+}

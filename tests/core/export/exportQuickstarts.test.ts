@@ -39,7 +39,9 @@ function createFullAnalysis(): RepoAnalysis {
           sourceFile: ".env.example",
           confidence: "high"
         }
-      ]
+      ],
+      docs: [],
+      demoSignals: []
     },
     evidence: []
   };
@@ -58,7 +60,9 @@ function createMinimalAnalysis(): RepoAnalysis {
       directories: [],
       configFiles: [],
       entrypoints: [],
-      envVars: []
+      envVars: [],
+      docs: [],
+      demoSignals: []
     },
     evidence: []
   };
@@ -136,7 +140,9 @@ describe("exportQuickstarts", () => {
             sourceFile: ".env.example",
             confidence: "certain"
           }
-        ]
+        ],
+        docs: [],
+        demoSignals: []
       },
       evidence: []
     } as unknown as RepoAnalysis;

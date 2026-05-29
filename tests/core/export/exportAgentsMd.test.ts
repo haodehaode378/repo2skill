@@ -83,7 +83,9 @@ function createFullAnalysis(): RepoAnalysis {
           sourceFile: ".env.example",
           confidence: "high"
         }
-      ]
+      ],
+      docs: [],
+      demoSignals: []
     },
     evidence: [
       {
@@ -108,7 +110,9 @@ function createMinimalAnalysis(): RepoAnalysis {
       directories: [],
       configFiles: [],
       entrypoints: [],
-      envVars: []
+      envVars: [],
+      docs: [],
+      demoSignals: []
     },
     evidence: []
   };
@@ -204,7 +208,9 @@ describe("exportAgentsMd", () => {
           }
         ],
         entrypoints: [],
-        envVars: []
+        envVars: [],
+        docs: [],
+        demoSignals: []
       },
       evidence: []
     } as unknown as RepoAnalysis;

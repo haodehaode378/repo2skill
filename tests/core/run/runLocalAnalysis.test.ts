@@ -114,6 +114,16 @@ describe("analyzeLocalRepo", () => {
         confidence: "medium"
       }
     ]);
+    expect(analysis.detected.packageMetadata).toMatchObject({
+      path: "package.json",
+      name: "analysis-target",
+      hasRepository: false,
+      hasBugs: false,
+      hasHomepage: false,
+      hasBin: false,
+      hasPublishConfig: false,
+      confidence: "high"
+    });
   });
 });
 
@@ -215,6 +225,36 @@ describe("exportAnalysisArtifacts", () => {
     await expect(fs.pathExists(path.join(outDir, "repo2skill.json"))).resolves.toBe(true);
     await expect(fs.pathExists(path.join(outDir, "AGENTS.md"))).resolves.toBe(false);
     await expect(fs.pathExists(path.join(outDir, "report.html"))).resolves.toBe(false);
+  });
+
+  it("writes only the requested collaboration profile", async () => {
+    const outDir = await createTempDir();
+    const analysis = await analyzeLocalRepo(path.resolve("tests/fixtures/collaboration-target"));
+
+    const writtenFiles = await exportAnalysisArtifacts(outDir, analysis, "all", "release-check");
+
+    expect(writtenFiles).toEqual([path.join(outDir, "release-check.md")]);
+    await expect(fs.pathExists(path.join(outDir, "release-check.md"))).resolves.toBe(true);
+    await expect(fs.pathExists(path.join(outDir, "repo2skill.json"))).resolves.toBe(false);
+  });
+
+  it("writes all collaboration profile outputs", async () => {
+    const outDir = await createTempDir();
+    const analysis = await analyzeLocalRepo(path.resolve("tests/fixtures/collaboration-target"));
+
+    const writtenFiles = await exportAnalysisArtifacts(outDir, analysis, "all", "all", {
+      issueText: "Fix the demo flow."
+    });
+
+    expect(writtenFiles).toContain(path.join(outDir, "repo2skill.json"));
+    expect(writtenFiles).toContain(path.join(outDir, "release-check.md"));
+    expect(writtenFiles).toContain(path.join(outDir, "course-project-report.md"));
+    expect(writtenFiles).toContain(path.join(outDir, "demo-screenshot-plan.md"));
+    expect(writtenFiles).toContain(path.join(outDir, "issue-to-pr-plan.md"));
+    await expect(fs.pathExists(path.join(outDir, "release-check.md"))).resolves.toBe(true);
+    await expect(fs.pathExists(path.join(outDir, "course-project-report.md"))).resolves.toBe(true);
+    await expect(fs.pathExists(path.join(outDir, "demo-screenshot-plan.md"))).resolves.toBe(true);
+    await expect(fs.pathExists(path.join(outDir, "issue-to-pr-plan.md"))).resolves.toBe(true);
   });
 });
 

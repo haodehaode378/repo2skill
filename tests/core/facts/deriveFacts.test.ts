@@ -59,7 +59,9 @@ function createAnalysis(): RepoAnalysis {
           reason: "bin"
         }
       ],
-      envVars: []
+      envVars: [],
+      docs: [],
+      demoSignals: []
     },
     evidence: []
   };

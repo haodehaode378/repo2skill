@@ -86,6 +86,44 @@ export const EnvVarSchema = z.object({
   confidence: ConfidenceLevelSchema
 });
 
+export const DocumentationFileTypeSchema = z.enum([
+  "readme",
+  "license",
+  "changelog",
+  "contributing",
+  "code-of-conduct",
+  "docs",
+  "examples"
+]);
+
+export const DocumentationFileSchema = z.object({
+  path: z.string(),
+  type: DocumentationFileTypeSchema,
+  confidence: ConfidenceLevelSchema
+});
+
+export const PackageMetadataSchema = z.object({
+  path: z.string(),
+  name: z.string().optional(),
+  version: z.string().optional(),
+  private: z.boolean().optional(),
+  hasRepository: z.boolean(),
+  hasBugs: z.boolean(),
+  hasHomepage: z.boolean(),
+  hasBin: z.boolean(),
+  hasPublishConfig: z.boolean(),
+  confidence: ConfidenceLevelSchema
+});
+
+export const DemoSignalTypeSchema = z.enum(["route", "asset", "example"]);
+
+export const DemoSignalSchema = z.object({
+  path: z.string(),
+  type: DemoSignalTypeSchema,
+  source: z.string(),
+  confidence: ConfidenceLevelSchema
+});
+
 export const WorkspaceInfoSchema = z.object({
   isWorkspace: z.boolean(),
   packageGlobs: z.array(z.string()).default([]),
@@ -109,7 +147,10 @@ export const RepoAnalysisSchema = z.object({
     configFiles: z.array(ConfigFileSchema).default([]),
     entrypoints: z.array(z.string()).default([]),
     entrypointFacts: z.array(EntrypointCandidateSchema).default([]).optional(),
-    envVars: z.array(EnvVarSchema).default([])
+    envVars: z.array(EnvVarSchema).default([]),
+    docs: z.array(DocumentationFileSchema).default([]),
+    packageMetadata: PackageMetadataSchema.optional(),
+    demoSignals: z.array(DemoSignalSchema).default([])
   }),
   evidence: z.array(EvidenceRecordSchema).default([])
 });
@@ -127,4 +168,9 @@ export type EntrypointCandidate = z.infer<typeof EntrypointCandidateSchema>;
 export type ConfigFileType = z.infer<typeof ConfigFileTypeSchema>;
 export type ConfigFile = z.infer<typeof ConfigFileSchema>;
 export type EnvVar = z.infer<typeof EnvVarSchema>;
+export type DocumentationFileType = z.infer<typeof DocumentationFileTypeSchema>;
+export type DocumentationFile = z.infer<typeof DocumentationFileSchema>;
+export type PackageMetadata = z.infer<typeof PackageMetadataSchema>;
+export type DemoSignalType = z.infer<typeof DemoSignalTypeSchema>;
+export type DemoSignal = z.infer<typeof DemoSignalSchema>;
 export type WorkspaceInfo = z.infer<typeof WorkspaceInfoSchema>;

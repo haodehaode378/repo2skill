@@ -27,7 +27,9 @@ function createAnalysis(): RepoAnalysis {
       directories: [],
       configFiles: [],
       entrypoints: [],
-      envVars: []
+      envVars: [],
+      docs: [],
+      demoSignals: []
     },
     evidence: [
       {
@@ -77,7 +79,9 @@ describe("exportJson", () => {
       detected: {
         scripts: [],
         entrypoints: [],
-        envVars: []
+        envVars: [],
+        docs: [],
+        demoSignals: []
       },
       evidence: [
         {

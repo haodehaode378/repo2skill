@@ -37,7 +37,7 @@ Input repository
   -> report.html
 ```
 
-[View tinybench demo](./docs/demo-tinybench.md) | [Before / After](./docs/before-after.md) | [Competitive positioning](./docs/competitive-positioning.md) | [Security model](./docs/security-model.md) | [Release checklist](./docs/release-checklist.md)
+[View tinybench demo](./docs/demo-tinybench.md) | [Before / After](./docs/before-after.md) | [Competitive positioning](./docs/competitive-positioning.md) | [Security model](./docs/security-model.md) | [Release checklist](./docs/release-checklist.md) | [Collaboration profiles](./docs/collaboration-profiles.md)
 
 ![repo2skill README preview](./img/readme-hero.png)
 

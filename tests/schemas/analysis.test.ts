@@ -25,6 +25,8 @@ describe("RepoAnalysisSchema", () => {
 
     expect(result.repo.name).toBe("demo-repo");
     expect(result.detected.workspace?.packageGlobs).toEqual(["packages/*"]);
+    expect(result.detected.docs).toEqual([]);
+    expect(result.detected.demoSignals).toEqual([]);
   });
 
   it("rejects an invalid confidence level", () => {

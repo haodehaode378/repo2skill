@@ -46,7 +46,9 @@ function createAnalysis(): RepoAnalysis {
           sourceFile: ".env.example",
           confidence: "high"
         }
-      ]
+      ],
+      docs: [],
+      demoSignals: []
     },
     evidence: [
       {

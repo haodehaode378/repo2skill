@@ -2,6 +2,7 @@ import path from "node:path";
 import fs from "fs-extra";
 import type { RepoAnalysis } from "../../schemas/analysis.js";
 import { walkDirectory } from "../collect/sharedWalker.js";
+import { detectCollaborationSignals } from "../detect/detectCollaborationSignals.js";
 import { getDisplayEnvVars, getOmittedEnvVarCount } from "../envVars/display.js";
 import { detectConfigFiles } from "../detect/detectConfigFiles.js";
 import { detectEnvVars } from "../detect/detectEnvVars.js";
@@ -12,14 +13,25 @@ import { detectScripts } from "../detect/detectScripts.js";
 import { detectWorkspace } from "../detect/detectWorkspace.js";
 import { deriveFacts } from "../facts/deriveFacts.js";
 import { exportAgentsMd } from "../export/exportAgentsMd.js";
+import { exportCourseProjectReport } from "../export/exportCourseProjectReport.js";
+import { exportDemoScreenshotPlan } from "../export/exportDemoScreenshotPlan.js";
 import { exportHtmlReport } from "../export/exportHtmlReport.js";
+import { exportIssueToPrPlan } from "../export/exportIssueToPrPlan.js";
 import { exportJson } from "../export/exportJson.js";
 import { exportProjectMap } from "../export/exportProjectMap.js";
 import { exportQuickstarts } from "../export/exportQuickstarts.js";
+import { exportReleaseCheck } from "../export/exportReleaseCheck.js";
 import { exportSkillMd } from "../export/exportSkillMd.js";
 import { createShareableAnalysis } from "../export/shareableAnalysis.js";
 
 export type OutputFormat = "json" | "md" | "all";
+export type OutputProfile =
+  | "onboarding"
+  | "release-check"
+  | "course-report"
+  | "demo"
+  | "issue-to-pr"
+  | "all";
 
 const SOURCE_FILE_EXTENSIONS = new Set([
   ".cjs",
@@ -46,7 +58,9 @@ export async function analyzeLocalRepo(rootDir: string): Promise<RepoAnalysis> {
       configFiles: [],
       entrypoints: [],
       entrypointFacts: [],
-      envVars: []
+      envVars: [],
+      docs: [],
+      demoSignals: []
     },
     evidence: []
   };
@@ -65,7 +79,8 @@ export async function analyzeLocalRepo(rootDir: string): Promise<RepoAnalysis> {
     detectProjectType(rootDir, analysis, packageJson),
     detectScripts(rootDir, analysis, packageJson),
     detectEntrypoints(rootDir, analysis, packageJson, sourceFiles),
-    detectEnvVars(rootDir, analysis, sourceFiles)
+    detectEnvVars(rootDir, analysis, sourceFiles),
+    detectCollaborationSignals(rootDir, analysis, packageJson)
   ]);
 
   deriveFacts(analysis);
@@ -76,17 +91,20 @@ export async function analyzeLocalRepo(rootDir: string): Promise<RepoAnalysis> {
 export async function exportAnalysisArtifacts(
   outDir: string,
   analysis: RepoAnalysis,
-  format: OutputFormat
+  format: OutputFormat,
+  profile: OutputProfile = "onboarding",
+  options: { issueText?: string } = {}
 ): Promise<string[]> {
   const writtenFiles: string[] = [];
   const exportedAnalysis = createShareableAnalysis(analysis);
+  const profiles = getProfilesToExport(profile);
 
-  if (format === "json" || format === "all") {
+  if (profiles.has("onboarding") && (format === "json" || format === "all")) {
     await exportJson(outDir, exportedAnalysis);
     writtenFiles.push(path.join(outDir, "repo2skill.json"));
   }
 
-  if (format === "md" || format === "all") {
+  if (profiles.has("onboarding") && (format === "md" || format === "all")) {
     await exportProjectMap(outDir, exportedAnalysis);
     writtenFiles.push(path.join(outDir, "project-map.md"));
 
@@ -102,12 +120,40 @@ export async function exportAnalysisArtifacts(
     writtenFiles.push(path.join(outDir, "quickstart.linux.md"));
   }
 
-  if (format === "all") {
+  if (profiles.has("onboarding") && format === "all") {
     await exportHtmlReport(outDir, exportedAnalysis);
     writtenFiles.push(path.join(outDir, "report.html"));
   }
 
+  if (profiles.has("release-check")) {
+    await exportReleaseCheck(outDir, exportedAnalysis);
+    writtenFiles.push(path.join(outDir, "release-check.md"));
+  }
+
+  if (profiles.has("course-report")) {
+    await exportCourseProjectReport(outDir, exportedAnalysis);
+    writtenFiles.push(path.join(outDir, "course-project-report.md"));
+  }
+
+  if (profiles.has("demo")) {
+    await exportDemoScreenshotPlan(outDir, exportedAnalysis);
+    writtenFiles.push(path.join(outDir, "demo-screenshot-plan.md"));
+  }
+
+  if (profiles.has("issue-to-pr")) {
+    await exportIssueToPrPlan(outDir, exportedAnalysis, options.issueText);
+    writtenFiles.push(path.join(outDir, "issue-to-pr-plan.md"));
+  }
+
   return writtenFiles;
+}
+
+function getProfilesToExport(profile: OutputProfile): Set<Exclude<OutputProfile, "all">> {
+  if (profile === "all") {
+    return new Set(["onboarding", "release-check", "course-report", "demo", "issue-to-pr"]);
+  }
+
+  return new Set([profile]);
 }
 
 export function renderAnalysisSummary(

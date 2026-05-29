@@ -17,7 +17,9 @@ function createAnalysis(): RepoAnalysis {
       configFiles: [],
       entrypoints: [],
       entrypointFacts: [],
-      envVars: []
+      envVars: [],
+      docs: [],
+      demoSignals: []
     },
     evidence: []
   };
