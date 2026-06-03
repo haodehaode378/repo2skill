@@ -40,7 +40,14 @@ Input repository
 
 [View tinybench demo](./docs/demo-tinybench.md) | [Before / After](./docs/before-after.md) | [Competitive positioning](./docs/competitive-positioning.md) | [Security model](./docs/security-model.md) | [Release checklist](./docs/release-checklist.md) | [Collaboration profiles](./docs/collaboration-profiles.md)
 
-![repo2skill README preview](./img/readme-hero.png)
+<p align="center">
+  <img src="./img/readme-hero-v2.png" alt="repo2skill turns repository evidence into agent maintainer context" />
+</p>
+
+| For agents                      | For maintainers                       | For releases                           |
+| ------------------------------- | ------------------------------------- | -------------------------------------- |
+| Evidence-backed edit guidance   | Reviewable generated onboarding files | Repeatable quality and audit context   |
+| Commands and validation ladders | Project maps and quickstarts          | JSON, Markdown, and HTML report output |
 
 ---
 
