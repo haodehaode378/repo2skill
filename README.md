@@ -33,6 +33,7 @@ Input repository
   -> project-map.md
   -> AGENTS.md
   -> SKILL.md
+  -> maintenance-profile.md
   -> quickstart.windows.md / quickstart.macos.md / quickstart.linux.md
   -> report.html
 ```
@@ -123,24 +124,25 @@ npx @haodehaode378/repo2skill https://github.com/tinylibs/tinybench --out ./out-
 
 ### 生成产物
 
-| 文件                    | 用途                                     |
-| ----------------------- | ---------------------------------------- |
-| `repo2skill.json`       | 供工具链继续处理的结构化分析结果         |
-| `project-map.md`        | 简洁仓库地图                             |
-| `AGENTS.md`             | 给 coding agent 的仓库级工作说明         |
-| `SKILL.md`              | 可复制到 agent 会话中的仓库专属 skill    |
-| `quickstart.windows.md` | Windows 快速开始                         |
-| `quickstart.macos.md`   | macOS 快速开始                           |
-| `quickstart.linux.md`   | Linux 快速开始                           |
-| `report.html`           | 使用 `--format all` 时生成的 HTML report |
+| 文件                     | 用途                                     |
+| ------------------------ | ---------------------------------------- |
+| `repo2skill.json`        | 供工具链继续处理的结构化分析结果         |
+| `project-map.md`         | 简洁仓库地图                             |
+| `AGENTS.md`              | 给 coding agent 的仓库级工作说明         |
+| `SKILL.md`               | 可复制到 agent 会话中的仓库专属 skill    |
+| `maintenance-profile.md` | agent 接手维护时需要的项目画像和边界     |
+| `quickstart.windows.md`  | Windows 快速开始                         |
+| `quickstart.macos.md`    | macOS 快速开始                           |
+| `quickstart.linux.md`    | Linux 快速开始                           |
+| `report.html`            | 使用 `--format all` 时生成的 HTML report |
 
 导出格式：
 
-| 参数            | 生成内容                                                           |
-| --------------- | ------------------------------------------------------------------ |
-| `--format json` | 只生成 `repo2skill.json`                                           |
-| `--format md`   | 生成 `project-map.md`、`AGENTS.md`、`SKILL.md` 和三平台 quickstart |
-| `--format all`  | 生成全部 Markdown、JSON 和 `report.html`                           |
+| 参数            | 生成内容                                                                                     |
+| --------------- | -------------------------------------------------------------------------------------------- |
+| `--format json` | 只生成 `repo2skill.json`                                                                     |
+| `--format md`   | 生成 `project-map.md`、`AGENTS.md`、`SKILL.md`、`maintenance-profile.md` 和三平台 quickstart |
+| `--format all`  | 生成全部 Markdown、JSON 和 `report.html`                                                     |
 
 `AGENTS.md` 会给出清晰的修改前导航和验证指令：
 
@@ -350,24 +352,25 @@ npx @haodehaode378/repo2skill https://github.com/tinylibs/tinybench --out ./out-
 
 ### Generated Artifacts
 
-| File                    | Purpose                                                   |
-| ----------------------- | --------------------------------------------------------- |
-| `repo2skill.json`       | Structured analysis for downstream tooling                |
-| `project-map.md`        | Concise repository map                                    |
-| `AGENTS.md`             | Repository-level instructions for coding agents           |
-| `SKILL.md`              | Repository skill that can be copied into an agent session |
-| `quickstart.windows.md` | Windows quickstart                                        |
-| `quickstart.macos.md`   | macOS quickstart                                          |
-| `quickstart.linux.md`   | Linux quickstart                                          |
-| `report.html`           | HTML report generated with `--format all`                 |
+| File                     | Purpose                                                   |
+| ------------------------ | --------------------------------------------------------- |
+| `repo2skill.json`        | Structured analysis for downstream tooling                |
+| `project-map.md`         | Concise repository map                                    |
+| `AGENTS.md`              | Repository-level instructions for coding agents           |
+| `SKILL.md`               | Repository skill that can be copied into an agent session |
+| `maintenance-profile.md` | Maintainer handoff profile for agents                     |
+| `quickstart.windows.md`  | Windows quickstart                                        |
+| `quickstart.macos.md`    | macOS quickstart                                          |
+| `quickstart.linux.md`    | Linux quickstart                                          |
+| `report.html`            | HTML report generated with `--format all`                 |
 
 Export formats:
 
-| Flag            | Generated files                                               |
-| --------------- | ------------------------------------------------------------- |
-| `--format json` | `repo2skill.json` only                                        |
-| `--format md`   | `project-map.md`, `AGENTS.md`, `SKILL.md`, and OS quickstarts |
-| `--format all`  | all Markdown artifacts, JSON, and `report.html`               |
+| Flag            | Generated files                                                                         |
+| --------------- | --------------------------------------------------------------------------------------- |
+| `--format json` | `repo2skill.json` only                                                                  |
+| `--format md`   | `project-map.md`, `AGENTS.md`, `SKILL.md`, `maintenance-profile.md`, and OS quickstarts |
+| `--format all`  | all Markdown artifacts, JSON, and `report.html`                                         |
 
 `AGENTS.md` gives clear pre-change navigation and validation guidance:
 

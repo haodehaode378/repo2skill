@@ -140,6 +140,7 @@ describe("exportAnalysisArtifacts", () => {
       path.join(outDir, "project-map.md"),
       path.join(outDir, "AGENTS.md"),
       path.join(outDir, "SKILL.md"),
+      path.join(outDir, "maintenance-profile.md"),
       path.join(outDir, "quickstart.windows.md"),
       path.join(outDir, "quickstart.macos.md"),
       path.join(outDir, "quickstart.linux.md"),
@@ -149,6 +150,7 @@ describe("exportAnalysisArtifacts", () => {
     await expect(fs.pathExists(path.join(outDir, "project-map.md"))).resolves.toBe(true);
     await expect(fs.pathExists(path.join(outDir, "AGENTS.md"))).resolves.toBe(true);
     await expect(fs.pathExists(path.join(outDir, "SKILL.md"))).resolves.toBe(true);
+    await expect(fs.pathExists(path.join(outDir, "maintenance-profile.md"))).resolves.toBe(true);
     await expect(fs.pathExists(path.join(outDir, "quickstart.windows.md"))).resolves.toBe(true);
     await expect(fs.pathExists(path.join(outDir, "quickstart.macos.md"))).resolves.toBe(true);
     await expect(fs.pathExists(path.join(outDir, "quickstart.linux.md"))).resolves.toBe(true);
@@ -202,6 +204,7 @@ describe("exportAnalysisArtifacts", () => {
       path.join(outDir, "project-map.md"),
       path.join(outDir, "AGENTS.md"),
       path.join(outDir, "SKILL.md"),
+      path.join(outDir, "maintenance-profile.md"),
       path.join(outDir, "quickstart.windows.md"),
       path.join(outDir, "quickstart.macos.md"),
       path.join(outDir, "quickstart.linux.md")
@@ -210,6 +213,7 @@ describe("exportAnalysisArtifacts", () => {
     await expect(fs.pathExists(path.join(outDir, "project-map.md"))).resolves.toBe(true);
     await expect(fs.pathExists(path.join(outDir, "AGENTS.md"))).resolves.toBe(true);
     await expect(fs.pathExists(path.join(outDir, "SKILL.md"))).resolves.toBe(true);
+    await expect(fs.pathExists(path.join(outDir, "maintenance-profile.md"))).resolves.toBe(true);
     await expect(fs.pathExists(path.join(outDir, "quickstart.windows.md"))).resolves.toBe(true);
     await expect(fs.pathExists(path.join(outDir, "quickstart.macos.md"))).resolves.toBe(true);
     await expect(fs.pathExists(path.join(outDir, "quickstart.linux.md"))).resolves.toBe(true);

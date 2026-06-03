@@ -18,6 +18,7 @@ import { exportDemoScreenshotPlan } from "../export/exportDemoScreenshotPlan.js"
 import { exportHtmlReport } from "../export/exportHtmlReport.js";
 import { exportIssueToPrPlan } from "../export/exportIssueToPrPlan.js";
 import { exportJson } from "../export/exportJson.js";
+import { exportMaintenanceProfile } from "../export/exportMaintenanceProfile.js";
 import { exportProjectMap } from "../export/exportProjectMap.js";
 import { exportQuickstarts } from "../export/exportQuickstarts.js";
 import { exportReleaseCheck } from "../export/exportReleaseCheck.js";
@@ -113,6 +114,9 @@ export async function exportAnalysisArtifacts(
 
     await exportSkillMd(outDir, exportedAnalysis);
     writtenFiles.push(path.join(outDir, "SKILL.md"));
+
+    await exportMaintenanceProfile(outDir, exportedAnalysis);
+    writtenFiles.push(path.join(outDir, "maintenance-profile.md"));
 
     await exportQuickstarts(outDir, exportedAnalysis);
     writtenFiles.push(path.join(outDir, "quickstart.windows.md"));
