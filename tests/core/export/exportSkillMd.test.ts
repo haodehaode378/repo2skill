@@ -132,6 +132,18 @@ describe("renderSkillMd", () => {
     expect(markdown).toContain(
       "- For workspace changes, identify the affected package before editing shared files."
     );
+    expect(markdown).toContain("## Maintenance Workflow");
+    expect(markdown).toContain("### Before Editing");
+    expect(markdown).toContain(
+      "- Do not trust generated instructions blindly; compare them against the referenced repository files."
+    );
+    expect(markdown).toContain("### Implementation Discipline");
+    expect(markdown).toContain(
+      "- Do not invent package scripts, entrypoints, or environment variables that are not evidenced below."
+    );
+    expect(markdown).toContain("### Validation Ladder");
+    expect(markdown).toContain("- Run the narrowest relevant detected check first.");
+    expect(markdown).toContain("### When Tests Are Missing");
     expect(markdown).toContain("## Commands");
     expect(markdown).toContain("- Run `pnpm dev` for `dev` (script: `vite`).");
     expect(markdown).toContain("## Validation");
@@ -153,9 +165,13 @@ describe("renderSkillMd", () => {
     const markdown = renderSkillMd(createMinimalAnalysis());
 
     expect(markdown).toContain("## Use When");
+    expect(markdown).toContain("## Maintenance Workflow");
+    expect(markdown).toContain(
+      "- No validation command was detected; inspect project scripts before claiming automated verification."
+    );
     expect(markdown).not.toContain("## Commands");
     expect(markdown).not.toContain("## References");
-    expect(markdown).not.toContain("## Validation");
+    expect(markdown).not.toContain("\n## Validation\n");
     expect(markdown).toContain("## Boundaries");
   });
 });

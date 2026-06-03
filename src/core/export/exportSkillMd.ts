@@ -35,6 +35,7 @@ export function renderSkillMd(analysis: RepoAnalysis): string {
 
   lines.push(renderSkillUseWhen(analysis));
   lines.push(...renderSkillSteps(analysis, commands, validationCommands));
+  lines.push(...renderSkillMaintenanceSection(analysis, validationCommands));
   lines.push(...renderSkillCommandsSection(commands));
   lines.push(...renderSkillValidationSection(validationCommands));
   lines.push(...renderSkillReferences(analysis));
@@ -102,6 +103,67 @@ function renderSkillCommandsSection(commands: CommandCandidate[]): string[] {
     const rawScript = command.rawScript ? ` (script: \`${command.rawScript}\`)` : "";
     lines.push(`- Run \`${command.command}\` for \`${command.name}\`${rawScript}.`);
   }
+
+  return lines;
+}
+
+function renderSkillMaintenanceSection(
+  analysis: RepoAnalysis,
+  validationCommands: CommandCandidate[]
+): string[] {
+  const lines: string[] = [];
+
+  lines.push("");
+  lines.push("## Maintenance Workflow");
+  lines.push("");
+  lines.push("### Before Editing");
+  lines.push("");
+  lines.push(
+    "- Treat repository files as evidence; inspect the relevant source and config before changing behavior."
+  );
+
+  if (analysis.detected.workspace) {
+    lines.push(
+      "- For workspace changes, identify the affected package before editing shared files."
+    );
+  }
+
+  lines.push(
+    "- Do not trust generated instructions blindly; compare them against the referenced repository files."
+  );
+  lines.push("");
+  lines.push("### Implementation Discipline");
+  lines.push("");
+  lines.push(
+    "- Keep changes scoped to the requested behavior and the files directly needed for that behavior."
+  );
+  lines.push("- Match local patterns before introducing new abstractions.");
+  lines.push(
+    "- Do not invent package scripts, entrypoints, or environment variables that are not evidenced below."
+  );
+  lines.push("");
+  lines.push("### Validation Ladder");
+  lines.push("");
+
+  if (validationCommands.length > 0) {
+    lines.push("- Run the narrowest relevant detected check first.");
+    lines.push(
+      "- Broaden to additional detected checks when touching shared code, config, or public behavior."
+    );
+  } else {
+    lines.push(
+      "- No validation command was detected; inspect project scripts before claiming automated verification."
+    );
+  }
+
+  lines.push("- Report any checks that could not be run.");
+  lines.push("");
+  lines.push("### When Tests Are Missing");
+  lines.push("");
+  lines.push("- Use the smallest reproducible manual check tied to the changed behavior.");
+  lines.push(
+    "- State the remaining risk instead of presenting an unverified change as fully validated."
+  );
 
   return lines;
 }
