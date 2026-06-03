@@ -31,6 +31,7 @@ export function renderAgentsMd(analysis: RepoAnalysis): string {
   sections.push(...renderAgentsDirectories(importantDirectories));
   sections.push(...renderAgentsEntrypoints(analysis));
   sections.push(...renderAgentsConfigFiles(analysis));
+  sections.push(...renderAgentsTrustAndSafety(analysis));
   sections.push(...renderAgentsNotes(analysis));
 
   sections.push("");
@@ -165,6 +166,35 @@ function renderAgentsConfigFiles(analysis: RepoAnalysis): string[] {
 
   for (const configFile of analysis.detected.configFiles) {
     lines.push(`- \`${configFile.path}\` (${configFile.type})`);
+  }
+
+  return lines;
+}
+
+function renderAgentsTrustAndSafety(analysis: RepoAnalysis): string[] {
+  const findings = analysis.detected.auditFindings ?? [];
+
+  if (findings.length === 0) {
+    return [];
+  }
+
+  const lines: string[] = [];
+  lines.push("");
+  lines.push("## Trust and Safety Notes");
+  lines.push("");
+  lines.push(
+    "- Review detected audit findings before running install, workflow, or environment-dependent commands."
+  );
+
+  for (const finding of findings.slice(0, 8)) {
+    const evidence = finding.evidence ? `, evidence: \`${finding.evidence}\`` : "";
+    lines.push(
+      `- [${finding.severity}] ${finding.category}: \`${finding.path}\` - ${finding.message}${evidence}`
+    );
+  }
+
+  if (findings.length > 8) {
+    lines.push(`- ${findings.length - 8} additional audit findings omitted from this summary.`);
   }
 
   return lines;

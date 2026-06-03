@@ -39,6 +39,7 @@ export function renderSkillMd(analysis: RepoAnalysis): string {
   lines.push(...renderSkillCommandsSection(commands));
   lines.push(...renderSkillValidationSection(validationCommands));
   lines.push(...renderSkillReferences(analysis));
+  lines.push(...renderSkillTrustAndSafety(analysis));
   lines.push(...renderSkillBoundaries());
 
   return lines.join("\n");
@@ -201,6 +202,36 @@ function renderSkillReferences(analysis: RepoAnalysis): string[] {
 
   for (const reference of references) {
     lines.push(`- ${reference}`);
+  }
+
+  return lines;
+}
+
+function renderSkillTrustAndSafety(analysis: RepoAnalysis): string[] {
+  const findings = analysis.detected.auditFindings ?? [];
+
+  if (findings.length === 0) {
+    return [];
+  }
+
+  const lines: string[] = [];
+  lines.push("");
+  lines.push("## Trust and Safety");
+  lines.push("");
+  lines.push("- Treat detected audit findings as review prompts, not proof of compromise.");
+  lines.push(
+    "- Review these files before running install, workflow, or environment-dependent commands:"
+  );
+
+  for (const finding of findings.slice(0, 8)) {
+    const evidence = finding.evidence ? `, evidence: \`${finding.evidence}\`` : "";
+    lines.push(
+      `- [${finding.severity}] ${finding.category}: \`${finding.path}\` - ${finding.message}${evidence}`
+    );
+  }
+
+  if (findings.length > 8) {
+    lines.push(`- ${findings.length - 8} additional audit findings omitted from this summary.`);
   }
 
   return lines;

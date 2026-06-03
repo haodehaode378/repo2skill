@@ -1,6 +1,7 @@
 import path from "node:path";
 import fs from "fs-extra";
 import type { RepoAnalysis } from "../../schemas/analysis.js";
+import { auditRepository } from "../audit/auditRepository.js";
 import { walkDirectory } from "../collect/sharedWalker.js";
 import { detectCollaborationSignals } from "../detect/detectCollaborationSignals.js";
 import { getDisplayEnvVars, getOmittedEnvVarCount } from "../envVars/display.js";
@@ -61,7 +62,8 @@ export async function analyzeLocalRepo(rootDir: string): Promise<RepoAnalysis> {
       entrypointFacts: [],
       envVars: [],
       docs: [],
-      demoSignals: []
+      demoSignals: [],
+      auditFindings: []
     },
     evidence: []
   };
@@ -81,7 +83,10 @@ export async function analyzeLocalRepo(rootDir: string): Promise<RepoAnalysis> {
     detectScripts(rootDir, analysis, packageJson),
     detectEntrypoints(rootDir, analysis, packageJson, sourceFiles),
     detectEnvVars(rootDir, analysis, sourceFiles),
-    detectCollaborationSignals(rootDir, analysis, packageJson)
+    detectCollaborationSignals(rootDir, analysis, packageJson),
+    auditRepository(rootDir).then((findings) => {
+      analysis.detected.auditFindings = findings;
+    })
   ]);
 
   deriveFacts(analysis);

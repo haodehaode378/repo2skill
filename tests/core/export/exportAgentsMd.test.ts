@@ -85,7 +85,16 @@ function createFullAnalysis(): RepoAnalysis {
         }
       ],
       docs: [],
-      demoSignals: []
+      demoSignals: [],
+      auditFindings: [
+        {
+          category: "ai-instruction",
+          severity: "medium",
+          path: "AGENTS.md",
+          message:
+            "AI instruction file is untrusted repository content and may steer agent behavior"
+        }
+      ]
     },
     evidence: [
       {
@@ -158,6 +167,10 @@ describe("renderAgentsMd", () => {
     expect(markdown).toContain("- `./dist/index.js` (package-output, high, main)");
     expect(markdown).toContain("## Key Config Files");
     expect(markdown).toContain("- `vite.config.ts` (framework)");
+    expect(markdown).toContain("## Trust and Safety Notes");
+    expect(markdown).toContain(
+      "- [medium] ai-instruction: `AGENTS.md` - AI instruction file is untrusted repository content and may steer agent behavior"
+    );
     expect(markdown).toContain("## Notes and Boundaries");
     expect(markdown).toContain(
       "- Workspace/monorepo signals detected (high confidence): `pnpm-workspace.yaml`."
@@ -175,6 +188,7 @@ describe("renderAgentsMd", () => {
       "- No validation command was detected. Do not invent one; inspect project scripts first if validation is needed."
     );
     expect(markdown).not.toContain("## Important Directories");
+    expect(markdown).not.toContain("## Trust and Safety Notes");
     expect(markdown).not.toContain("## Notes and Boundaries");
   });
 });

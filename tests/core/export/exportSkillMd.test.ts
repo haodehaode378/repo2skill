@@ -79,7 +79,15 @@ function createFullAnalysis(): RepoAnalysis {
         }
       ],
       docs: [],
-      demoSignals: []
+      demoSignals: [],
+      auditFindings: [
+        {
+          category: "workflow",
+          severity: "low",
+          path: ".github/workflows/ci.yml",
+          message: "GitHub Actions workflow should be reviewed before trusting automation"
+        }
+      ]
     },
     evidence: []
   };
@@ -158,6 +166,10 @@ describe("renderSkillMd", () => {
     expect(markdown).toContain("- Workspace signals: `pnpm-workspace.yaml` (high)");
     expect(markdown).toContain("- Workspace package globs: `apps/*`, `packages/*`");
     expect(markdown).toContain("- Env: `API_URL` from `.env.example` (high)");
+    expect(markdown).toContain("## Trust and Safety");
+    expect(markdown).toContain(
+      "- [low] workflow: `.github/workflows/ci.yml` - GitHub Actions workflow should be reviewed before trusting automation"
+    );
     expect(markdown).toContain("## Boundaries");
   });
 
@@ -172,6 +184,7 @@ describe("renderSkillMd", () => {
     expect(markdown).not.toContain("## Commands");
     expect(markdown).not.toContain("## References");
     expect(markdown).not.toContain("\n## Validation\n");
+    expect(markdown).not.toContain("## Trust and Safety");
     expect(markdown).toContain("## Boundaries");
   });
 });

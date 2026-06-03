@@ -124,6 +124,16 @@ export const DemoSignalSchema = z.object({
   confidence: ConfidenceLevelSchema
 });
 
+export const AuditSeveritySchema = z.enum(["info", "low", "medium", "high"]);
+
+export const AuditFindingSchema = z.object({
+  category: z.enum(["lifecycle-script", "workflow", "env-file", "ai-instruction", "secret"]),
+  severity: AuditSeveritySchema,
+  path: z.string(),
+  message: z.string(),
+  evidence: z.string().optional()
+});
+
 export const WorkspaceInfoSchema = z.object({
   isWorkspace: z.boolean(),
   packageGlobs: z.array(z.string()).default([]),
@@ -150,7 +160,8 @@ export const RepoAnalysisSchema = z.object({
     envVars: z.array(EnvVarSchema).default([]),
     docs: z.array(DocumentationFileSchema).default([]),
     packageMetadata: PackageMetadataSchema.optional(),
-    demoSignals: z.array(DemoSignalSchema).default([])
+    demoSignals: z.array(DemoSignalSchema).default([]),
+    auditFindings: z.array(AuditFindingSchema).default([]).optional()
   }),
   evidence: z.array(EvidenceRecordSchema).default([])
 });
@@ -173,4 +184,6 @@ export type DocumentationFile = z.infer<typeof DocumentationFileSchema>;
 export type PackageMetadata = z.infer<typeof PackageMetadataSchema>;
 export type DemoSignalType = z.infer<typeof DemoSignalTypeSchema>;
 export type DemoSignal = z.infer<typeof DemoSignalSchema>;
+export type AuditSeverity = z.infer<typeof AuditSeveritySchema>;
+export type AuditFinding = z.infer<typeof AuditFindingSchema>;
 export type WorkspaceInfo = z.infer<typeof WorkspaceInfoSchema>;
