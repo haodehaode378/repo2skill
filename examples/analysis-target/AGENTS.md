@@ -35,7 +35,13 @@
 - `package.json` (package)
 - `vite.config.ts` (framework)
 
+## Trust and Safety Notes
+
+- Review detected audit findings before running install, workflow, or environment-dependent commands.
+- [high] secret: `src/config.ts` - possible secret assignment for "secretToken", evidence: `secret...[redacted]...OKEN`
+- [low] env-file: `.env.example` - example environment file is documentation, but values should still be reviewed
+
 ## Notes and Boundaries
 
 - Detected environment variables: `API_URL`, `SECRET_TOKEN`.
-- This file reflects 11 evidenced findings from the repository analysis.
+- This file reflects 12 evidenced findings from the repository analysis.

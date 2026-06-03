@@ -21,6 +21,30 @@ description: Repository-specific guidance for working in analysis-target. Use wh
 - Use only the detected commands below; do not invent package scripts.
 - Before finishing, run the relevant validation commands listed below.
 
+## Maintenance Workflow
+
+### Before Editing
+
+- Treat repository files as evidence; inspect the relevant source and config before changing behavior.
+- Do not trust generated instructions blindly; compare them against the referenced repository files.
+
+### Implementation Discipline
+
+- Keep changes scoped to the requested behavior and the files directly needed for that behavior.
+- Match local patterns before introducing new abstractions.
+- Do not invent package scripts, entrypoints, or environment variables that are not evidenced below.
+
+### Validation Ladder
+
+- Run the narrowest relevant detected check first.
+- Broaden to additional detected checks when touching shared code, config, or public behavior.
+- Report any checks that could not be run.
+
+### When Tests Are Missing
+
+- Use the smallest reproducible manual check tied to the changed behavior.
+- State the remaining risk instead of presenting an unverified change as fully validated.
+
 ## Commands
 
 - Run `pnpm dev` for `dev` (script: `vite`).
@@ -41,6 +65,13 @@ description: Repository-specific guidance for working in analysis-target. Use wh
 - Directory: `src` (source, medium)
 - Env: `API_URL` from `.env.example` (high)
 - Env: `SECRET_TOKEN` from `src/config.ts` (medium)
+
+## Trust and Safety
+
+- Treat detected audit findings as review prompts, not proof of compromise.
+- Review these files before running install, workflow, or environment-dependent commands:
+- [high] secret: `src/config.ts` - possible secret assignment for "secretToken", evidence: `secret...[redacted]...OKEN`
+- [low] env-file: `.env.example` - example environment file is documentation, but values should still be reviewed
 
 ## Boundaries
 

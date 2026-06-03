@@ -95,6 +95,34 @@
         "sourceFile": "src/config.ts",
         "confidence": "medium"
       }
+    ],
+    "docs": [],
+    "packageMetadata": {
+      "path": "package.json",
+      "name": "analysis-target",
+      "private": true,
+      "hasRepository": false,
+      "hasBugs": false,
+      "hasHomepage": false,
+      "hasBin": false,
+      "hasPublishConfig": false,
+      "confidence": "high"
+    },
+    "demoSignals": [],
+    "auditFindings": [
+      {
+        "category": "secret",
+        "severity": "high",
+        "path": "src/config.ts",
+        "message": "possible secret assignment for \"secretToken\"",
+        "evidence": "secret...[redacted]...OKEN"
+      },
+      {
+        "category": "env-file",
+        "severity": "low",
+        "path": ".env.example",
+        "message": "example environment file is documentation, but values should still be reviewed"
+      }
     ]
   },
   "evidence": [
@@ -139,6 +167,12 @@
       "claim": "configFile:vite.config.ts",
       "sourceFile": "vite.config.ts",
       "reason": "Detected framework configuration file",
+      "confidence": "high"
+    },
+    {
+      "claim": "packageMetadata",
+      "sourceFile": "package.json",
+      "reason": "Detected package metadata for release and report profiles",
       "confidence": "high"
     },
     {
