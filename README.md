@@ -233,11 +233,7 @@ npm run evaluate -- ./evaluations/tinybench.json --cache-dir E:/r2s-cache --out 
 ### 开发验证
 
 ```bash
-npm run format:check
-npm run lint
-npm run typecheck
-npm test
-npm run build
+npm run release:check
 ```
 
 发布 PR 前可运行 `npm run format`。
@@ -461,11 +457,7 @@ npm run evaluate -- ./evaluations/tinybench.json --cache-dir E:/r2s-cache --out 
 ### Development
 
 ```bash
-npm run format:check
-npm run lint
-npm run typecheck
-npm test
-npm run build
+npm run release:check
 ```
 
 Use `npm run format` before opening a release PR.

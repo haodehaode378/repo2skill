@@ -46,10 +46,7 @@ Run before release:
 发布前运行：
 
 ```bash
-npm run lint
-npm run typecheck
-npm test
-npm run build
+npm run release:check
 ```
 
 Run the stable fixture export:

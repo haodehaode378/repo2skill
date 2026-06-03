@@ -47,10 +47,7 @@ Run before a release:
 发布前运行：
 
 ```bash
-npm run lint
-npm run typecheck
-npm test
-npm run build
+npm run release:check
 npm pack --dry-run
 python C:/Users/36366/.codex/skills/text-encoding-guard/scripts/check_mojibake.py --root .
 ```
