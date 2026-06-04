@@ -10,9 +10,16 @@ import {
   exportAnalysisArtifacts,
   renderAnalysisSummary,
   type OutputFormat,
-  type OutputProfile
+  type OutputProfile,
+  type VisualMode
 } from "../core/run/runLocalAnalysis.js";
-import { parseOutputFormat, parseOutputProfile } from "./options.js";
+import type { VisualAssetKind } from "../schemas/visual.js";
+import {
+  parseOutputFormat,
+  parseOutputProfile,
+  parseVisualAssets,
+  parseVisualMode
+} from "./options.js";
 
 const program = new Command();
 
@@ -38,6 +45,13 @@ program
   .option("--branch <branch>", "Git branch to clone for GitHub repository inputs")
   .option("--summary-only", "Analyze and print the summary without writing output files")
   .option("--audit-only", "Run trust and safety checks without generating artifacts")
+  .option("--visual", "Generate an evidence-backed visual prompt asset pack")
+  .option("--visual-mode <mode>", "prompts", parseVisualMode, "prompts")
+  .option(
+    "--visual-assets <assets>",
+    "Comma-separated visual assets: hero,skill-card,architecture",
+    parseVisualAssets
+  )
   .action(
     async (
       input: string,
@@ -52,6 +66,9 @@ program
         branch?: string;
         summaryOnly?: boolean;
         auditOnly?: boolean;
+        visual?: boolean;
+        visualMode: VisualMode;
+        visualAssets?: VisualAssetKind[];
       }
     ) => {
       const resolved = await resolveInput(input);
@@ -76,7 +93,14 @@ program
         const writtenFiles = options.summaryOnly
           ? []
           : await exportAnalysisArtifacts(options.out, analysis, options.format, options.profile, {
-              issueText
+              issueText,
+              visual: options.visual
+                ? {
+                    enabled: true,
+                    mode: options.visualMode,
+                    assets: options.visualAssets
+                  }
+                : undefined
             });
         console.log(
           renderAnalysisSummary(analysis, writtenFiles, {

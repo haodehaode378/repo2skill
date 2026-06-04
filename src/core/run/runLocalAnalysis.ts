@@ -24,9 +24,12 @@ import { exportProjectMap } from "../export/exportProjectMap.js";
 import { exportQuickstarts } from "../export/exportQuickstarts.js";
 import { exportReleaseCheck } from "../export/exportReleaseCheck.js";
 import { exportSkillMd } from "../export/exportSkillMd.js";
+import { exportVisualAssets } from "../export/exportVisualAssets.js";
 import { createShareableAnalysis } from "../export/shareableAnalysis.js";
+import type { VisualAssetKind } from "../../schemas/visual.js";
 
 export type OutputFormat = "json" | "md" | "all";
+export type VisualMode = "prompts";
 export type OutputProfile =
   | "onboarding"
   | "release-check"
@@ -99,7 +102,14 @@ export async function exportAnalysisArtifacts(
   analysis: RepoAnalysis,
   format: OutputFormat,
   profile: OutputProfile = "onboarding",
-  options: { issueText?: string } = {}
+  options: {
+    issueText?: string;
+    visual?: {
+      enabled: boolean;
+      mode: VisualMode;
+      assets?: VisualAssetKind[];
+    };
+  } = {}
 ): Promise<string[]> {
   const writtenFiles: string[] = [];
   const exportedAnalysis = createShareableAnalysis(analysis);
@@ -152,6 +162,13 @@ export async function exportAnalysisArtifacts(
   if (profiles.has("issue-to-pr")) {
     await exportIssueToPrPlan(outDir, exportedAnalysis, options.issueText);
     writtenFiles.push(path.join(outDir, "issue-to-pr-plan.md"));
+  }
+
+  if (options.visual?.enabled) {
+    const visualFiles = await exportVisualAssets(outDir, exportedAnalysis, {
+      assets: options.visual.assets
+    });
+    writtenFiles.push(...visualFiles);
   }
 
   return writtenFiles;

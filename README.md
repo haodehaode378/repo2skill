@@ -333,6 +333,14 @@ Run the audit-only skeleton before generating artifacts:
 npm run dev -- https://github.com/tinylibs/tinybench --no-cache --audit-only
 ```
 
+Generate a reviewable visual prompt asset pack without calling an image model:
+
+```bash
+npm run dev -- ./tests/fixtures/analysis-target --out ./out-visual --visual --visual-mode prompts
+```
+
+This writes `visual/visual-brief.json`, `visual/visual-prompts.md`, `visual/asset-manifest.json`, and `visual/visual-review.md`.
+
 After npm publication, run:
 
 ```bash

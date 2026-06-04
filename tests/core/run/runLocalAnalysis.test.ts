@@ -231,6 +231,28 @@ describe("exportAnalysisArtifacts", () => {
     await expect(fs.pathExists(path.join(outDir, "report.html"))).resolves.toBe(false);
   });
 
+  it("writes visual prompt assets when requested", async () => {
+    const outDir = await createTempDir();
+    const analysis = await analyzeLocalRepo(path.resolve("tests/fixtures/analysis-target"));
+
+    const writtenFiles = await exportAnalysisArtifacts(outDir, analysis, "json", "onboarding", {
+      visual: {
+        enabled: true,
+        mode: "prompts",
+        assets: ["readme-hero", "skill-card", "architecture-poster"]
+      }
+    });
+
+    expect(writtenFiles).toContain(path.join(outDir, "repo2skill.json"));
+    expect(writtenFiles).toContain(path.join(outDir, "visual", "visual-brief.json"));
+    expect(writtenFiles).toContain(path.join(outDir, "visual", "visual-prompts.md"));
+    expect(writtenFiles).toContain(path.join(outDir, "visual", "asset-manifest.json"));
+    expect(writtenFiles).toContain(path.join(outDir, "visual", "visual-review.md"));
+    await expect(fs.pathExists(path.join(outDir, "visual", "visual-prompts.md"))).resolves.toBe(
+      true
+    );
+  });
+
   it("writes only the requested collaboration profile", async () => {
     const outDir = await createTempDir();
     const analysis = await analyzeLocalRepo(path.resolve("tests/fixtures/collaboration-target"));
