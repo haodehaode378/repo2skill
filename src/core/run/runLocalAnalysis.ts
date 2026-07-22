@@ -13,6 +13,7 @@ import { detectProjectType } from "../detect/detectProjectType.js";
 import { detectScripts } from "../detect/detectScripts.js";
 import { detectWorkspace } from "../detect/detectWorkspace.js";
 import { deriveFacts } from "../facts/deriveFacts.js";
+import { analyzeWorkspacePackages } from "../workspaces/analyzeWorkspacePackages.js";
 import { exportAgentsMd } from "../export/exportAgentsMd.js";
 import { exportCourseProjectReport } from "../export/exportCourseProjectReport.js";
 import { exportDemoScreenshotPlan } from "../export/exportDemoScreenshotPlan.js";
@@ -92,6 +93,7 @@ export async function analyzeLocalRepo(rootDir: string): Promise<RepoAnalysis> {
     })
   ]);
 
+  await analyzeWorkspacePackages(rootDir, analysis, sourceFiles);
   deriveFacts(analysis);
 
   return analysis;

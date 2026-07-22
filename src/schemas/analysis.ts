@@ -141,7 +141,15 @@ export const WorkspacePackageSchema = z.object({
   version: z.string().optional(),
   private: z.boolean().optional(),
   source: z.string(),
-  confidence: ConfidenceLevelSchema
+  confidence: ConfidenceLevelSchema,
+  projectType: z.string().optional(),
+  scripts: z.array(ScriptCommandSchema).optional(),
+  directories: z.array(DirectoryCandidateSchema).optional(),
+  configFiles: z.array(ConfigFileSchema).optional(),
+  entrypoints: z.array(z.string()).optional(),
+  entrypointFacts: z.array(EntrypointCandidateSchema).optional(),
+  envVars: z.array(EnvVarSchema).optional(),
+  evidence: z.array(EvidenceRecordSchema).optional()
 });
 
 export const WorkspaceInfoSchema = z.object({

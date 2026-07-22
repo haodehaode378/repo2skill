@@ -1,0 +1,8 @@
+{
+  "name": "@fixture/web",
+  "private": true,
+  "scripts": {
+    "dev": "vite",
+    "typecheck": "tsc --noEmit"
+  }
+}
