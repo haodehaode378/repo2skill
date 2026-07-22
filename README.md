@@ -1,8 +1,8 @@
 # repo2skill
 
-> Analyze any repository into agent-ready onboarding context: commands, entrypoints, security audit, quickstarts, and SKILL.md.
+> Evidence-backed onboarding compiler for Node.js/TypeScript repositories: commands, source entrypoints, security audit, quickstarts, and SKILL.md.
 >
-> 将任意仓库分析为 agent-ready 的 onboarding 上下文：命令、入口文件、安全审计、quickstart 和 SKILL.md。
+> 面向 Node.js/TypeScript 仓库、以真实证据为基础的 coding agent onboarding 编译器。
 
 ![npm caution](https://img.shields.io/badge/npm-name%20caution-f59e0b?style=flat-square)
 [![TypeScript](https://img.shields.io/badge/TypeScript-ready-3178c6?style=flat-square)](https://www.typescriptlang.org/)
@@ -10,9 +10,9 @@
 
 **Language / 语言:** [简体中文](#简体中文) | [English](#english)
 
-`repo2skill` turns a local repository or public GitHub repository into agent-ready onboarding context. It is built for coding agents that need grounded instructions, not a loose project summary.
+`repo2skill` turns a local or public GitHub Node.js/TypeScript repository into agent-ready onboarding context. It is built for coding agents that need grounded instructions, not a loose project summary.
 
-`repo2skill` 会把本地仓库或公开 GitHub 仓库转换成 coding agent 可直接使用的 onboarding 上下文。它不是泛泛总结项目，而是基于真实证据生成可执行、可审查的 agent 工作材料。
+`repo2skill` 会把本地或公开 GitHub 上的 Node.js/TypeScript 仓库转换成 coding agent 可直接使用的 onboarding 上下文。它不是泛泛总结项目，而是基于真实证据生成可执行、可审查的 agent 工作材料。
 
 ```bash
 git clone https://github.com/haodehaode378/repo2skill.git
@@ -53,7 +53,7 @@ Input repository
 
 ## 简体中文
 
-`repo2skill` 会分析本地仓库或公开 GitHub 仓库，把仓库里的真实信号转换成 agent-ready onboarding 产物：命令、入口文件、关键配置、重要目录、环境变量线索、验证步骤、`AGENTS.md`、`SKILL.md`、quickstart 和结构化 JSON 报告。
+`repo2skill` 面向 Node.js/TypeScript 项目，分析本地仓库或公开 GitHub 仓库，把真实信号转换成 agent-ready onboarding 产物：命令、入口文件、关键配置、重要目录、环境变量线索、验证步骤、`AGENTS.md`、`SKILL.md`、quickstart 和结构化 JSON 报告。
 
 ### 为什么存在
 
@@ -62,7 +62,7 @@ Input repository
 - 生成有证据支撑的 `AGENTS.md`，说明修改前导航和完成前验证。
 - 生成仓库专属 `SKILL.md`，保留源码入口、发布入口、配置文件和验证命令。
 - 所有 JSON、Markdown、HTML 产物来自同一个分析对象，减少文档漂移。
-- 通过 benchmark 和 evaluation fixture 保护仓库分析质量。
+- 通过 benchmark 观察结构变化，并用 semantic evaluation 验证具体入口、命令、配置和导航目录。
 
 ### 适合什么场景
 
@@ -75,14 +75,14 @@ Input repository
 
 `repo2skill` 不运行目标仓库的 package scripts。它读取文件、检测信号，并把每个结论尽量绑定到真实来源：
 
-| 信号                      | 示例来源                                                        |
-| ------------------------- | --------------------------------------------------------------- |
-| 包管理器                  | `pnpm-lock.yaml`、`package-lock.json`、`yarn.lock`、`bun.lockb` |
-| 验证命令                  | `package.json` scripts                                          |
-| 入口文件                  | `package.json` `main` / `bin`、`src/main.ts`、`src/index.ts`    |
-| 配置文件                  | `tsconfig.json`、`vite.config.ts`、`.github/workflows/*.yml`    |
-| 环境变量                  | `.env.example`、`.env.local.example`、`process.env.*`           |
-| workspace / monorepo 信号 | `pnpm-workspace.yaml`、`package.json workspaces`、`turbo.json`  |
+| 信号                      | 示例来源                                                         |
+| ------------------------- | ---------------------------------------------------------------- |
+| 包管理器                  | `pnpm-lock.yaml`、`package-lock.json`、`yarn.lock`、`bun.lockb`  |
+| 验证命令                  | `package.json` scripts                                           |
+| 入口文件                  | `package.json` `main` / `bin`、`src/main.ts`、`src/cli/index.ts` |
+| 配置文件                  | `tsconfig.json`、`vite.config.ts`、`.github/workflows/*.yml`     |
+| 环境变量                  | `.env.example`、`.env.local.example`、`process.env.*`            |
+| workspace / monorepo 信号 | `pnpm-workspace.yaml`、`package.json workspaces`、`turbo.json`   |
 
 如果没有证据，相关段落会被省略，而不是用通用建议填充。
 
@@ -178,6 +178,10 @@ npx @haodehaode378/repo2skill https://github.com/tinylibs/tinybench --out ./out-
 
 完整示例见 [examples/analysis-target](./examples/analysis-target)。
 
+### 源码入口与发布入口
+
+`package.json` 中的 `main`、`module`、`browser` 和 `bin` 描述包如何被加载或执行；它们可能指向 `dist` 等构建产物。`repo2skill` 会保留这些发布证据，但不会把 `dist`、`build`、`out` 或 `coverage` 提升为源码修改起点。检测到 `src/index.ts`、`src/main.ts`、`src/cli/index.ts` 等源码入口时，生成的 agent 导航会优先指向源码目录。
+
 ### 推荐工作流
 
 ```bash
@@ -228,13 +232,19 @@ npm run dev -- https://github.com/octocat/Hello-World --no-cache --out ./out-git
 运行 benchmark manifest：
 
 ```bash
-npm run benchmark -- ./benchmarks/public-node-ts-smoke.json --cache-dir E:/r2s-cache --out ./benchmark-smoke-out
+npm run benchmark -- ./benchmarks/public-node-ts-smoke.json --cache-dir ./repo2skill-cache --out ./benchmark-smoke-out
 ```
 
-运行产物级上下文评估：
+先运行无需网络的语义评估：
 
 ```bash
-npm run evaluate -- ./evaluations/tinybench.json --cache-dir E:/r2s-cache --out ./evaluation-out
+npm run evaluate -- ./evaluations/v0.3-local.json --out ./evaluation-out
+```
+
+再将 tinybench 作为公开仓库补充评估：
+
+```bash
+npm run evaluate -- ./evaluations/tinybench.json --cache-dir ./repo2skill-cache --out ./evaluation-tinybench-out
 ```
 
 ### 开发验证
@@ -254,6 +264,8 @@ npm run release:check
 - `json`、`md`、`all` 导出模式。
 - GitHub clone 缓存、`--refresh`、`--no-cache`。
 - smoke/full benchmark baseline 和 regression comparison。
+- workspace-aware 根目录导航；不会递归完成每个子包的完整语义分析。
+- 本地 semantic evaluation，验证具体事实而不只比较数量。
 
 暂不支持：
 
@@ -271,7 +283,7 @@ npm run release:check
 
 ## English
 
-`repo2skill` analyzes a local repository or public GitHub repository and turns real repository signals into agent-ready onboarding artifacts: commands, entrypoints, key config files, important directories, environment-variable hints, validation steps, `AGENTS.md`, `SKILL.md`, quickstarts, and a structured JSON report.
+`repo2skill` analyzes local or public GitHub Node.js/TypeScript repositories and turns real repository signals into agent-ready onboarding artifacts: commands, source and package entrypoints, key config files, important directories, environment-variable hints, validation steps, `AGENTS.md`, `SKILL.md`, quickstarts, and a structured JSON report.
 
 ### Why It Exists
 
@@ -280,7 +292,7 @@ Most repository summaries tell an agent what a project appears to be. `repo2skil
 - evidence-backed `AGENTS.md` instructions for where to look before editing and what to run before finishing;
 - repository-specific `SKILL.md` references that preserve source files, package entrypoints, config files, and validation commands;
 - repeatable JSON/Markdown/HTML artifacts derived from the same analysis object;
-- benchmark and evaluation fixtures that make regressions visible.
+- count-based benchmarks for structural changes and semantic evaluations for exact repository facts.
 
 ### Use Cases
 
@@ -293,14 +305,14 @@ Most repository summaries tell an agent what a project appears to be. `repo2skil
 
 `repo2skill` does not run target repository package scripts. It reads files, detects signals, and ties conclusions back to repository evidence:
 
-| Signal                | Example sources                                                 |
-| --------------------- | --------------------------------------------------------------- |
-| Package manager       | `pnpm-lock.yaml`, `package-lock.json`, `yarn.lock`, `bun.lockb` |
-| Validation commands   | `package.json` scripts                                          |
-| Entrypoints           | `package.json` `main` / `bin`, `src/main.ts`, `src/index.ts`    |
-| Config files          | `tsconfig.json`, `vite.config.ts`, `.github/workflows/*.yml`    |
-| Environment variables | `.env.example`, `.env.local.example`, `process.env.*`           |
-| Workspace / monorepo  | `pnpm-workspace.yaml`, `package.json workspaces`, `turbo.json`  |
+| Signal                | Example sources                                                  |
+| --------------------- | ---------------------------------------------------------------- |
+| Package manager       | `pnpm-lock.yaml`, `package-lock.json`, `yarn.lock`, `bun.lockb`  |
+| Validation commands   | `package.json` scripts                                           |
+| Entrypoints           | `package.json` `main` / `bin`, `src/main.ts`, `src/cli/index.ts` |
+| Config files          | `tsconfig.json`, `vite.config.ts`, `.github/workflows/*.yml`     |
+| Environment variables | `.env.example`, `.env.local.example`, `process.env.*`            |
+| Workspace / monorepo  | `pnpm-workspace.yaml`, `package.json workspaces`, `turbo.json`   |
 
 If there is no supporting evidence, the relevant section is omitted instead of filled with generic advice.
 
@@ -410,6 +422,10 @@ Export formats:
 
 See [examples/analysis-target](./examples/analysis-target) for committed sample output.
 
+### Source vs. Package Entrypoints
+
+`main`, `module`, `browser`, and `bin` describe how a package is loaded or executed, and may point to build output under `dist`. `repo2skill` preserves that package evidence without promoting `dist`, `build`, `out`, or `coverage` as source navigation. When source conventions such as `src/index.ts`, `src/main.ts`, or `src/cli/index.ts` are present, generated agent guidance prioritizes those source directories.
+
 ### Recommended Workflow
 
 ```bash
@@ -460,13 +476,19 @@ npm run dev -- https://github.com/octocat/Hello-World --no-cache --out ./out-git
 Run the benchmark manifest:
 
 ```bash
-npm run benchmark -- ./benchmarks/public-node-ts-smoke.json --cache-dir E:/r2s-cache --out ./benchmark-smoke-out
+npm run benchmark -- ./benchmarks/public-node-ts-smoke.json --cache-dir ./repo2skill-cache --out ./benchmark-smoke-out
 ```
 
-Artifact-level context evaluation:
+Run the deterministic local semantic evaluation first:
 
 ```bash
-npm run evaluate -- ./evaluations/tinybench.json --cache-dir E:/r2s-cache --out ./evaluation-out
+npm run evaluate -- ./evaluations/v0.3-local.json --out ./evaluation-out
+```
+
+Use tinybench as a supplementary public-repository evaluation:
+
+```bash
+npm run evaluate -- ./evaluations/tinybench.json --cache-dir ./repo2skill-cache --out ./evaluation-tinybench-out
 ```
 
 ### Development
@@ -486,6 +508,8 @@ Supported now:
 - `json`, `md`, and `all` export modes.
 - GitHub clone cache, `--refresh`, and `--no-cache`.
 - Smoke/full benchmark baselines and regression comparison.
+- Workspace-aware root navigation, not complete per-package semantic analysis.
+- Local semantic evaluation of exact facts rather than counts alone.
 
 Not implemented yet:
 

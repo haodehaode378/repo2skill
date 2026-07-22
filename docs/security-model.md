@@ -29,9 +29,11 @@ Untrusted:
 
 ## Current Audit Checks
 
-The audit skeleton flags:
+The lightweight audit flags:
 
-- npm lifecycle scripts such as `postinstall`, `prepare`, and `prepublishOnly`;
+- install lifecycle scripts (`preinstall`, `install`, and `postinstall`) as high risk because consumers may execute them during installation;
+- preparation and publish hooks such as `prepare`, `prepack`, and `prepublishOnly` as medium risk by default;
+- any lifecycle hook with suspicious network, shell, or eval-like behavior as high risk;
 - scripts with suspicious network, shell, or eval-like patterns;
 - GitHub Actions workflows, `pull_request_target`, broad write permissions, secret/env references, and download-to-shell patterns;
 - real `.env` files as medium risk and `.env.example` as lower risk documentation;
@@ -53,5 +55,6 @@ The audit skeleton flags:
 - Prefer `--audit-only` before generating artifacts for an unfamiliar repository.
 - Review generated `AGENTS.md` and `SKILL.md` before giving them to an agent as instructions.
 - Treat detected commands as candidates, not endorsements.
+- Treat severity as triage guidance: a medium publish hook still requires review, while high findings deserve priority.
 - Do not run package lifecycle scripts from an untrusted repository without inspection.
 - Keep output directories separate from source repositories when reviewing unknown projects.

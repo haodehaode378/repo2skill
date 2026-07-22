@@ -1,8 +1,8 @@
-# v0.2 Release Checklist / v0.2 发布检查清单
+# v0.3 Release Checklist / v0.3 发布检查清单
 
-This checklist keeps the release focused on a stable, evidence-first MVP.
+This checklist keeps the release focused on evidence-backed Node.js/TypeScript onboarding correctness.
 
-这份清单用于确保 v0.2 仍然聚焦在稳定、证据优先的 MVP。
+这份清单用于确保 v0.3 聚焦于 Node.js/TypeScript onboarding 的证据与正确性。
 
 ## Scope / 范围
 
@@ -10,6 +10,7 @@ This checklist keeps the release focused on a stable, evidence-first MVP.
 - Local repositories / 本地仓库
 - Node.js / TypeScript-oriented repositories
 - Evidence-backed exports only / 只输出有证据支撑的内容
+- Workspace-aware root navigation, not complete per-package analysis / 感知 workspace 根目录，不做完整子包分析
 - No private repository authentication / 不做私有仓库鉴权
 - No broad multi-language support / 不做广泛多语言支持
 
@@ -68,15 +69,14 @@ Before publishing, verify the package contents locally:
 发布前先在本地验证包内容：
 
 ```bash
-npm pack
+npm pack --dry-run --json
 ```
 
-The packed tarball should include:
+The dry-run package listing should include:
 
 打包产物应包含：
 
 - `dist/index.js`
-- `dist/index.d.ts`
 - `README.md`
 - `LICENSE`
 - `package.json`
@@ -92,22 +92,20 @@ The packed tarball should not include:
 - `out-*`
 - `node_modules`
 
-After `npm pack`, test the generated CLI from the packed package before publishing.
-
-运行 `npm pack` 后，发布前应使用打包产物验证 CLI 可执行。
+The package is a pure CLI and should not contain an empty `dist/index.d.ts` declaration artifact.
 
 ## Benchmark Checks / Benchmark 检查
 
 Smoke benchmark:
 
 ```bash
-npm run benchmark -- ./benchmarks/public-node-ts-smoke.json --cache-dir E:/r2s-cache --out ./benchmark-smoke-out
+npm run benchmark -- ./benchmarks/public-node-ts-smoke.json --cache-dir ./repo2skill-cache --out ./benchmark-smoke-out
 ```
 
 Compare with baseline:
 
 ```bash
-npm run benchmark -- ./benchmarks/public-node-ts-smoke.json --cache-dir E:/r2s-cache --out ./benchmark-smoke-out --compare ./benchmarks/baselines/public-node-ts-smoke.summary.json
+npm run benchmark -- ./benchmarks/public-node-ts-smoke.json --cache-dir ./repo2skill-cache --out ./benchmark-smoke-out --compare ./benchmarks/baselines/public-node-ts-smoke.summary.json
 ```
 
 The comparison should not report regressions in:
@@ -124,6 +122,12 @@ The comparison should not report regressions in:
 - `entrypointCount`
 - `envVarCount`
 
+Equal counts do not prove equal facts. Run the deterministic semantic suite as a separate required gate:
+
+```bash
+npm run evaluate -- ./evaluations/v0.3-local.json --out ./evaluation-out
+```
+
 ## README / README 检查
 
 - The README should remain bilingual / README 应保持中英双语
@@ -133,10 +137,4 @@ The comparison should not report regressions in:
 
 ## Encoding / 编码检查
 
-Because the README and release docs contain Chinese text, run the mojibake checker before release:
-
-因为 README 和发布文档包含中文，发布前运行乱码检查：
-
-```bash
-python C:/Users/36366/.codex/skills/text-encoding-guard/scripts/check_mojibake.py --root .
-```
+README 和发布文档包含中文。编辑器和自动化应保持 UTF-8，并在发布前检查中英文文本没有乱码。

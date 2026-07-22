@@ -83,8 +83,8 @@ npm run typecheck
 npm test
 npm run build
 npm pack --dry-run
-npm run benchmark -- ./benchmarks/public-node-ts-smoke.json --cache-dir E:/r2s-cache --out ./benchmark-smoke-out --compare ./benchmarks/baselines/public-node-ts-smoke.summary.json
-npm run evaluate -- ./evaluations/tinybench.json --cache-dir E:/r2s-cache --out ./evaluation-out
+npm run benchmark -- ./benchmarks/public-node-ts-smoke.json --cache-dir ./repo2skill-cache --out ./benchmark-smoke-out --compare ./benchmarks/baselines/public-node-ts-smoke.summary.json
+npm run evaluate -- ./evaluations/tinybench.json --cache-dir ./repo2skill-cache --out ./evaluation-out
 ```
 
 Recorded verification results:

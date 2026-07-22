@@ -32,11 +32,15 @@ Use this checklist when changing detectors, exporters, README content, examples,
 
 - Source entrypoints such as `src/index.ts` should be visible in `SKILL.md`, `AGENTS.md`, and `project-map.md`.
 - Package output entrypoints such as `./dist/index.js` should be marked as `package-output`.
+- A generated path referenced by `bin` remains package output for navigation purposes; `bin` is retained as its reason.
+- Conventional CLI sources such as `src/cli/index.ts` should be detected when present.
 - Generated directories such as `dist`, `build`, `out`, and `coverage` must not be promoted to `Important Directories`.
 - `Important Directories` should prioritize source directories and workspace roots.
 
 - `src/index.ts` 这类源码入口应出现在 `SKILL.md`、`AGENTS.md` 和 `project-map.md`。
 - `./dist/index.js` 这类发布产物入口应标记为 `package-output`。
+- `bin` 指向生成路径时，导航属性仍应是 package output，同时保留 `bin` 作为原因。
+- 存在 `src/cli/index.ts` 这类常规 CLI 源码入口时应识别出来。
 - `dist`、`build`、`out`、`coverage` 这类生成目录不能被提升为 `Important Directories`。
 - `Important Directories` 应优先展示源码目录和 workspace 根目录。
 
@@ -49,7 +53,6 @@ Run before a release:
 ```bash
 npm run release:check
 npm pack --dry-run
-python C:/Users/36366/.codex/skills/text-encoding-guard/scripts/check_mojibake.py --root .
 ```
 
 For benchmark regression checks:
@@ -57,7 +60,7 @@ For benchmark regression checks:
 用于 benchmark 回归检查：
 
 ```bash
-npm run benchmark -- ./benchmarks/public-node-ts-smoke.json --cache-dir E:/r2s-cache --out ./benchmark-smoke-out --compare ./benchmarks/baselines/public-node-ts-smoke.summary.json
+npm run benchmark -- ./benchmarks/public-node-ts-smoke.json --cache-dir ./repo2skill-cache --out ./benchmark-smoke-out --compare ./benchmarks/baselines/public-node-ts-smoke.summary.json
 ```
 
 For artifact-level context checks:
@@ -65,5 +68,6 @@ For artifact-level context checks:
 用于生成物级别的上下文检查：
 
 ```bash
-npm run evaluate -- ./evaluations/tinybench.json --cache-dir E:/r2s-cache --out ./evaluation-out
+npm run evaluate -- ./evaluations/v0.3-local.json --out ./evaluation-out
+npm run evaluate -- ./evaluations/tinybench.json --cache-dir ./repo2skill-cache --out ./evaluation-tinybench-out
 ```
