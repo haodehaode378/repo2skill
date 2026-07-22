@@ -40,7 +40,10 @@ function createSummary(): BenchmarkSummary {
         commandCount: 6,
         configFileCount: 4,
         entrypointCount: 0,
-        envVarCount: 34
+        envVarCount: 34,
+        workspacePackageCount: 12,
+        internalDependencyEdgeCount: 18,
+        packageCommandCount: 27
       },
       {
         name: "nextjs",
@@ -79,6 +82,10 @@ describe("createBenchmarkBaseline", () => {
           configFileCount: 4,
           entrypointCount: 0,
           envVarCount: 34,
+          workspacePackageCount: 12,
+          internalDependencyEdgeCount: 18,
+          packageCommandCount: 27,
+          focusedPackageSuccess: undefined,
           error: undefined
         },
         {
@@ -94,6 +101,10 @@ describe("createBenchmarkBaseline", () => {
           configFileCount: undefined,
           entrypointCount: undefined,
           envVarCount: undefined,
+          workspacePackageCount: undefined,
+          internalDependencyEdgeCount: undefined,
+          packageCommandCount: undefined,
+          focusedPackageSuccess: undefined,
           error: "clone failed"
         }
       ]

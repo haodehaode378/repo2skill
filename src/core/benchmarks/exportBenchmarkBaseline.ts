@@ -41,6 +41,10 @@ export function createBenchmarkBaseline(
       configFileCount: result.configFileCount,
       entrypointCount: result.entrypointCount,
       envVarCount: result.envVarCount,
+      workspacePackageCount: result.workspacePackageCount,
+      internalDependencyEdgeCount: result.internalDependencyEdgeCount,
+      packageCommandCount: result.packageCommandCount,
+      focusedPackageSuccess: result.focusedPackageSuccess,
       error: result.error
     }))
   };

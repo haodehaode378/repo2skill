@@ -1,0 +1,9 @@
+{
+  "name": "public-monorepo-smoke",
+  "repos": [
+    {
+      "name": "turborepo",
+      "url": "https://github.com/vercel/turborepo"
+    }
+  ]
+}

@@ -38,6 +38,30 @@ function createAnalysis(): RepoAnalysis {
         isWorkspace: true,
         packageGlobs: ["packages/*"],
         signals: ["pnpm-workspace.yaml"],
+        packages: [
+          {
+            path: "packages/core",
+            packageJsonPath: "packages/core/package.json",
+            name: "@fixture/core",
+            source: "pnpm-workspace.yaml",
+            confidence: "high",
+            commands: [
+              {
+                name: "test",
+                role: "test",
+                command: "pnpm --filter @fixture/core test",
+                rawScript: "vitest run",
+                cwd: ".",
+                packageName: "@fixture/core",
+                packagePath: "packages/core",
+                source: "packages/core/package.json",
+                confidence: "high",
+                scoped: true
+              }
+            ]
+          }
+        ],
+        dependencyEdges: [],
         confidence: "high"
       },
       scripts: [
@@ -107,7 +131,11 @@ describe("runBenchmarkManifest", () => {
         commandCount: 0,
         configFileCount: 1,
         entrypointCount: 1,
-        envVarCount: 1
+        envVarCount: 1,
+        workspacePackageCount: 1,
+        internalDependencyEdgeCount: 0,
+        packageCommandCount: 1,
+        focusedPackageSuccess: undefined
       },
       {
         name: "repo-two",
@@ -122,7 +150,11 @@ describe("runBenchmarkManifest", () => {
         commandCount: 0,
         configFileCount: 1,
         entrypointCount: 1,
-        envVarCount: 1
+        envVarCount: 1,
+        workspacePackageCount: 1,
+        internalDependencyEdgeCount: 0,
+        packageCommandCount: 1,
+        focusedPackageSuccess: undefined
       }
     ]);
     expect(materializeRepositoryFn).toHaveBeenCalledTimes(2);
@@ -178,6 +210,50 @@ describe("runBenchmarkManifest", () => {
     });
   });
 
+  it("reports focused package success when a benchmark requests a package", async () => {
+    const materializeRepositoryFn = vi.fn().mockResolvedValue({
+      rootDir: "/tmp/repo",
+      cleanup: vi.fn().mockResolvedValue(undefined)
+    });
+    const exportAnalysisArtifactsFn = vi.fn().mockResolvedValue([]);
+    const summary = await runBenchmarkManifest(
+      {
+        name: "focused-benchmark",
+        repos: [
+          {
+            name: "repo-one",
+            url: "https://github.com/example/repo-one",
+            package: "@fixture/core"
+          }
+        ]
+      },
+      {
+        outDir: "benchmark-out",
+        materializeRepositoryFn,
+        analyzeLocalRepoFn: vi.fn().mockResolvedValue(createAnalysis()),
+        exportAnalysisArtifactsFn
+      }
+    );
+
+    expect(summary.results[0]).toMatchObject({
+      success: true,
+      workspacePackageCount: 1,
+      packageCommandCount: 1,
+      focusedPackageSuccess: true
+    });
+    expect(exportAnalysisArtifactsFn).toHaveBeenCalledWith(
+      path.join("benchmark-out", "repo-one"),
+      expect.objectContaining({
+        detected: expect.objectContaining({
+          workspace: expect.objectContaining({
+            focusedPackage: { name: "@fixture/core", path: "packages/core" }
+          })
+        })
+      }),
+      "all"
+    );
+  });
+
   it("captures materialization failures without aborting the whole run", async () => {
     const materializeRepositoryFn = vi
       .fn()
@@ -231,7 +307,11 @@ describe("renderBenchmarkSummary", () => {
           commandCount: 3,
           configFileCount: 2,
           entrypointCount: 1,
-          envVarCount: 2
+          envVarCount: 2,
+          workspacePackageCount: 4,
+          internalDependencyEdgeCount: 3,
+          packageCommandCount: 8,
+          focusedPackageSuccess: true
         },
         {
           name: "repo-two",
@@ -249,7 +329,7 @@ describe("renderBenchmarkSummary", () => {
     expect(text).toContain("Succeeded: 1");
     expect(text).toContain("Failed: 1");
     expect(text).toContain(
-      "OK | repo-one | pm=pnpm | type=vite | workspace=true | scripts=3 | commands=3 | configs=2 | entrypoints=1 | env=2"
+      "OK | repo-one | pm=pnpm | type=vite | workspace=true | scripts=3 | commands=3 | configs=2 | entrypoints=1 | env=2 | workspacePackages=4 | internalEdges=3 | packageCommands=8 | focusedPackage=true"
     );
     expect(text).toContain("FAIL | repo-two | error=analysis failed");
   });

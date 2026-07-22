@@ -136,6 +136,30 @@ function compareSingleRepo(
     currentRepo.entrypointCount
   );
   compareCountField(deltas, "envVarCount", baselineRepo.envVarCount, currentRepo.envVarCount);
+  compareCountField(
+    deltas,
+    "workspacePackageCount",
+    baselineRepo.workspacePackageCount,
+    currentRepo.workspacePackageCount
+  );
+  compareCountField(
+    deltas,
+    "internalDependencyEdgeCount",
+    baselineRepo.internalDependencyEdgeCount,
+    currentRepo.internalDependencyEdgeCount
+  );
+  compareCountField(
+    deltas,
+    "packageCommandCount",
+    baselineRepo.packageCommandCount,
+    currentRepo.packageCommandCount
+  );
+  compareOptionalBooleanField(
+    deltas,
+    "focusedPackageSuccess",
+    baselineRepo.focusedPackageSuccess,
+    currentRepo.focusedPackageSuccess
+  );
 
   if (deltas.some((delta) => delta.kind === "regression")) {
     return {

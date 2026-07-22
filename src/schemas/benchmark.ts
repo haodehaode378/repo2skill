@@ -3,7 +3,8 @@ import { z } from "zod";
 export const BenchmarkRepoSchema = z.object({
   name: z.string(),
   url: z.string().url(),
-  branch: z.string().optional()
+  branch: z.string().optional(),
+  package: z.string().optional()
 });
 
 export const BenchmarkManifestSchema = z.object({
@@ -24,6 +25,10 @@ export const BenchmarkBaselineRepoSchema = z.object({
   configFileCount: z.number().int().nonnegative().optional(),
   entrypointCount: z.number().int().nonnegative().optional(),
   envVarCount: z.number().int().nonnegative().optional(),
+  workspacePackageCount: z.number().int().nonnegative().optional(),
+  internalDependencyEdgeCount: z.number().int().nonnegative().optional(),
+  packageCommandCount: z.number().int().nonnegative().optional(),
+  focusedPackageSuccess: z.boolean().optional(),
   error: z.string().optional()
 });
 
@@ -50,7 +55,11 @@ export const BenchmarkComparisonDeltaSchema = z.object({
     "commandCount",
     "configFileCount",
     "entrypointCount",
-    "envVarCount"
+    "envVarCount",
+    "workspacePackageCount",
+    "internalDependencyEdgeCount",
+    "packageCommandCount",
+    "focusedPackageSuccess"
   ]),
   kind: z.enum(["regression", "improvement"]),
   baselineValue: z.union([z.boolean(), z.number(), z.string()]).optional(),

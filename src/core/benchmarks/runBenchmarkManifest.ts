@@ -7,6 +7,7 @@ import {
   type OutputFormat
 } from "../run/runLocalAnalysis.js";
 import { materializeRepository } from "../collect/materializeRepository.js";
+import { focusWorkspacePackage } from "../workspaces/focusWorkspacePackage.js";
 
 export type BenchmarkRepoResult = {
   name: string;
@@ -22,6 +23,10 @@ export type BenchmarkRepoResult = {
   configFileCount?: number;
   entrypointCount?: number;
   envVarCount?: number;
+  workspacePackageCount?: number;
+  internalDependencyEdgeCount?: number;
+  packageCommandCount?: number;
+  focusedPackageSuccess?: boolean;
   error?: string;
 };
 
@@ -125,6 +130,22 @@ export function renderBenchmarkSummary(summary: BenchmarkSummary): string {
         parts.push(`env=${result.envVarCount}`);
       }
 
+      if (typeof result.workspacePackageCount === "number") {
+        parts.push(`workspacePackages=${result.workspacePackageCount}`);
+      }
+
+      if (typeof result.internalDependencyEdgeCount === "number") {
+        parts.push(`internalEdges=${result.internalDependencyEdgeCount}`);
+      }
+
+      if (typeof result.packageCommandCount === "number") {
+        parts.push(`packageCommands=${result.packageCommandCount}`);
+      }
+
+      if (typeof result.focusedPackageSuccess === "boolean") {
+        parts.push(`focusedPackage=${result.focusedPackageSuccess}`);
+      }
+
       if (result.error) {
         parts.push(`error=${result.error}`);
       }
@@ -161,10 +182,13 @@ async function runSingleBenchmarkRepo(
       branch: repo.branch,
       cacheDir: options.cacheDir
     });
-    const analysis = await options.analyzeLocalRepoFn(materialized.rootDir);
+    const fullAnalysis = await options.analyzeLocalRepoFn(materialized.rootDir);
+    const analysis = repo.package
+      ? focusWorkspacePackage(fullAnalysis, repo.package)
+      : fullAnalysis;
     await options.exportAnalysisArtifactsFn(outputDir, analysis, options.format);
 
-    return buildSuccessResult(repo, outputDir, analysis);
+    return buildSuccessResult(repo, outputDir, fullAnalysis);
   } catch (error) {
     return {
       name: repo.name,
@@ -172,6 +196,7 @@ async function runSingleBenchmarkRepo(
       branch: repo.branch,
       success: false,
       outputDir,
+      focusedPackageSuccess: repo.package ? false : undefined,
       error: error instanceof Error ? error.message : String(error)
     };
   } finally {
@@ -199,6 +224,14 @@ function buildSuccessResult(
     commandCount: analysis.detected.commands.length,
     configFileCount: analysis.detected.configFiles.length,
     entrypointCount: analysis.detected.entrypoints.length,
-    envVarCount: analysis.detected.envVars.length
+    envVarCount: analysis.detected.envVars.length,
+    workspacePackageCount: analysis.detected.workspace?.packages?.length ?? 0,
+    internalDependencyEdgeCount: analysis.detected.workspace?.dependencyEdges?.length ?? 0,
+    packageCommandCount:
+      analysis.detected.workspace?.packages?.reduce(
+        (count, workspacePackage) => count + (workspacePackage.commands?.length ?? 0),
+        0
+      ) ?? 0,
+    focusedPackageSuccess: repo.package ? true : undefined
   };
 }
