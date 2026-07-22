@@ -5,6 +5,12 @@ import { renderPackageScriptCommand } from "../commands/packageScripts.js";
 import { getEntrypointFacts } from "../entrypoints/facts.js";
 import { getDisplayEnvVars, getOmittedEnvVarCount } from "../envVars/display.js";
 import { formatCode } from "./commandHelpers.js";
+import {
+  formatReferenceList,
+  getWorkspacePackageLabel,
+  getWorkspacePackages,
+  getWorkspaceSourceEntrypoints
+} from "./workspaceHelpers.js";
 
 export async function exportProjectMap(outDir: string, analysis: RepoAnalysis): Promise<void> {
   const validatedAnalysis = RepoAnalysisSchema.parse(analysis);
@@ -52,6 +58,8 @@ export function renderProjectMap(analysis: RepoAnalysis): string {
         `- Package Globs: ${analysis.detected.workspace.packageGlobs.map(formatCode).join(", ")}`
       );
     }
+
+    sections.push(...renderWorkspacePackages(analysis));
   }
 
   if (analysis.detected.scripts.length > 0) {
@@ -129,4 +137,69 @@ export function renderProjectMap(analysis: RepoAnalysis): string {
   sections.push("");
 
   return sections.join("\n");
+}
+
+function renderWorkspacePackages(analysis: RepoAnalysis): string[] {
+  const workspace = analysis.detected.workspace;
+  const packages = getWorkspacePackages(analysis);
+
+  if (!workspace || packages.length === 0) {
+    return [];
+  }
+
+  const lines = [
+    "",
+    "### Workspace Packages",
+    "",
+    "| Package | Path | Type | Private | Key source entrypoint | Commands | Direct consumers |",
+    "| --- | --- | --- | --- | --- | --- | --- |"
+  ];
+
+  for (const workspacePackage of packages) {
+    const commands = (workspacePackage.commands ?? []).map((command) => `\`${command.command}\``);
+    const entrypoint = getWorkspaceSourceEntrypoints(workspacePackage)[0];
+    lines.push(
+      `| ${formatCode(getWorkspacePackageLabel(workspacePackage))} | ${formatCode(workspacePackage.path)} | ${formatCode(workspacePackage.projectType ?? "unknown")} | ${workspacePackage.private === undefined ? "unknown" : String(workspacePackage.private)} | ${entrypoint ? formatCode(entrypoint) : "none"} | ${commands.join("<br>") || "none"} | ${formatReferenceList(workspacePackage.directConsumers)} |`
+    );
+  }
+
+  if (workspace.focusedPackage) {
+    lines.push("");
+    lines.push(
+      `Focused package: ${formatCode(workspace.focusedPackage.name ?? workspace.focusedPackage.path)} at ${formatCode(workspace.focusedPackage.path)}.`
+    );
+  }
+
+  const edges = workspace.dependencyEdges ?? [];
+  if (edges.length > 0) {
+    lines.push("");
+    lines.push("### Internal Package Dependencies");
+    lines.push("");
+    for (const edge of edges) {
+      lines.push(
+        `- ${formatCode(edge.sourcePackageName)} -> ${formatCode(edge.targetPackageName)} (${edge.dependencyType})`
+      );
+    }
+  }
+
+  if (edges.length >= 3) {
+    const nodeIds = new Map(
+      packages.map((workspacePackage, index) => [workspacePackage.path, `P${index}`])
+    );
+    lines.push("");
+    lines.push("```mermaid");
+    lines.push("graph LR");
+    for (const workspacePackage of packages) {
+      const label = getWorkspacePackageLabel(workspacePackage).replaceAll('"', "'");
+      lines.push(`  ${nodeIds.get(workspacePackage.path)}["${label}"]`);
+    }
+    for (const edge of edges) {
+      lines.push(
+        `  ${nodeIds.get(edge.sourcePackagePath)} -->|${edge.dependencyType}| ${nodeIds.get(edge.targetPackagePath)}`
+      );
+    }
+    lines.push("```");
+  }
+
+  return lines;
 }

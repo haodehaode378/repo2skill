@@ -8,6 +8,11 @@ import {
 import { getEntrypointFacts } from "../entrypoints/facts.js";
 import { getDisplayEnvVars, getOmittedEnvVarCount } from "../envVars/display.js";
 import { formatCode, getCommands, getValidationCommands } from "./commandHelpers.js";
+import {
+  formatReferenceList,
+  getWorkspacePackageLabel,
+  getWorkspacePackages
+} from "./workspaceHelpers.js";
 
 export async function exportSkillMd(outDir: string, analysis: RepoAnalysis): Promise<void> {
   const validatedAnalysis = RepoAnalysisSchema.parse(analysis);
@@ -37,12 +42,50 @@ export function renderSkillMd(analysis: RepoAnalysis): string {
   lines.push(...renderSkillSteps(analysis, commands, validationCommands));
   lines.push(...renderSkillMaintenanceSection(analysis, validationCommands));
   lines.push(...renderSkillCommandsSection(commands));
+  lines.push(...renderSkillWorkspacePackages(analysis));
   lines.push(...renderSkillValidationSection(validationCommands));
   lines.push(...renderSkillReferences(analysis));
   lines.push(...renderSkillTrustAndSafety(analysis));
   lines.push(...renderSkillBoundaries());
 
   return lines.join("\n");
+}
+
+function renderSkillWorkspacePackages(analysis: RepoAnalysis): string[] {
+  const packages = getWorkspacePackages(analysis);
+
+  if (packages.length === 0) {
+    return [];
+  }
+
+  const lines = ["", "## Workspace Package Context", ""];
+  const focused = analysis.detected.workspace?.focusedPackage;
+  if (focused) {
+    lines.push(
+      `- Focused package: ${formatCode(focused.name ?? focused.path)} at ${formatCode(focused.path)}.`
+    );
+  }
+
+  for (const workspacePackage of packages) {
+    lines.push(`### ${getWorkspacePackageLabel(workspacePackage)}`);
+    lines.push("");
+    lines.push(`- Path: ${formatCode(workspacePackage.path)}.`);
+    for (const entrypoint of workspacePackage.entrypointFacts ?? []) {
+      lines.push(`- Entrypoint: ${formatCode(entrypoint.path)} (${entrypoint.role}).`);
+    }
+    for (const command of workspacePackage.commands ?? []) {
+      lines.push(
+        `- ${command.role} command: ${formatCode(command.command)} (cwd: ${formatCode(command.cwd)}).`
+      );
+    }
+    lines.push(
+      `- Direct dependencies: ${formatReferenceList(workspacePackage.directDependencies)}.`
+    );
+    lines.push(`- Direct consumers: ${formatReferenceList(workspacePackage.directConsumers)}.`);
+    lines.push("");
+  }
+
+  return lines;
 }
 
 function renderSkillUseWhen(analysis: RepoAnalysis): string {

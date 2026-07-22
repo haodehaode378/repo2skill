@@ -7,6 +7,7 @@ import {
 } from "../../schemas/analysis.js";
 import { getDisplayEnvVars, getOmittedEnvVarCount } from "../envVars/display.js";
 import { getCommands } from "./commandHelpers.js";
+import { getWorkspacePackageLabel, getWorkspacePackages } from "./workspaceHelpers.js";
 
 type QuickstartTarget = {
   fileName: string;
@@ -101,6 +102,28 @@ export function renderQuickstart(analysis: RepoAnalysis, target: QuickstartTarge
     }
   }
 
+  const packages = getWorkspacePackages(analysis);
+  if (packages.length > 0) {
+    lines.push("");
+    lines.push("## Workspace Package Commands");
+    lines.push("");
+    for (const workspacePackage of packages) {
+      const packageCommands = workspacePackage.commands ?? [];
+      if (packageCommands.length === 0) {
+        continue;
+      }
+      lines.push(`### ${getWorkspacePackageLabel(workspacePackage)}`);
+      lines.push("");
+      for (const command of packageCommands) {
+        lines.push(`- ${command.role}:`);
+        lines.push("");
+        lines.push(`\`\`\`${target.shellLabel}`);
+        lines.push(...renderWorkspaceCommand(command.command, command.cwd, target.shellLabel));
+        lines.push("```");
+      }
+    }
+  }
+
   lines.push("");
   lines.push("## Notes");
   lines.push("");
@@ -109,6 +132,19 @@ export function renderQuickstart(analysis: RepoAnalysis, target: QuickstartTarge
   lines.push("");
 
   return lines.join("\n");
+}
+
+function renderWorkspaceCommand(command: string, cwd: string, shellLabel: string): string[] {
+  if (cwd === ".") {
+    return [command];
+  }
+
+  if (shellLabel === "powershell") {
+    return [`Push-Location '${cwd.replaceAll("'", "''")}'`, command, "Pop-Location"];
+  }
+
+  const escapedCwd = cwd.replaceAll("'", "'\\''");
+  return [`(cd '${escapedCwd}' && ${command})`];
 }
 
 function getSuggestedStartCommand(commands: CommandCandidate[]): CommandCandidate | undefined {

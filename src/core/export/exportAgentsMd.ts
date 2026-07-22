@@ -8,6 +8,13 @@ import {
 import { getEntrypointFacts, isGeneratedEntrypointRole } from "../entrypoints/facts.js";
 import { getDisplayEnvVars, getOmittedEnvVarCount } from "../envVars/display.js";
 import { formatCode, getCommands, getValidationCommands } from "./commandHelpers.js";
+import {
+  formatReferenceList,
+  getWorkspacePackageLabel,
+  getWorkspacePackages,
+  getWorkspaceSourceEntrypoints,
+  getWorkspaceValidationCommands
+} from "./workspaceHelpers.js";
 
 export async function exportAgentsMd(outDir: string, analysis: RepoAnalysis): Promise<void> {
   const validatedAnalysis = RepoAnalysisSchema.parse(analysis);
@@ -26,6 +33,7 @@ export function renderAgentsMd(analysis: RepoAnalysis): string {
   const importantDirectories = getImportantDirectories(analysis);
 
   sections.push(...renderAgentsCommands(commands));
+  sections.push(...renderAgentsWorkspacePackages(analysis));
   sections.push(...renderAgentsBeforeChanging(analysis, importantDirectories));
   sections.push(...renderAgentsValidation(commands));
   sections.push(...renderAgentsDirectories(importantDirectories));
@@ -37,6 +45,58 @@ export function renderAgentsMd(analysis: RepoAnalysis): string {
   sections.push("");
 
   return sections.join("\n");
+}
+
+function renderAgentsWorkspacePackages(analysis: RepoAnalysis): string[] {
+  const packages = getWorkspacePackages(analysis);
+
+  if (packages.length === 0) {
+    return [];
+  }
+
+  const lines = ["", "## Package-Specific Guidance", ""];
+
+  if (analysis.detected.workspace?.focusedPackage) {
+    const focused = analysis.detected.workspace.focusedPackage;
+    lines.push(
+      `Focused context: ${formatCode(focused.name ?? focused.path)} (${formatCode(focused.path)}).`
+    );
+    lines.push("");
+  }
+
+  for (const workspacePackage of packages) {
+    const entrypoints = getWorkspaceSourceEntrypoints(workspacePackage);
+    const configs = (workspacePackage.configFiles ?? []).map((config) => config.path);
+    const validations = getWorkspaceValidationCommands(workspacePackage);
+    lines.push(`### ${getWorkspacePackageLabel(workspacePackage)}`);
+    lines.push("");
+    lines.push(`- Package path: ${formatCode(workspacePackage.path)}.`);
+    if (entrypoints.length > 0) {
+      lines.push(
+        `- Before editing, inspect source entrypoints: ${entrypoints.map(formatCode).join(", ")}.`
+      );
+    }
+    if (configs.length > 0) {
+      lines.push(`- Before editing configuration, inspect: ${configs.map(formatCode).join(", ")}.`);
+    }
+    if (validations.length > 0) {
+      lines.push(
+        `- Package validation: ${validations.map((command) => formatCode(command.command)).join(", ")}.`
+      );
+    }
+    lines.push(
+      `- Direct internal dependencies: ${formatReferenceList(workspacePackage.directDependencies)}.`
+    );
+    lines.push(
+      `- Direct consumers to re-check: ${formatReferenceList(workspacePackage.directConsumers)}.`
+    );
+    lines.push("");
+  }
+
+  lines.push(
+    "Use root validation for shared/root configuration changes; use package validation for isolated package changes."
+  );
+  return lines;
 }
 
 function renderAgentsOverview(analysis: RepoAnalysis): string {

@@ -7,6 +7,11 @@ import {
 } from "../../schemas/analysis.js";
 import { getEntrypointFacts, isGeneratedEntrypointRole } from "../entrypoints/facts.js";
 import { formatCode, getCommands, getValidationCommands } from "./commandHelpers.js";
+import {
+  formatReferenceList,
+  getWorkspacePackageLabel,
+  getWorkspacePackages
+} from "./workspaceHelpers.js";
 
 export async function exportMaintenanceProfile(
   outDir: string,
@@ -40,12 +45,58 @@ export function renderMaintenanceProfile(analysis: RepoAnalysis): string {
   }
 
   lines.push(...renderMainEntrypoints(analysis));
+  lines.push(...renderWorkspaceInventory(analysis));
   lines.push(...renderMinimumValidation(validationCommands));
   lines.push(...renderHighRiskFiles(analysis));
   lines.push(...renderChangeBoundaries(analysis));
   lines.push(...renderAgentHandoffAdvice(analysis, validationCommands));
 
   return `${lines.join("\n")}\n`;
+}
+
+function renderWorkspaceInventory(analysis: RepoAnalysis): string[] {
+  const packages = getWorkspacePackages(analysis);
+
+  if (packages.length === 0) {
+    return [];
+  }
+
+  const lines = ["", "## Workspace Package Inventory", ""];
+  for (const workspacePackage of packages) {
+    const locationClass = workspacePackage.path.startsWith("apps/")
+      ? "application path"
+      : workspacePackage.path.startsWith("packages/")
+        ? "shared package path"
+        : "workspace path";
+    lines.push(
+      `- ${formatCode(getWorkspacePackageLabel(workspacePackage))} at ${formatCode(workspacePackage.path)} (${locationClass}); dependencies: ${formatReferenceList(workspacePackage.directDependencies)}; consumers: ${formatReferenceList(workspacePackage.directConsumers)}.`
+    );
+  }
+
+  const ranked = packages
+    .map((workspacePackage) => ({
+      workspacePackage,
+      consumerCount: workspacePackage.directConsumers?.length ?? 0
+    }))
+    .filter((item) => item.consumerCount > 0)
+    .sort(
+      (left, right) =>
+        right.consumerCount - left.consumerCount ||
+        left.workspacePackage.path.localeCompare(right.workspacePackage.path)
+    );
+
+  if (ranked.length > 0) {
+    lines.push("");
+    lines.push("### Packages by Direct Consumer Count");
+    lines.push("");
+    for (const item of ranked) {
+      lines.push(
+        `- ${formatCode(getWorkspacePackageLabel(item.workspacePackage))}: ${item.consumerCount} direct consumer${item.consumerCount === 1 ? "" : "s"}.`
+      );
+    }
+  }
+
+  return lines;
 }
 
 function renderMainEntrypoints(analysis: RepoAnalysis): string[] {

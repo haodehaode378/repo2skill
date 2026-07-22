@@ -3,6 +3,11 @@ import fs from "fs-extra";
 import { RepoAnalysisSchema, type RepoAnalysis } from "../../schemas/analysis.js";
 import { getEntrypointFacts, isGeneratedEntrypointRole } from "../entrypoints/facts.js";
 import { getDisplayEnvVars, getOmittedEnvVarCount } from "../envVars/display.js";
+import {
+  formatReferenceList,
+  getWorkspacePackageLabel,
+  getWorkspacePackages
+} from "./workspaceHelpers.js";
 
 export async function exportHtmlReport(outDir: string, analysis: RepoAnalysis): Promise<void> {
   const validatedAnalysis = RepoAnalysisSchema.parse(analysis);
@@ -20,6 +25,7 @@ export function renderHtmlReport(analysis: RepoAnalysis): string {
   sections.push(...renderDetectedSignals(analysis));
   sections.push(...renderScriptsSection(analysis));
   sections.push(...renderWorkspaceSection(analysis));
+  sections.push(...renderWorkspacePackagesSection(analysis));
   sections.push(...renderEntrypointsSection(analysis));
   sections.push(...renderConfigFilesSection(analysis));
   sections.push(...renderTopologySection(analysis));
@@ -27,6 +33,53 @@ export function renderHtmlReport(analysis: RepoAnalysis): string {
   sections.push(...renderEvidenceSection(analysis));
 
   return wrapHtmlShell(title, sections);
+}
+
+function renderWorkspacePackagesSection(analysis: RepoAnalysis): string[] {
+  const packages = getWorkspacePackages(analysis);
+  const workspace = analysis.detected.workspace;
+
+  if (!workspace || packages.length === 0) {
+    return [];
+  }
+
+  const focus = workspace.focusedPackage
+    ? `<p><strong>Focused package:</strong> <code>${escapeHtml(workspace.focusedPackage.name ?? workspace.focusedPackage.path)}</code> at <code>${escapeHtml(workspace.focusedPackage.path)}</code></p>`
+    : "";
+  const rows = packages
+    .map((workspacePackage) => {
+      const commands = (workspacePackage.commands ?? [])
+        .map((command) => `<code>${escapeHtml(command.command)}</code>`)
+        .join("<br>");
+      const entrypoints = (workspacePackage.entrypointFacts ?? [])
+        .map(
+          (entrypoint) =>
+            `<code>${escapeHtml(entrypoint.path)}</code> (${escapeHtml(entrypoint.role)})`
+        )
+        .join("<br>");
+      return (
+        `<tr><td><code>${escapeHtml(getWorkspacePackageLabel(workspacePackage))}</code></td>` +
+        `<td><code>${escapeHtml(workspacePackage.path)}</code></td>` +
+        `<td>${escapeHtml(workspacePackage.projectType ?? "unknown")}</td>` +
+        `<td>${entrypoints || "none"}</td><td>${commands || "none"}</td>` +
+        `<td>${escapeHtml(formatReferenceList(workspacePackage.directDependencies))}</td>` +
+        `<td>${escapeHtml(formatReferenceList(workspacePackage.directConsumers))}</td></tr>`
+      );
+    })
+    .join("");
+  const edges = (workspace.dependencyEdges ?? [])
+    .map(
+      (edge) =>
+        `<li><code>${escapeHtml(edge.sourcePackageName)}</code> &rarr; <code>${escapeHtml(edge.targetPackageName)}</code> (${escapeHtml(edge.dependencyType)})</li>`
+    )
+    .join("");
+  const edgeList = edges ? `<h3>Internal Dependencies</h3><ul>${edges}</ul>` : "";
+
+  return [
+    `<section><h2>Workspace Packages</h2>${focus}` +
+      `<table><thead><tr><th>Package</th><th>Path</th><th>Type</th><th>Entrypoints</th><th>Commands</th><th>Dependencies</th><th>Consumers</th></tr></thead>` +
+      `<tbody>${rows}</tbody></table>${edgeList}</section>`
+  ];
 }
 
 function renderOverview(analysis: RepoAnalysis): string {

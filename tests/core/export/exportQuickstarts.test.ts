@@ -110,6 +110,58 @@ describe("renderQuickstart", () => {
     expect(markdown).not.toContain("## Available Scripts");
     expect(markdown).toContain("## Notes");
   });
+
+  it("renders package-local fallback commands safely for each shell", () => {
+    const analysis: RepoAnalysis = {
+      ...createMinimalAnalysis(),
+      detected: {
+        ...createMinimalAnalysis().detected,
+        workspace: {
+          isWorkspace: true,
+          packageGlobs: ["packages/*"],
+          signals: ["package.json#workspaces"],
+          confidence: "high",
+          packages: [
+            {
+              path: "packages/tool",
+              packageJsonPath: "packages/tool/package.json",
+              name: "@fixture/tool",
+              source: "package.json#workspaces",
+              confidence: "high",
+              commands: [
+                {
+                  name: "test",
+                  role: "test",
+                  command: "bun run test",
+                  rawScript: "vitest run",
+                  cwd: "packages/tool",
+                  packageName: "@fixture/tool",
+                  packagePath: "packages/tool",
+                  source: "packages/tool/package.json",
+                  confidence: "high",
+                  scoped: false
+                }
+              ]
+            }
+          ]
+        }
+      }
+    };
+
+    const windows = renderQuickstart(analysis, {
+      fileName: "quickstart.windows.md",
+      title: "Windows Quickstart",
+      shellLabel: "powershell"
+    });
+    const linux = renderQuickstart(analysis, {
+      fileName: "quickstart.linux.md",
+      title: "Linux Quickstart",
+      shellLabel: "bash"
+    });
+
+    expect(windows).toContain("Push-Location 'packages/tool'\nbun run test\nPop-Location");
+    expect(linux).toContain("(cd 'packages/tool' && bun run test)");
+  });
 });
 
 describe("exportQuickstarts", () => {
