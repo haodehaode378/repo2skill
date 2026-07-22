@@ -210,6 +210,56 @@ describe("runEvaluationManifest", () => {
     expect(summary.failureCount).toBe(0);
     expect(summary.results[0]?.failures).toEqual([]);
   });
+
+  it("checks structured internal dependency assertions", async () => {
+    const outDir = await createTempDir();
+    const manifest: EvaluationManifest = {
+      name: "workspace-dependency-facts",
+      cases: [
+        {
+          name: "typed-edge",
+          input: path.resolve("tests/fixtures/workspaces/internal-dependencies"),
+          assertions: [],
+          facts: {
+            expectedEntrypoints: [],
+            forbiddenEntrypoints: [],
+            expectedImportantDirectories: [],
+            forbiddenImportantDirectories: [],
+            expectedCommands: [],
+            expectedConfigFiles: [],
+            expectedWorkspacePackages: [],
+            forbiddenWorkspacePackages: [],
+            expectedWorkspacePackagePaths: [],
+            forbiddenWorkspacePackagePaths: [],
+            expectedInternalDependencies: [
+              {
+                sourcePackage: "@fixture/web",
+                targetPackage: "@fixture/core",
+                dependencyType: "dependency"
+              }
+            ],
+            forbiddenInternalDependencies: [
+              {
+                sourcePackage: "@fixture/web",
+                targetPackage: "@fixture/duplicate",
+                dependencyType: "devDependency"
+              }
+            ],
+            expectedPackageCommands: [],
+            forbiddenPackageCommands: [],
+            expectedPackageEntrypoints: [],
+            forbiddenPackageEntrypoints: [],
+            expectedPackageImportantDirectories: [],
+            forbiddenPackageImportantDirectories: []
+          }
+        }
+      ]
+    };
+
+    const summary = await runEvaluationManifest(manifest, { outDir });
+
+    expect(summary.failureCount).toBe(0);
+  });
 });
 
 describe("renderEvaluationSummary", () => {
