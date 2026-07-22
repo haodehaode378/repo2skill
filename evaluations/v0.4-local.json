@@ -2,6 +2,27 @@
   "name": "v0.4-local-monorepo-intelligence",
   "cases": [
     {
+      "name": "repo2skill-self-single-package-compatibility",
+      "input": ".",
+      "facts": {
+        "expectedEntrypoints": ["dist/index.js", "src/cli/index.ts"],
+        "forbiddenEntrypoints": ["coverage/index.js"],
+        "expectedImportantDirectories": ["src/cli"],
+        "forbiddenImportantDirectories": ["dist", "build", "out", "coverage"],
+        "expectedCommands": ["npm run test"],
+        "expectedConfigFiles": ["package.json", "tsconfig.json"],
+        "forbiddenWorkspacePackages": ["@fixture/core"],
+        "forbiddenWorkspacePackagePaths": ["packages/core"]
+      },
+      "assertions": [
+        {
+          "artifact": "repo2skill.json",
+          "includes": ["src/cli/index.ts", "dist/index.js"],
+          "excludes": ["focusedPackage", "dependencyEdges"]
+        }
+      ]
+    },
+    {
       "name": "pnpm-yaml-discovery-and-exclusion",
       "input": "tests/fixtures/workspaces/pnpm-packages",
       "facts": {
