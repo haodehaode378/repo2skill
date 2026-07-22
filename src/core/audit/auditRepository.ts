@@ -12,10 +12,9 @@ export type AuditFinding = {
   evidence?: string;
 };
 
-const LIFECYCLE_SCRIPTS = new Set([
-  "preinstall",
-  "install",
-  "postinstall",
+const INSTALL_LIFECYCLE_SCRIPTS = new Set(["preinstall", "install", "postinstall"]);
+
+const PUBLISH_LIFECYCLE_SCRIPTS = new Set([
   "prepare",
   "prepack",
   "postpack",
@@ -117,12 +116,21 @@ async function auditPackageJsonFiles(
         continue;
       }
 
-      if (LIFECYCLE_SCRIPTS.has(scriptName)) {
+      const isInstallLifecycle = INSTALL_LIFECYCLE_SCRIPTS.has(scriptName);
+      const isPublishLifecycle = PUBLISH_LIFECYCLE_SCRIPTS.has(scriptName);
+
+      if (isInstallLifecycle || isPublishLifecycle) {
+        const suspicious = SUSPICIOUS_SCRIPT_PATTERN.test(scriptCommand);
+        const stage = isInstallLifecycle
+          ? "package installation"
+          : "package preparation or publish";
         findings.push({
           category: "lifecycle-script",
-          severity: "high",
+          severity: isInstallLifecycle || suspicious ? "high" : "medium",
           path: filePath,
-          message: `package.json lifecycle script "${scriptName}" runs during install or publish flows`,
+          message: suspicious
+            ? `package.json lifecycle script "${scriptName}" runs during ${stage} and contains network, shell, or eval-like behavior`
+            : `package.json lifecycle script "${scriptName}" runs during ${stage}`,
           evidence: trimEvidence(scriptCommand)
         });
       } else if (SUSPICIOUS_SCRIPT_PATTERN.test(scriptCommand)) {
