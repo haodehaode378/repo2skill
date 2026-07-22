@@ -24,20 +24,5 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Format check
-        run: npm run format:check
-
-      - name: Lint
-        run: npm run lint
-
-      - name: Typecheck
-        run: npm run typecheck
-
-      - name: Test
-        run: npm test
-
-      - name: Coverage
-        run: npm run test:coverage
-
-      - name: Build
-        run: npm run build
+      - name: Release check
+        run: npm run release:check

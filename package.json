@@ -32,7 +32,7 @@
     "format:check": "prettier --check \"**/*.{ts,md,yml,yaml,json}\"",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
-    "release:check": "npm run format:check && npm run lint && npm run typecheck && npm test && npm run build"
+    "release:check": "npm run format:check && npm run lint && npm run typecheck && npm run test:coverage && npm run build"
   },
   "engines": {
     "node": ">=20"
