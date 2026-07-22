@@ -25,6 +25,7 @@ describe("RepoAnalysisSchema", () => {
 
     expect(result.repo.name).toBe("demo-repo");
     expect(result.detected.workspace?.packageGlobs).toEqual(["packages/*"]);
+    expect(result.detected.workspace?.packages).toBeUndefined();
     expect(result.detected.docs).toEqual([]);
     expect(result.detected.demoSignals).toEqual([]);
   });

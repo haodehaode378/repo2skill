@@ -1,6 +1,8 @@
 import path from "node:path";
 import fs from "fs-extra";
-import type { RepoAnalysis } from "../../schemas/analysis.js";
+import { glob } from "tinyglobby";
+import { parse as parseYaml } from "yaml";
+import type { RepoAnalysis, WorkspacePackage } from "../../schemas/analysis.js";
 
 type PackageJsonWithWorkspaces = {
   workspaces?: unknown;
@@ -8,6 +10,18 @@ type PackageJsonWithWorkspaces = {
 
 const TOOLING_SIGNAL_FILES = ["turbo.json", "nx.json"] as const;
 const CONVENTIONAL_WORKSPACE_DIRS = ["apps", "packages"] as const;
+const IGNORED_WORKSPACE_PATHS = [
+  "**/.git/**",
+  "**/node_modules/**",
+  "**/dist/**",
+  "**/build/**",
+  "**/coverage/**",
+  "**/out/**",
+  "**/repo2skill-cache/**",
+  "**/benchmark-out/**",
+  "**/benchmark-smoke-out/**",
+  "**/evaluation-out/**"
+] as const;
 
 export async function detectWorkspace(
   rootDir: string,
@@ -28,12 +42,22 @@ export async function detectWorkspace(
 
   const hasExplicitWorkspaceConfig =
     signals.has("pnpm-workspace.yaml") || signals.has("package.json workspaces");
+  const confidence = hasExplicitWorkspaceConfig ? "high" : "medium";
+  const sortedSignals = [...signals].sort();
+  const sortedGlobs = [...packageGlobs].sort();
+  const packageSource = signals.has("pnpm-workspace.yaml")
+    ? "pnpm-workspace.yaml"
+    : signals.has("package.json workspaces")
+      ? "package.json workspaces"
+      : sortedSignals[0];
+  const packages = await discoverWorkspacePackages(rootDir, sortedGlobs, packageSource, confidence);
 
   analysis.detected.workspace = {
     isWorkspace: true,
-    packageGlobs: [...packageGlobs].sort(),
-    signals: [...signals].sort(),
-    confidence: hasExplicitWorkspaceConfig ? "high" : "medium"
+    packageGlobs: sortedGlobs,
+    signals: sortedSignals,
+    packages,
+    confidence
   };
 
   analysis.evidence.push({
@@ -42,6 +66,15 @@ export async function detectWorkspace(
     reason: `Detected workspace signals: ${analysis.detected.workspace.signals.join(", ")}`,
     confidence: analysis.detected.workspace.confidence
   });
+
+  for (const workspacePackage of packages) {
+    analysis.evidence.push({
+      claim: `workspacePackage=${workspacePackage.name ?? workspacePackage.path}`,
+      sourceFile: workspacePackage.packageJsonPath,
+      reason: `Matched workspace configuration from ${workspacePackage.source}`,
+      confidence: workspacePackage.confidence
+    });
+  }
 }
 
 async function detectPnpmWorkspace(
@@ -60,36 +93,19 @@ async function detectPnpmWorkspace(
   const content = await fs.readFile(workspacePath, "utf8");
 
   for (const workspaceGlob of parsePnpmWorkspaceGlobs(content)) {
-    packageGlobs.add(workspaceGlob);
+    registerWorkspaceGlob(packageGlobs, workspaceGlob);
   }
 }
 
 function parsePnpmWorkspaceGlobs(content: string): string[] {
-  const globs: string[] = [];
-  let inPackagesBlock = false;
-
-  for (const line of content.split(/\r?\n/)) {
-    if (/^packages:\s*$/.test(line)) {
-      inPackagesBlock = true;
-      continue;
-    }
-
-    if (inPackagesBlock && /^\S/.test(line)) {
-      inPackagesBlock = false;
-    }
-
-    if (!inPackagesBlock) {
-      continue;
-    }
-
-    const match = line.match(/^\s*-\s*['"]?([^'"\s#]+)['"]?/);
-
-    if (match) {
-      globs.push(match[1]);
-    }
+  try {
+    const document = parseYaml(content) as { packages?: unknown } | null;
+    return Array.isArray(document?.packages)
+      ? document.packages.filter((value): value is string => typeof value === "string")
+      : [];
+  } catch {
+    return [];
   }
-
-  return globs;
 }
 
 async function detectPackageJsonWorkspaces(
@@ -121,7 +137,7 @@ async function detectPackageJsonWorkspaces(
   signals.add("package.json workspaces");
 
   for (const workspaceGlob of detectedGlobs) {
-    packageGlobs.add(workspaceGlob);
+    registerWorkspaceGlob(packageGlobs, workspaceGlob);
   }
 }
 
@@ -171,6 +187,100 @@ async function detectConventionalWorkspaceDirs(
     }
 
     signals.add(`${directoryName}/`);
-    packageGlobs.add(`${directoryName}/*`);
+    registerWorkspaceGlob(packageGlobs, `${directoryName}/*`);
   }
+}
+
+function registerWorkspaceGlob(packageGlobs: Set<string>, workspaceGlob: string): void {
+  const normalized = normalizeWorkspaceGlob(workspaceGlob);
+
+  if (normalized) {
+    packageGlobs.add(normalized);
+  }
+}
+
+function normalizeWorkspaceGlob(workspaceGlob: string): string | undefined {
+  const trimmed = workspaceGlob.trim();
+
+  if (!trimmed) {
+    return undefined;
+  }
+
+  const negated = trimmed.startsWith("!");
+  const body = (negated ? trimmed.slice(1) : trimmed)
+    .replace(/\\/g, "/")
+    .replace(/^\.\//, "")
+    .replace(/\/+$/, "");
+
+  if (
+    !body ||
+    path.posix.isAbsolute(body) ||
+    /^[A-Za-z]:\//.test(body) ||
+    body.split("/").includes("..")
+  ) {
+    return undefined;
+  }
+
+  return negated ? `!${body}` : body;
+}
+
+async function discoverWorkspacePackages(
+  rootDir: string,
+  packageGlobs: string[],
+  source: string,
+  confidence: "high" | "medium"
+): Promise<WorkspacePackage[]> {
+  if (packageGlobs.length === 0) {
+    return [];
+  }
+
+  const packageJsonPatterns = packageGlobs.map((workspaceGlob) => {
+    const negated = workspaceGlob.startsWith("!");
+    const body = negated ? workspaceGlob.slice(1) : workspaceGlob;
+    return `${negated ? "!" : ""}${body}/package.json`;
+  });
+  const packageJsonPaths = await glob(packageJsonPatterns, {
+    cwd: rootDir,
+    onlyFiles: true,
+    followSymbolicLinks: false,
+    ignore: IGNORED_WORKSPACE_PATHS
+  });
+  const packages = await Promise.all(
+    packageJsonPaths
+      .map(normalizeRepositoryPath)
+      .filter((packageJsonPath) => packageJsonPath !== "package.json")
+      .sort()
+      .map(async (packageJsonPath) => {
+        const packagePath = path.posix.dirname(packageJsonPath);
+        const packageJson = await readPackageJson(
+          path.join(rootDir, ...packageJsonPath.split("/"))
+        );
+
+        return {
+          path: packagePath,
+          packageJsonPath,
+          name: typeof packageJson?.name === "string" ? packageJson.name : undefined,
+          version: typeof packageJson?.version === "string" ? packageJson.version : undefined,
+          private: typeof packageJson?.private === "boolean" ? packageJson.private : undefined,
+          source,
+          confidence
+        } satisfies WorkspacePackage;
+      })
+  );
+
+  return packages;
+}
+
+async function readPackageJson(
+  packageJsonPath: string
+): Promise<Record<string, unknown> | undefined> {
+  try {
+    return (await fs.readJson(packageJsonPath)) as Record<string, unknown>;
+  } catch {
+    return undefined;
+  }
+}
+
+function normalizeRepositoryPath(filePath: string): string {
+  return filePath.replace(/\\/g, "/").split(path.sep).join("/");
 }

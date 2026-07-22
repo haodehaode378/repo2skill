@@ -134,10 +134,21 @@ export const AuditFindingSchema = z.object({
   evidence: z.string().optional()
 });
 
+export const WorkspacePackageSchema = z.object({
+  path: z.string(),
+  packageJsonPath: z.string(),
+  name: z.string().optional(),
+  version: z.string().optional(),
+  private: z.boolean().optional(),
+  source: z.string(),
+  confidence: ConfidenceLevelSchema
+});
+
 export const WorkspaceInfoSchema = z.object({
   isWorkspace: z.boolean(),
   packageGlobs: z.array(z.string()).default([]),
   signals: z.array(z.string()).default([]),
+  packages: z.array(WorkspacePackageSchema).optional(),
   confidence: ConfidenceLevelSchema
 });
 
@@ -186,4 +197,5 @@ export type DemoSignalType = z.infer<typeof DemoSignalTypeSchema>;
 export type DemoSignal = z.infer<typeof DemoSignalSchema>;
 export type AuditSeverity = z.infer<typeof AuditSeveritySchema>;
 export type AuditFinding = z.infer<typeof AuditFindingSchema>;
+export type WorkspacePackage = z.infer<typeof WorkspacePackageSchema>;
 export type WorkspaceInfo = z.infer<typeof WorkspaceInfoSchema>;
