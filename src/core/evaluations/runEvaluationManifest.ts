@@ -1,6 +1,12 @@
 import path from "node:path";
 import fs from "fs-extra";
-import type { EvaluationCase, EvaluationManifest } from "../../schemas/evaluation.js";
+import type {
+  EvaluationCase,
+  EvaluationDependencyAssertion,
+  EvaluationManifest,
+  EvaluationPackageCommandAssertion,
+  EvaluationPackagePathAssertion
+} from "../../schemas/evaluation.js";
 import type { RepoAnalysis } from "../../schemas/analysis.js";
 import { materializeRepository } from "../collect/materializeRepository.js";
 import { resolveInput } from "../collect/resolveInput.js";
@@ -9,6 +15,7 @@ import {
   exportAnalysisArtifacts,
   type OutputFormat
 } from "../run/runLocalAnalysis.js";
+import { focusWorkspacePackage } from "../workspaces/focusWorkspacePackage.js";
 
 export type EvaluationFailure = {
   artifact: string;
@@ -148,7 +155,10 @@ async function runSingleEvaluationCase(
       throw new Error(`Unable to materialize input: ${evaluationCase.input}`);
     }
 
-    const analysis = await analyze(rootDir);
+    const fullAnalysis = await analyze(rootDir);
+    const analysis = evaluationCase.package
+      ? focusWorkspacePackage(fullAnalysis, evaluationCase.package)
+      : fullAnalysis;
     await exportArtifacts(options.outDir, analysis, format);
 
     const failures = [
@@ -269,7 +279,160 @@ function collectFactFailures(
     }
   }
 
+  failures.push(...collectWorkspaceFactFailures(analysis, evaluationCase));
+
   return failures;
+}
+
+function collectWorkspaceFactFailures(
+  analysis: RepoAnalysis,
+  evaluationCase: EvaluationCase
+): EvaluationFailure[] {
+  const facts = evaluationCase.facts;
+  if (!facts) {
+    return [];
+  }
+
+  const workspace = analysis.detected.workspace;
+  const packages = workspace?.packages ?? [];
+  const failures: EvaluationFailure[] = [];
+  collectStringCheckFailures(
+    failures,
+    "facts.workspacePackages",
+    packages.flatMap((workspacePackage) => (workspacePackage.name ? [workspacePackage.name] : [])),
+    facts.expectedWorkspacePackages ?? [],
+    facts.forbiddenWorkspacePackages ?? []
+  );
+  collectStringCheckFailures(
+    failures,
+    "facts.workspacePackagePaths",
+    packages.map((workspacePackage) => workspacePackage.path),
+    facts.expectedWorkspacePackagePaths ?? [],
+    facts.forbiddenWorkspacePackagePaths ?? []
+  );
+
+  const actualEdges = (workspace?.dependencyEdges ?? []).map(formatDependencyEdge);
+  collectStringCheckFailures(
+    failures,
+    "facts.internalDependencies",
+    actualEdges,
+    (facts.expectedInternalDependencies ?? []).map(formatDependencyAssertion),
+    (facts.forbiddenInternalDependencies ?? []).map(formatDependencyAssertion)
+  );
+
+  const actualCommands = packages.flatMap((workspacePackage) =>
+    (workspacePackage.commands ?? []).map((command) =>
+      formatPackageCommand({
+        package: workspacePackage.name ?? workspacePackage.path,
+        command: command.command,
+        cwd: command.cwd
+      })
+    )
+  );
+  collectStringCheckFailures(
+    failures,
+    "facts.packageCommands",
+    actualCommands,
+    (facts.expectedPackageCommands ?? []).map(formatPackageCommand),
+    (facts.forbiddenPackageCommands ?? []).map(formatPackageCommand)
+  );
+
+  collectPackagePathFailures(
+    failures,
+    "facts.packageEntrypoints",
+    packages.flatMap((workspacePackage) =>
+      (workspacePackage.entrypoints ?? []).map((entrypoint) => ({
+        package: workspacePackage.name ?? workspacePackage.path,
+        path: entrypoint
+      }))
+    ),
+    facts.expectedPackageEntrypoints ?? [],
+    facts.forbiddenPackageEntrypoints ?? []
+  );
+  collectPackagePathFailures(
+    failures,
+    "facts.packageImportantDirectories",
+    packages.flatMap((workspacePackage) =>
+      (workspacePackage.directories ?? []).map((directory) => ({
+        package: workspacePackage.name ?? workspacePackage.path,
+        path: directory.path
+      }))
+    ),
+    facts.expectedPackageImportantDirectories ?? [],
+    facts.forbiddenPackageImportantDirectories ?? []
+  );
+
+  if (facts.expectedFocusedPackage) {
+    const actualFocus = workspace?.focusedPackage;
+    const actualValues = actualFocus
+      ? [actualFocus.name, actualFocus.path].filter((value): value is string => Boolean(value))
+      : [];
+    if (!actualValues.includes(facts.expectedFocusedPackage)) {
+      failures.push({
+        artifact: "facts.focusedPackage",
+        expected: facts.expectedFocusedPackage,
+        actual: formatActualValues(actualValues)
+      });
+    }
+  }
+
+  return failures;
+}
+
+function collectPackagePathFailures(
+  failures: EvaluationFailure[],
+  artifact: string,
+  actual: EvaluationPackagePathAssertion[],
+  expected: EvaluationPackagePathAssertion[],
+  forbidden: EvaluationPackagePathAssertion[]
+): void {
+  collectStringCheckFailures(
+    failures,
+    artifact,
+    actual.map(formatPackagePath),
+    expected.map(formatPackagePath),
+    forbidden.map(formatPackagePath)
+  );
+}
+
+function collectStringCheckFailures(
+  failures: EvaluationFailure[],
+  artifact: string,
+  actual: string[],
+  expected: string[],
+  forbidden: string[]
+): void {
+  const actualText = formatActualValues(actual);
+  for (const value of expected) {
+    if (!actual.includes(value)) {
+      failures.push({ artifact, expected: value, actual: actualText });
+    }
+  }
+  for (const value of forbidden) {
+    if (actual.includes(value)) {
+      failures.push({ artifact, unexpected: value, actual: actualText });
+    }
+  }
+}
+
+function formatDependencyEdge(edge: {
+  sourcePackageName: string;
+  targetPackageName: string;
+  dependencyType: string;
+}): string {
+  return `${edge.sourcePackageName} -> ${edge.targetPackageName} (${edge.dependencyType})`;
+}
+
+function formatDependencyAssertion(assertion: EvaluationDependencyAssertion): string {
+  return `${assertion.sourcePackage} -> ${assertion.targetPackage} (${assertion.dependencyType})`;
+}
+
+function formatPackageCommand(assertion: EvaluationPackageCommandAssertion): string {
+  return `${assertion.package}: ${assertion.command} (cwd: ${assertion.cwd})`;
+}
+
+function formatPackagePath(assertion: EvaluationPackagePathAssertion): string {
+  return `${assertion.package}: ${assertion.path}`;
 }
 
 function formatActualValues(values: string[]): string {

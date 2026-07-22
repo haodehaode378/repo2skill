@@ -1,0 +1,181 @@
+{
+  "name": "v0.4-local-monorepo-intelligence",
+  "cases": [
+    {
+      "name": "pnpm-yaml-discovery-and-exclusion",
+      "input": "tests/fixtures/workspaces/pnpm-packages",
+      "facts": {
+        "expectedWorkspacePackages": ["@fixture/web", "@fixture/core"],
+        "forbiddenWorkspacePackages": ["@fixture/legacy"],
+        "expectedWorkspacePackagePaths": ["apps/web", "packages/core"],
+        "forbiddenWorkspacePackagePaths": ["packages/legacy", "packages/missing-package-json"]
+      }
+    },
+    {
+      "name": "npm-array-workspaces",
+      "input": "tests/fixtures/workspaces/package-json",
+      "facts": {
+        "expectedWorkspacePackages": ["@fixture/site", "@fixture/util"],
+        "expectedWorkspacePackagePaths": ["apps/site", "packages/util"]
+      }
+    },
+    {
+      "name": "npm-object-workspaces-and-windows-glob",
+      "input": "tests/fixtures/workspaces/npm-object",
+      "facts": {
+        "expectedWorkspacePackages": ["@fixture/ui"],
+        "expectedWorkspacePackagePaths": ["packages/ui"]
+      }
+    },
+    {
+      "name": "conventional-directory-fallback",
+      "input": "tests/fixtures/workspaces/conventions",
+      "facts": {
+        "expectedWorkspacePackages": ["@fixture/demo"],
+        "expectedWorkspacePackagePaths": ["apps/demo"]
+      }
+    },
+    {
+      "name": "safe-package-boundaries",
+      "input": "tests/fixtures/workspaces/safe-boundaries",
+      "facts": {
+        "forbiddenWorkspacePackagePaths": ["build/generated", "../outside"]
+      },
+      "assertions": [
+        {
+          "artifact": "repo2skill.json",
+          "includes": ["packages/*"],
+          "excludes": ["build/generated/package.json", "C:/outside"]
+        }
+      ]
+    },
+    {
+      "name": "typed-internal-dependency-graph",
+      "input": "tests/fixtures/workspaces/internal-dependencies",
+      "facts": {
+        "expectedWorkspacePackages": ["@fixture/cli", "@fixture/web", "@fixture/core"],
+        "expectedWorkspacePackagePaths": ["packages/unnamed"],
+        "expectedInternalDependencies": [
+          {
+            "sourcePackage": "@fixture/web",
+            "targetPackage": "@fixture/core",
+            "dependencyType": "dependency"
+          },
+          {
+            "sourcePackage": "@fixture/web",
+            "targetPackage": "@fixture/core",
+            "dependencyType": "devDependency"
+          },
+          {
+            "sourcePackage": "@fixture/cli",
+            "targetPackage": "@fixture/core",
+            "dependencyType": "peerDependency"
+          },
+          {
+            "sourcePackage": "@fixture/cli",
+            "targetPackage": "@fixture/web",
+            "dependencyType": "optionalDependency"
+          }
+        ],
+        "forbiddenInternalDependencies": [
+          {
+            "sourcePackage": "@fixture/web",
+            "targetPackage": "@fixture/duplicate",
+            "dependencyType": "devDependency"
+          }
+        ]
+      },
+      "assertions": [
+        {
+          "artifact": "repo2skill.json",
+          "includes": ["duplicate-package-name", "packages/unnamed"],
+          "excludes": []
+        }
+      ]
+    },
+    {
+      "name": "package-facts-and-scoped-commands",
+      "input": "tests/fixtures/workspaces/package-facts",
+      "facts": {
+        "expectedPackageCommands": [
+          {
+            "package": "@fixture/core",
+            "command": "pnpm --filter @fixture/core test",
+            "cwd": "."
+          },
+          {
+            "package": "@fixture/web",
+            "command": "pnpm --filter @fixture/web typecheck",
+            "cwd": "."
+          }
+        ],
+        "expectedPackageEntrypoints": [
+          {
+            "package": "@fixture/core",
+            "path": "packages/core/src/index.ts"
+          },
+          {
+            "package": "@fixture/web",
+            "path": "apps/web/src/main.ts"
+          }
+        ],
+        "forbiddenPackageEntrypoints": [
+          {
+            "package": "@fixture/core",
+            "path": "packages/core/dist/index.ts"
+          }
+        ],
+        "expectedPackageImportantDirectories": [
+          {
+            "package": "@fixture/core",
+            "path": "packages/core/src"
+          },
+          {
+            "package": "@fixture/web",
+            "path": "apps/web/src"
+          }
+        ],
+        "forbiddenPackageImportantDirectories": [
+          {
+            "package": "@fixture/core",
+            "path": "packages/core/dist"
+          }
+        ]
+      },
+      "assertions": [
+        {
+          "artifact": "project-map.md",
+          "includes": ["### Workspace Packages", "pnpm --filter @fixture/core test"],
+          "excludes": []
+        },
+        {
+          "artifact": "report.html",
+          "includes": ["<h2>Workspace Packages</h2>", "@fixture/web"],
+          "excludes": ["<script", "https://"]
+        }
+      ]
+    },
+    {
+      "name": "focused-package-windows-path",
+      "input": "tests/fixtures/workspaces/package-facts",
+      "package": ".\\packages\\core\\",
+      "facts": {
+        "expectedWorkspacePackages": ["@fixture/core"],
+        "forbiddenWorkspacePackages": ["@fixture/web"],
+        "expectedFocusedPackage": "@fixture/core"
+      },
+      "assertions": [
+        {
+          "artifact": "AGENTS.md",
+          "includes": ["Focused context: `@fixture/core`", "### @fixture/core"],
+          "excludes": ["### @fixture/web"]
+        },
+        {
+          "artifact": "SKILL.md",
+          "includes": ["Focused package: `@fixture/core` at `packages/core`"],
+          "excludes": ["### @fixture/web"]
+        }
+      ]
+    }
+  ]
+}

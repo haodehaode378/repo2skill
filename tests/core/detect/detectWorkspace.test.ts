@@ -55,8 +55,27 @@ describe("detectWorkspace", () => {
     expect(analysis.detected.workspace).toEqual({
       isWorkspace: true,
       packageGlobs: ["apps/*", "packages/*"],
-      signals: ["package.json workspaces"],
-      packages: [],
+      signals: ["apps/", "package.json workspaces", "packages/"],
+      packages: [
+        {
+          path: "apps/site",
+          packageJsonPath: "apps/site/package.json",
+          name: "@fixture/site",
+          version: undefined,
+          private: true,
+          source: "package.json workspaces",
+          confidence: "high"
+        },
+        {
+          path: "packages/util",
+          packageJsonPath: "packages/util/package.json",
+          name: "@fixture/util",
+          version: "1.0.0",
+          private: undefined,
+          source: "package.json workspaces",
+          confidence: "high"
+        }
+      ],
       confidence: "high"
     });
   });
@@ -86,7 +105,17 @@ describe("detectWorkspace", () => {
       isWorkspace: true,
       packageGlobs: ["apps/*"],
       signals: ["apps/"],
-      packages: [],
+      packages: [
+        {
+          path: "apps/demo",
+          packageJsonPath: "apps/demo/package.json",
+          name: "@fixture/demo",
+          version: undefined,
+          private: true,
+          source: "apps/",
+          confidence: "medium"
+        }
+      ],
       confidence: "medium"
     });
   });

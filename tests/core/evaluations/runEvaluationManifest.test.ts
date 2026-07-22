@@ -125,7 +125,19 @@ describe("runEvaluationManifest", () => {
             expectedImportantDirectories: [],
             forbiddenImportantDirectories: ["dist"],
             expectedCommands: [],
-            expectedConfigFiles: []
+            expectedConfigFiles: [],
+            expectedWorkspacePackages: [],
+            forbiddenWorkspacePackages: [],
+            expectedWorkspacePackagePaths: [],
+            forbiddenWorkspacePackagePaths: [],
+            expectedInternalDependencies: [],
+            forbiddenInternalDependencies: [],
+            expectedPackageCommands: [],
+            forbiddenPackageCommands: [],
+            expectedPackageEntrypoints: [],
+            forbiddenPackageEntrypoints: [],
+            expectedPackageImportantDirectories: [],
+            forbiddenPackageImportantDirectories: []
           }
         }
       ]
@@ -146,6 +158,57 @@ describe("runEvaluationManifest", () => {
         actual: "[./dist/index.js, src/cli/wrong.ts]"
       }
     ]);
+  });
+
+  it("checks workspace packages, graph facts, commands, and Windows-style focus selectors", async () => {
+    const outDir = await createTempDir();
+    const manifest: EvaluationManifest = {
+      name: "workspace-semantic-facts",
+      cases: [
+        {
+          name: "focused-core",
+          input: path.resolve("tests/fixtures/workspaces/package-facts"),
+          package: ".\\packages\\core\\",
+          assertions: [],
+          facts: {
+            expectedEntrypoints: [],
+            forbiddenEntrypoints: [],
+            expectedImportantDirectories: [],
+            forbiddenImportantDirectories: [],
+            expectedCommands: [],
+            expectedConfigFiles: [],
+            expectedWorkspacePackages: ["@fixture/core"],
+            forbiddenWorkspacePackages: ["@fixture/web"],
+            expectedWorkspacePackagePaths: ["packages/core"],
+            forbiddenWorkspacePackagePaths: ["apps/web"],
+            expectedInternalDependencies: [],
+            forbiddenInternalDependencies: [],
+            expectedPackageCommands: [
+              {
+                package: "@fixture/core",
+                command: "pnpm --filter @fixture/core test",
+                cwd: "."
+              }
+            ],
+            forbiddenPackageCommands: [],
+            expectedPackageEntrypoints: [
+              { package: "@fixture/core", path: "packages/core/src/index.ts" }
+            ],
+            forbiddenPackageEntrypoints: [],
+            expectedPackageImportantDirectories: [
+              { package: "@fixture/core", path: "packages/core/src" }
+            ],
+            forbiddenPackageImportantDirectories: [],
+            expectedFocusedPackage: "@fixture/core"
+          }
+        }
+      ]
+    };
+
+    const summary = await runEvaluationManifest(manifest, { outDir });
+
+    expect(summary.failureCount).toBe(0);
+    expect(summary.results[0]?.failures).toEqual([]);
   });
 });
 

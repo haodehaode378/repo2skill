@@ -33,6 +33,43 @@ describe("EvaluationManifestSchema", () => {
     expect(manifest.cases[0]?.facts?.expectedEntrypoints).toEqual(["src/cli/index.ts"]);
   });
 
+  it("accepts workspace graph, package command, and focus assertions", () => {
+    const manifest = EvaluationManifestSchema.parse({
+      name: "workspace-facts",
+      cases: [
+        {
+          name: "focused-package",
+          input: ".",
+          package: ".\\packages\\core\\",
+          facts: {
+            expectedWorkspacePackages: ["@fixture/core"],
+            expectedInternalDependencies: [
+              {
+                sourcePackage: "@fixture/web",
+                targetPackage: "@fixture/core",
+                dependencyType: "dependency"
+              }
+            ],
+            expectedPackageCommands: [
+              {
+                package: "@fixture/core",
+                command: "pnpm --filter @fixture/core test",
+                cwd: "."
+              }
+            ],
+            expectedPackageEntrypoints: [
+              { package: "@fixture/core", path: "packages/core/src/index.ts" }
+            ],
+            expectedFocusedPackage: "@fixture/core"
+          }
+        }
+      ]
+    });
+
+    expect(manifest.cases[0]?.package).toBe(".\\packages\\core\\");
+    expect(manifest.cases[0]?.facts?.expectedInternalDependencies).toHaveLength(1);
+  });
+
   it("rejects cases without any quality assertion", () => {
     expect(() =>
       EvaluationManifestSchema.parse({
