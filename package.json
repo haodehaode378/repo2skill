@@ -23,7 +23,7 @@
     "dev": "tsx src/cli/index.ts",
     "benchmark": "tsx src/cli/benchmark.ts",
     "evaluate": "tsx src/cli/evaluate.ts",
-    "build": "tsup src/cli/index.ts --format esm --dts --clean",
+    "build": "tsup src/cli/index.ts --format esm --clean",
     "prepack": "npm run build",
     "test": "vitest run",
     "test:coverage": "vitest run --coverage",
