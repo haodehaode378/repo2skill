@@ -1,0 +1,10 @@
+{
+  "name": "@fixture/cli",
+  "private": true,
+  "peerDependencies": {
+    "@fixture/core": "workspace:*"
+  },
+  "optionalDependencies": {
+    "@fixture/web": "workspace:*"
+  }
+}

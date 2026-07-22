@@ -134,6 +134,36 @@ export const AuditFindingSchema = z.object({
   evidence: z.string().optional()
 });
 
+export const WorkspacePackageReferenceSchema = z.object({
+  path: z.string(),
+  name: z.string().optional()
+});
+
+export const WorkspaceDependencyTypeSchema = z.enum([
+  "dependency",
+  "devDependency",
+  "peerDependency",
+  "optionalDependency"
+]);
+
+export const WorkspaceDependencyEdgeSchema = z.object({
+  sourcePackagePath: z.string(),
+  sourcePackageName: z.string(),
+  targetPackagePath: z.string(),
+  targetPackageName: z.string(),
+  dependencyType: WorkspaceDependencyTypeSchema,
+  sourceFile: z.string(),
+  confidence: ConfidenceLevelSchema
+});
+
+export const WorkspaceDiagnosticSchema = z.object({
+  code: z.enum(["duplicate-package-name"]),
+  message: z.string(),
+  packagePaths: z.array(z.string()),
+  sourceFiles: z.array(z.string()),
+  confidence: ConfidenceLevelSchema
+});
+
 export const WorkspacePackageSchema = z.object({
   path: z.string(),
   packageJsonPath: z.string(),
@@ -149,7 +179,9 @@ export const WorkspacePackageSchema = z.object({
   entrypoints: z.array(z.string()).optional(),
   entrypointFacts: z.array(EntrypointCandidateSchema).optional(),
   envVars: z.array(EnvVarSchema).optional(),
-  evidence: z.array(EvidenceRecordSchema).optional()
+  evidence: z.array(EvidenceRecordSchema).optional(),
+  directDependencies: z.array(WorkspacePackageReferenceSchema).optional(),
+  directConsumers: z.array(WorkspacePackageReferenceSchema).optional()
 });
 
 export const WorkspaceInfoSchema = z.object({
@@ -157,6 +189,8 @@ export const WorkspaceInfoSchema = z.object({
   packageGlobs: z.array(z.string()).default([]),
   signals: z.array(z.string()).default([]),
   packages: z.array(WorkspacePackageSchema).optional(),
+  dependencyEdges: z.array(WorkspaceDependencyEdgeSchema).optional(),
+  diagnostics: z.array(WorkspaceDiagnosticSchema).optional(),
   confidence: ConfidenceLevelSchema
 });
 
@@ -205,5 +239,9 @@ export type DemoSignalType = z.infer<typeof DemoSignalTypeSchema>;
 export type DemoSignal = z.infer<typeof DemoSignalSchema>;
 export type AuditSeverity = z.infer<typeof AuditSeveritySchema>;
 export type AuditFinding = z.infer<typeof AuditFindingSchema>;
+export type WorkspacePackageReference = z.infer<typeof WorkspacePackageReferenceSchema>;
+export type WorkspaceDependencyType = z.infer<typeof WorkspaceDependencyTypeSchema>;
+export type WorkspaceDependencyEdge = z.infer<typeof WorkspaceDependencyEdgeSchema>;
+export type WorkspaceDiagnostic = z.infer<typeof WorkspaceDiagnosticSchema>;
 export type WorkspacePackage = z.infer<typeof WorkspacePackageSchema>;
 export type WorkspaceInfo = z.infer<typeof WorkspaceInfoSchema>;

@@ -14,6 +14,7 @@ import { detectScripts } from "../detect/detectScripts.js";
 import { detectWorkspace } from "../detect/detectWorkspace.js";
 import { deriveFacts } from "../facts/deriveFacts.js";
 import { analyzeWorkspacePackages } from "../workspaces/analyzeWorkspacePackages.js";
+import { deriveWorkspaceDependencyGraph } from "../workspaces/deriveWorkspaceDependencyGraph.js";
 import { exportAgentsMd } from "../export/exportAgentsMd.js";
 import { exportCourseProjectReport } from "../export/exportCourseProjectReport.js";
 import { exportDemoScreenshotPlan } from "../export/exportDemoScreenshotPlan.js";
@@ -94,6 +95,7 @@ export async function analyzeLocalRepo(rootDir: string): Promise<RepoAnalysis> {
   ]);
 
   await analyzeWorkspacePackages(rootDir, analysis, sourceFiles);
+  await deriveWorkspaceDependencyGraph(rootDir, analysis);
   deriveFacts(analysis);
 
   return analysis;
