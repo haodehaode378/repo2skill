@@ -2,7 +2,7 @@
 
 Date: 2026-07-22
 
-This record tracks the concrete repo2skill v0.4.0 release checks. Final package, coverage, dependency, encoding, Git, and CI values are refreshed by the release preparation commit after all documentation and version metadata are complete.
+This record contains the concrete local repo2skill v0.4.0 release checks. GitHub CI is verified against the pushed release commit and reported with its run URL in the release handoff.
 
 ## Deterministic Semantic Evaluation
 
@@ -11,7 +11,7 @@ npm run evaluate -- ./evaluations/v0.3-local.json --out ./evaluation-out/v0.3
 npm run evaluate -- ./evaluations/v0.4-local.json --out ./evaluation-out/v0.4
 ```
 
-Observed pre-release result:
+Observed final result:
 
 - v0.3: 5 cases succeeded, 0 failed.
 - v0.4: 9 cases succeeded, 0 failed.
@@ -44,11 +44,48 @@ The result was supplementary and did not overwrite a committed baseline. The clo
 
 ## Final Gate
 
-The final release audit records:
+```bash
+npm run format
+npm run release:check
+```
 
-- `npm run release:check` test and coverage totals;
-- focused CLI, self-analysis, and self-audit results;
-- `npm pack --dry-run --json` file list and sizes;
-- `npm audit` result;
-- UTF-8/mojibake and `git diff --check` results;
-- local/remote SHA equality and final GitHub CI URL.
+Result:
+
+- Format, lint, typecheck, and build passed.
+- Test files: 39 passed.
+- Tests: 166 passed.
+- Coverage: 94.19% statements, 94.19% lines, 85.05% branches, 99.18% functions.
+- All four coverage percentages exceed the recorded v0.3 baseline; configured thresholds were not reduced.
+
+## Self-Hosted and Focused CLI Checks
+
+```bash
+npm run dev -- . --summary-only
+npm run dev -- . --audit-only
+npm run dev -- ./tests/fixtures/workspaces/package-facts --package @fixture/core --summary-only
+```
+
+Result:
+
+- Self-analysis detected npm, CLI project type, `dist/index.js`, and `src/cli/index.ts`.
+- Self-audit reported two review hints: the medium `prepack` lifecycle hook and the low GitHub Actions workflow.
+- Focused analysis selected `@fixture/core` at `packages/core` and retained only `CORE_TOKEN` from its package context.
+
+## Package and Dependency Checks
+
+```bash
+npm pack --dry-run --json
+npm audit
+```
+
+Result:
+
+- Package: `@haodehaode378/repo2skill@0.4.0`.
+- Files: 4 (`LICENSE`, `README.md`, `dist/index.js`, `package.json`).
+- Tarball size: 41,032 bytes; unpacked size: 181,514 bytes.
+- No source, tests, fixtures, caches, evaluation output, benchmark output, local paths, or empty declaration file were packed.
+- npm audit: one low-severity esbuild development-tool advisory; no moderate, high, or critical finding.
+
+## Encoding and Diff Checks
+
+The UTF-8/mojibake scanner reported no suspicious patterns. `git diff --check` passed. `REPO_ROAST_REPORT.md` remained unmodified and uncommitted.

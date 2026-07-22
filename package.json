@@ -1,6 +1,6 @@
 {
   "name": "@haodehaode378/repo2skill",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "description": "Compile evidence-backed onboarding context for Node.js and TypeScript repositories.",
   "type": "module",
   "homepage": "https://github.com/haodehaode378/repo2skill#readme",
