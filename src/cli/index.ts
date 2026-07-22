@@ -14,6 +14,7 @@ import {
   type VisualMode
 } from "../core/run/runLocalAnalysis.js";
 import type { VisualAssetKind } from "../schemas/visual.js";
+import { focusWorkspacePackage } from "../core/workspaces/focusWorkspacePackage.js";
 import {
   parseOutputFormat,
   parseOutputProfile,
@@ -43,6 +44,10 @@ program
   )
   .option("--issue-file <file>", "Issue markdown/text file for the issue-to-pr profile")
   .option("--branch <branch>", "Git branch to clone for GitHub repository inputs")
+  .option(
+    "--package <name-or-path>",
+    "Focus output on one workspace package and its direct neighbors"
+  )
   .option("--summary-only", "Analyze and print the summary without writing output files")
   .option("--audit-only", "Run trust and safety checks without generating artifacts")
   .option("--visual", "Generate an evidence-backed visual prompt asset pack")
@@ -64,6 +69,7 @@ program
         profile: OutputProfile;
         issueFile?: string;
         branch?: string;
+        package?: string;
         summaryOnly?: boolean;
         auditOnly?: boolean;
         visual?: boolean;
@@ -86,7 +92,10 @@ program
           return;
         }
 
-        const analysis = await analyzeLocalRepo(materialized.rootDir);
+        const completeAnalysis = await analyzeLocalRepo(materialized.rootDir);
+        const analysis = options.package
+          ? focusWorkspacePackage(completeAnalysis, options.package)
+          : completeAnalysis;
         const issueText = options.issueFile
           ? await fs.readFile(options.issueFile, "utf8")
           : undefined;

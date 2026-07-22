@@ -205,6 +205,7 @@ export const WorkspaceInfoSchema = z.object({
   packages: z.array(WorkspacePackageSchema).optional(),
   dependencyEdges: z.array(WorkspaceDependencyEdgeSchema).optional(),
   diagnostics: z.array(WorkspaceDiagnosticSchema).optional(),
+  focusedPackage: WorkspacePackageReferenceSchema.optional(),
   confidence: ConfidenceLevelSchema
 });
 

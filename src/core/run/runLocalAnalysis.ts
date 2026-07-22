@@ -214,6 +214,13 @@ export function renderAnalysisSummary(
     lines.push(`Project type: ${analysis.detected.projectType}`);
   }
 
+  if (analysis.detected.workspace?.focusedPackage) {
+    const focusedPackage = analysis.detected.workspace.focusedPackage;
+    lines.push(
+      `Focused package: ${focusedPackage.name ? `${focusedPackage.name} (${focusedPackage.path})` : focusedPackage.path}`
+    );
+  }
+
   if (analysis.detected.scripts.length > 0) {
     lines.push(`Scripts: ${analysis.detected.scripts.map((script) => script.name).join(", ")}`);
   }
