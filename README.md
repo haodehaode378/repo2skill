@@ -1,34 +1,21 @@
 # repo2skill
 
-> Evidence-backed onboarding compiler for Node.js/TypeScript repositories: commands, source entrypoints, security audit, quickstarts, and SKILL.md.
+> Deterministic preflight context compiler for Node.js/TypeScript repositories and monorepos.
 >
-> 面向 Node.js/TypeScript 仓库、以真实证据为基础的 coding agent onboarding 编译器。
+> 面向 Node.js/TypeScript 仓库与 monorepo 的确定性开工检查与上下文编译器。
 
 ![npm caution](https://img.shields.io/badge/npm-name%20caution-f59e0b?style=flat-square)
 [![TypeScript](https://img.shields.io/badge/TypeScript-ready-3178c6?style=flat-square)](https://www.typescriptlang.org/)
 [![License: MIT](https://img.shields.io/badge/license-MIT-111827?style=flat-square)](./LICENSE)
 
-**Language / 语言:** [简体中文](#简体中文) | [English](#english)
+**Current version / 当前版本：`v0.4.0`**
 
-`repo2skill` turns a local or public GitHub Node.js/TypeScript repository into agent-ready onboarding context. It is built for coding agents that need grounded instructions, not a loose project summary.
+**Language / 语言：** [简体中文](#简体中文) | [English](#english)
 
-`repo2skill` 会把本地或公开 GitHub 上的 Node.js/TypeScript 仓库转换成 coding agent 可直接使用的 onboarding 上下文。它不是泛泛总结项目，而是基于真实证据生成可执行、可审查的 agent 工作材料。
+`repo2skill` reads a local repository or a public GitHub repository and compiles evidence-backed files for coding agents. It detects real commands, entrypoints, configuration, workspace packages, package relationships, and validation scope without running target-repository scripts.
 
-```bash
-git clone https://github.com/haodehaode378/repo2skill.git
-cd repo2skill
-npm install
-npm run dev -- https://github.com/tinylibs/tinybench --no-cache --out ./out-tinybench
-```
-
-Package usage after npm publication:
-
-```bash
-npx @haodehaode378/repo2skill https://github.com/tinylibs/tinybench --out ./out-tinybench
-```
-
-```txt
-Input repository
+```text
+Repository evidence
   -> repo2skill.json
   -> project-map.md
   -> AGENTS.md
@@ -38,57 +25,62 @@ Input repository
   -> report.html
 ```
 
-[View tinybench demo](./docs/demo-tinybench.md) | [Before / After](./docs/before-after.md) | [Competitive positioning](./docs/competitive-positioning.md) | [Security model](./docs/security-model.md) | [Release checklist](./docs/release-checklist.md) | [Collaboration profiles](./docs/collaboration-profiles.md)
-
-<p align="center">
-  <img src="./img/readme-hero-v2.png" alt="repo2skill turns repository evidence into agent maintainer context" />
-</p>
-
-| For agents                      | For maintainers                       | For releases                           |
-| ------------------------------- | ------------------------------------- | -------------------------------------- |
-| Evidence-backed edit guidance   | Reviewable generated onboarding files | Repeatable quality and audit context   |
-| Commands and validation ladders | Project maps and quickstarts          | JSON, Markdown, and HTML report output |
+[Security model](./docs/security-model.md) | [Evaluation](./docs/evaluation.md) | [Benchmark plan](./docs/benchmark-plan.md) | [v0.4 release notes](./docs/release-v0.4.md)
 
 ---
 
 ## 简体中文
 
-`repo2skill` 面向 Node.js/TypeScript 项目，分析本地仓库或公开 GitHub 仓库，把真实信号转换成 agent-ready onboarding 产物：命令、入口文件、关键配置、重要目录、环境变量线索、验证步骤、`AGENTS.md`、`SKILL.md`、quickstart 和结构化 JSON 报告。
+### 它解决什么问题
 
-### 为什么存在
+通用仓库摘要通常只回答“这个项目大概是什么”。`repo2skill` 更关注 coding agent 开工前真正需要的确定性事实：从哪里开始读代码、有哪些真实脚本、修改某个 workspace package 后该验证什么、哪些直接消费者可能受影响。
 
-很多 repo summary 只能告诉 agent“这个项目大概是什么”。`repo2skill` 更关心“agent 修改代码前应该看什么、完成前应该跑什么”。
+所有 JSON、Markdown 和 HTML 产物都消费同一个结构化分析对象。没有证据的内容会被省略，不会用泛化建议填充。
 
-- 生成有证据支撑的 `AGENTS.md`，说明修改前导航和完成前验证。
-- 生成仓库专属 `SKILL.md`，保留源码入口、发布入口、配置文件和验证命令。
-- 所有 JSON、Markdown、HTML 产物来自同一个分析对象，减少文档漂移。
-- 通过 benchmark 观察结构变化，并用 semantic evaluation 验证具体入口、命令、配置和导航目录。
+### v0.4 新增内容
 
-### 适合什么场景
+v0.4.0 的主题是 **Monorepo Intelligence / Workspace Package Operational Graph**：
 
-- 你要把一个陌生仓库交给 Codex、Claude Code、Cursor 或其他 coding agent。
-- 你想在 agent 修改代码前，先给它明确的“先看哪里、跑什么检查、哪些内容不应猜测”。
-- 你维护开源项目，希望为贡献者和 AI 工具提供可审查的 onboarding 文件。
-- 你需要一份可提交到 PR 或 release notes 的仓库分析报告，而不是一次性的聊天总结。
+- 从 `pnpm-workspace.yaml`、`package.json` workspaces 数组或对象以及常规 `apps/*`、`packages/*` 目录发现真实 package；
+- 支持 glob 排除、Windows 路径规范化、稳定排序，并忽略生成目录、缓存、缺少 `package.json` 的目录；
+- 为每个 package 收集 metadata、脚本、命令、源码入口、发布产物入口、配置、重要目录、项目类型和安全的环境变量线索；
+- 建立仅包含 workspace 内部包的直接 `dependency`、`devDependency`、`peerDependency`、`optionalDependency` 边；
+- 计算每个包的直接依赖和直接消费者；
+- 生成 pnpm、npm、Yarn 感知的包级命令；无法可靠生成 filter 时，保留 package `cwd` 并在三平台 quickstart 中安全渲染；
+- 新增 `--package <name-or-path>` 聚焦分析；
+- 扩展全部导出器、semantic evaluation 和 benchmark 指标。
 
-### 它如何保持可信
+### Workspace 示例
 
-`repo2skill` 不运行目标仓库的 package scripts。它读取文件、检测信号，并把每个结论尽量绑定到真实来源：
+假设仓库包含：
 
-| 信号                      | 示例来源                                                         |
-| ------------------------- | ---------------------------------------------------------------- |
-| 包管理器                  | `pnpm-lock.yaml`、`package-lock.json`、`yarn.lock`、`bun.lockb`  |
-| 验证命令                  | `package.json` scripts                                           |
-| 入口文件                  | `package.json` `main` / `bin`、`src/main.ts`、`src/cli/index.ts` |
-| 配置文件                  | `tsconfig.json`、`vite.config.ts`、`.github/workflows/*.yml`     |
-| 环境变量                  | `.env.example`、`.env.local.example`、`process.env.*`            |
-| workspace / monorepo 信号 | `pnpm-workspace.yaml`、`package.json workspaces`、`turbo.json`   |
+```text
+apps/web          @acme/web
+packages/core     @acme/core
+packages/ui       @acme/ui
+```
 
-如果没有证据，相关段落会被省略，而不是用通用建议填充。
+且 `@acme/web` 依赖 `@acme/ui`，`@acme/ui` 依赖 `@acme/core`，生成的 package operational graph 会保留明确的依赖类型和来源：
+
+```mermaid
+graph LR
+  WEB["@acme/web"] -->|dependency| UI["@acme/ui"]
+  UI -->|peerDependency| CORE["@acme/core"]
+```
+
+对应的包级命令来自各包自己的 `package.json` scripts，例如：
+
+```bash
+pnpm --filter @acme/core test
+npm run build --workspace @acme/core
+yarn workspace @acme/core typecheck
+```
+
+这些命令只会生成和展示，`repo2skill` 不会执行目标仓库脚本。
 
 ### 快速开始
 
-可以从源码运行，也可以使用 scoped npm 包。公开 npm registry 上的非 scoped `repo2skill` 包名可能被其他项目占用；本项目使用 `@haodehaode378/repo2skill` 作为发布包名，CLI bin 仍为 `repo2skill`。
+从源码运行：
 
 ```bash
 git clone https://github.com/haodehaode378/repo2skill.git
@@ -103,222 +95,133 @@ npm run dev -- ./tests/fixtures/analysis-target --out ./out
 npm run dev -- https://github.com/tinylibs/tinybench --no-cache --out ./out-tinybench
 ```
 
-只打印摘要，不写入文件：
+发布后使用 scoped npm 包：
 
 ```bash
-npm run dev -- ./tests/fixtures/analysis-target --summary-only
+npx @haodehaode378/repo2skill . --out ./out
 ```
 
-生成产物前先运行 audit-only 雏形：
+### 聚焦单个 workspace package
+
+按包名：
 
 ```bash
-npm run dev -- https://github.com/tinylibs/tinybench --no-cache --audit-only
+npm run dev -- . --package @acme/core --out ./out-core
 ```
 
-### npm 状态
-
-当前 `package.json` 声明：
-
-- package name: `@haodehaode378/repo2skill`;
-- CLI bin: `repo2skill -> dist/index.js`;
-- publish files: `dist`, `README.md`, `LICENSE`。
-
-但公开 npm 名称 `repo2skill` 可能被其他包占用。因此本项目使用 scoped package，命令行 bin 保留为 `repo2skill`：
+按仓库相对路径：
 
 ```bash
-npx @haodehaode378/repo2skill https://github.com/tinylibs/tinybench --out ./out-tinybench
+npm run dev -- . --package packages/core --summary-only
+```
+
+聚焦输出保留根仓库必要信息、当前包、它的直接依赖和直接消费者，并过滤无关 package 的入口、命令、配置和环境变量线索。找不到包、名称重复或在单包仓库使用 `--package` 时会返回明确错误。
+
+### 常用模式
+
+```bash
+# 只打印摘要，不写文件
+npm run dev -- . --summary-only
+
+# 只做只读风险提示，不写产物
+npm run dev -- https://github.com/example/repo --no-cache --audit-only
+
+# 选择输出格式
+npm run dev -- . --format json --out ./out-json
+npm run dev -- . --format md --out ./out-md
+npm run dev -- . --format all --out ./out-all
 ```
 
 ### 生成产物
 
-| 文件                     | 用途                                     |
-| ------------------------ | ---------------------------------------- |
-| `repo2skill.json`        | 供工具链继续处理的结构化分析结果         |
-| `project-map.md`         | 简洁仓库地图                             |
-| `AGENTS.md`              | 给 coding agent 的仓库级工作说明         |
-| `SKILL.md`               | 可复制到 agent 会话中的仓库专属 skill    |
-| `maintenance-profile.md` | agent 接手维护时需要的项目画像和边界     |
-| `quickstart.windows.md`  | Windows 快速开始                         |
-| `quickstart.macos.md`    | macOS 快速开始                           |
-| `quickstart.linux.md`    | Linux 快速开始                           |
-| `report.html`            | 使用 `--format all` 时生成的 HTML report |
+| 文件                     | v0.4 中的用途                                              |
+| ------------------------ | ---------------------------------------------------------- |
+| `repo2skill.json`        | 统一结构化事实、workspace packages、内部边、命令和聚焦状态 |
+| `project-map.md`         | package 表、入口、命令、消费者和小型 Mermaid graph         |
+| `AGENTS.md`              | 修改前阅读位置、根级与包级验证、直接消费者提示             |
+| `SKILL.md`               | package references、入口角色、scoped commands 和聚焦上下文 |
+| `maintenance-profile.md` | package inventory 与按直接消费者数量计算的影响提示         |
+| `quickstart.*.md`        | Windows、macOS、Linux 对应的根级和包级命令                 |
+| `report.html`            | 无运行时网络依赖的自包含 workspace 报告                    |
 
-导出格式：
-
-| 参数            | 生成内容                                                                                     |
-| --------------- | -------------------------------------------------------------------------------------------- |
-| `--format json` | 只生成 `repo2skill.json`                                                                     |
-| `--format md`   | 生成 `project-map.md`、`AGENTS.md`、`SKILL.md`、`maintenance-profile.md` 和三平台 quickstart |
-| `--format all`  | 生成全部 Markdown、JSON 和 `report.html`                                                     |
-
-`AGENTS.md` 会给出清晰的修改前导航和验证指令：
-
-```md
-## Before Changing Code
-
-- Review relevant config first: `package.json`, `vitest.config.ts`.
-- Start from evidenced directories: `src`.
-
-## Validation Before Finishing
-
-- Run only the evidenced validation commands that are relevant to your change.
-- Run `pnpm test` for the `test` command.
-```
-
-`SKILL.md` 会保留证据来源，包括源码入口和发布产物入口的区别：
-
-```md
-## References
-
-- Config: `vitest.config.ts` (test, high)
-- Entrypoint: `./dist/index.js` (package-output, high, main)
-- Entrypoint: `src/index.ts` (source, medium)
-- Directory: `src` (source, medium)
-```
-
-完整示例见 [examples/analysis-target](./examples/analysis-target)。
-
-### 源码入口与发布入口
-
-`package.json` 中的 `main`、`module`、`browser` 和 `bin` 描述包如何被加载或执行；它们可能指向 `dist` 等构建产物。`repo2skill` 会保留这些发布证据，但不会把 `dist`、`build`、`out` 或 `coverage` 提升为源码修改起点。检测到 `src/index.ts`、`src/main.ts`、`src/cli/index.ts` 等源码入口时，生成的 agent 导航会优先指向源码目录。
-
-### 推荐工作流
+### 确定性评测与 benchmark
 
 ```bash
-# 1. 先查看风险提示，不生成产物
-npm run dev -- https://github.com/tinylibs/tinybench --no-cache --audit-only
+# v0.3 单包与入口回归
+npm run evaluate -- ./evaluations/v0.3-local.json --out ./evaluation-out/v0.3
 
-# 2. 生成 agent onboarding 产物
-npm run dev -- https://github.com/tinylibs/tinybench --no-cache --out ./out-tinybench
+# v0.4 monorepo 语义评测
+npm run evaluate -- ./evaluations/v0.4-local.json --out ./evaluation-out/v0.4
 
-# 3. 先人工审阅，再交给 agent 使用
-ls ./out-tinybench
+# 公开 monorepo 补充 smoke
+npm run benchmark -- ./benchmarks/public-monorepo-smoke.json --cache-dir ./repo2skill-cache --out ./benchmark-smoke-out
 ```
 
-把 `AGENTS.md` 放在仓库根目录可以给 coding agent 提供项目级约束；把 `SKILL.md` 复制到支持 skill 的 agent 环境中，可以把同一套证据复用到后续会话。
+v0.4 semantic assertions 可以验证具体 package、路径、内部依赖、包级命令、入口、重要目录和 focused package。公开 benchmark 只作为补充信号；网络、checkout 或上游变化不会替代本地确定性评测。
 
-### 当前可检测内容
+### 与 Understand-Anything 等知识图谱工具的区别
 
-- 从 lockfile 检测包管理器。
-- 从框架配置、依赖和 CLI 信号检测项目类型。
-- 从 `package.json` scripts 提取命令，并渲染为 `pnpm test` 或 `npm run build` 等可执行命令。
-- 识别 `source`、`package-output`、`cli`、`generated` 等入口角色。
-- 检测 `pnpm-workspace.yaml`、`package.json workspaces`、`turbo.json`、`nx.json` 等 workspace 信号。
-- 根据源码入口和 workspace globs 推导重要目录，不把 `dist` 当作优先导航目录。
-- 检测 `tsconfig`、Vite、Next.js、ESLint、Prettier、Vitest、GitHub Actions、Dockerfile 等关键配置。
-- 从 `.env.example`、`.env.local.example` 和 `process.env.*` 用法提取环境变量线索。
-- `--audit-only` 可提示 lifecycle scripts、workflows、env files、AI instruction files 和疑似 secrets。
+`repo2skill` 是 **deterministic preflight compiler**：它从明确文件证据生成 coding agent 的开工检查、验证命令和 package-level operational graph。
 
-### 常用命令
+它不实现函数调用图、symbol graph、LLM 架构摘要、向量搜索、Dashboard 或 Guided Tour。需要深度知识图谱时，可以先用 `repo2skill` 生成可审计的开工上下文，再与 Understand-Anything 组合使用；两者定位互补，而不是互相替代。
 
-分析指定 GitHub 分支：
+### 信任边界与明确限制
 
-```bash
-npm run dev -- https://github.com/octocat/Hello-World --branch master --out ./out-github
-```
+- 只深度支持 Node.js/TypeScript 仓库；
+- 只支持本地仓库和公开 GitHub 仓库，不含私有仓库鉴权；
+- 不运行目标仓库的 install、build、test、deploy、publish、migration 或 lifecycle scripts；
+- 不自动安装目标仓库依赖；
+- 不读取真实 `.env` secret 内容，只收集允许的变量名和安全元数据；
+- 不提供完整 sandbox、malware detection 或依赖漏洞扫描；
+- v0.4 的 graph 只到 package 直接关系，不包含函数、类、symbol、import 或 call-level graph；
+- 生成的 `AGENTS.md`、`SKILL.md` 和命令仍需人工审阅。
 
-刷新缓存后分析：
-
-```bash
-npm run dev -- https://github.com/octocat/Hello-World --refresh --out ./out-github
-```
-
-使用临时 clone，分析后删除：
-
-```bash
-npm run dev -- https://github.com/octocat/Hello-World --no-cache --out ./out-github
-```
-
-运行 benchmark manifest：
-
-```bash
-npm run benchmark -- ./benchmarks/public-node-ts-smoke.json --cache-dir ./repo2skill-cache --out ./benchmark-smoke-out
-```
-
-先运行无需网络的语义评估：
-
-```bash
-npm run evaluate -- ./evaluations/v0.3-local.json --out ./evaluation-out
-```
-
-再将 tinybench 作为公开仓库补充评估：
-
-```bash
-npm run evaluate -- ./evaluations/tinybench.json --cache-dir ./repo2skill-cache --out ./evaluation-tinybench-out
-```
-
-### 开发验证
-
-```bash
-npm run release:check
-```
-
-发布 PR 前可运行 `npm run format`。
-
-### 当前范围
-
-已支持：
-
-- 本地仓库和公开 GitHub 仓库。
-- 以 Node.js / TypeScript 为主的项目。
-- `json`、`md`、`all` 导出模式。
-- GitHub clone 缓存、`--refresh`、`--no-cache`。
-- smoke/full benchmark baseline 和 regression comparison。
-- workspace-aware 根目录导航；不会递归完成每个子包的完整语义分析。
-- 本地 semantic evaluation，验证具体事实而不只比较数量。
-
-暂不支持：
-
-- 私有仓库鉴权。
-- 广泛多语言仓库的深度语义分析。
-- 针对不可信仓库的完整 sandbox 或 malware detection。
-
-### 信任边界
-
-`repo2skill` 会读取陌生仓库内容，因此生成文件仍应先审阅再交给 agent 当作指令。`--audit-only` 是轻量风险提示，不是完整安全扫描。更多细节见 [Security model](./docs/security-model.md)。
-
-[Back to top](#repo2skill)
+详情见 [安全模型](./docs/security-model.md)。
 
 ---
 
 ## English
 
-`repo2skill` analyzes local or public GitHub Node.js/TypeScript repositories and turns real repository signals into agent-ready onboarding artifacts: commands, source and package entrypoints, key config files, important directories, environment-variable hints, validation steps, `AGENTS.md`, `SKILL.md`, quickstarts, and a structured JSON report.
+### What It Solves
 
-### Why It Exists
+General repository summaries answer “what is this project?” `repo2skill` answers the operational questions a coding agent needs before editing: where source starts, which scripts actually exist, what validates a package, and which direct consumers may be affected.
 
-Most repository summaries tell an agent what a project appears to be. `repo2skill` focuses on what an agent can safely act on:
+Every JSON, Markdown, and HTML exporter consumes the same structured analysis object. Unsupported claims are omitted instead of replaced with generic advice.
 
-- evidence-backed `AGENTS.md` instructions for where to look before editing and what to run before finishing;
-- repository-specific `SKILL.md` references that preserve source files, package entrypoints, config files, and validation commands;
-- repeatable JSON/Markdown/HTML artifacts derived from the same analysis object;
-- count-based benchmarks for structural changes and semantic evaluations for exact repository facts.
+### What’s New in v0.4
 
-### Use Cases
+v0.4.0 introduces **Monorepo Intelligence / Workspace Package Operational Graph**:
 
-- You are handing an unfamiliar repository to Codex, Claude Code, Cursor, or another coding agent.
-- You want the agent to know what to inspect and validate before editing, without inventing workflows.
-- You maintain an open-source project and want reviewable onboarding files for contributors and AI tools.
-- You need a release or PR artifact that documents detected repository facts, not a one-off chat summary.
+- discovers concrete packages from `pnpm-workspace.yaml`, array/object `package.json` workspaces, and conventional `apps/*` or `packages/*` directories;
+- supports glob exclusions, Windows path normalization, stable ordering, and generated/cache boundary rules;
+- collects package metadata, scripts, commands, source and package-output entrypoints, config files, important directories, project type, environment-variable hints, and evidence;
+- derives direct internal `dependency`, `devDependency`, `peerDependency`, and `optionalDependency` edges;
+- records direct dependencies and consumers for every package;
+- renders pnpm, npm, and Yarn-aware scoped commands, with safe package-`cwd` fallbacks in platform quickstarts;
+- adds focused analysis through `--package <name-or-path>`;
+- upgrades every exporter, semantic evaluation, and benchmark metrics.
 
-### How It Stays Grounded
+### Workspace Example
 
-`repo2skill` does not run target repository package scripts. It reads files, detects signals, and ties conclusions back to repository evidence:
+For a workspace containing `@acme/web`, `@acme/ui`, and `@acme/core`, the generated operational graph preserves direct edge type and source evidence:
 
-| Signal                | Example sources                                                  |
-| --------------------- | ---------------------------------------------------------------- |
-| Package manager       | `pnpm-lock.yaml`, `package-lock.json`, `yarn.lock`, `bun.lockb`  |
-| Validation commands   | `package.json` scripts                                           |
-| Entrypoints           | `package.json` `main` / `bin`, `src/main.ts`, `src/cli/index.ts` |
-| Config files          | `tsconfig.json`, `vite.config.ts`, `.github/workflows/*.yml`     |
-| Environment variables | `.env.example`, `.env.local.example`, `process.env.*`            |
-| Workspace / monorepo  | `pnpm-workspace.yaml`, `package.json workspaces`, `turbo.json`   |
+```mermaid
+graph LR
+  WEB["@acme/web"] -->|dependency| UI["@acme/ui"]
+  UI -->|peerDependency| CORE["@acme/core"]
+```
 
-If there is no supporting evidence, the relevant section is omitted instead of filled with generic advice.
+Package commands come only from each package’s own `package.json` scripts:
+
+```bash
+pnpm --filter @acme/core test
+npm run build --workspace @acme/core
+yarn workspace @acme/core typecheck
+```
+
+The commands are generated and displayed; target-repository scripts are never executed.
 
 ### Quick Start
-
-Run from source today. After npm publication, use the scoped package. The unscoped `repo2skill` npm package name may be occupied by another project, so this repo uses `@haodehaode378/repo2skill` as the package identity while keeping the CLI bin name `repo2skill`.
 
 ```bash
 git clone https://github.com/haodehaode378/repo2skill.git
@@ -333,192 +236,81 @@ Analyze a public GitHub repository:
 npm run dev -- https://github.com/tinylibs/tinybench --no-cache --out ./out-tinybench
 ```
 
-Print a summary without writing files:
+After npm publication, use the scoped package identity while the executable remains `repo2skill`:
 
 ```bash
-npm run dev -- ./tests/fixtures/analysis-target --summary-only
+npx @haodehaode378/repo2skill . --out ./out
 ```
 
-Run the audit-only skeleton before generating artifacts:
+### Focus One Workspace Package
+
+Select by package name or repository-relative path:
 
 ```bash
-npm run dev -- https://github.com/tinylibs/tinybench --no-cache --audit-only
+npm run dev -- . --package @acme/core --out ./out-core
+npm run dev -- . --package packages/core --summary-only
 ```
 
-Generate a reviewable visual prompt asset pack without calling an image model:
+Focused output retains required root context, the selected package, its direct dependencies, and its direct consumers. Unrelated package details are filtered. Missing, ambiguous, and non-workspace selections return explicit errors.
+
+### Common Modes
 
 ```bash
-npm run dev -- ./tests/fixtures/analysis-target --out ./out-visual --visual --visual-mode prompts
-```
-
-This writes `visual/visual-brief.json`, `visual/visual-prompts.md`, `visual/asset-manifest.json`, and `visual/visual-review.md`.
-
-After npm publication, run:
-
-```bash
-npx @haodehaode378/repo2skill https://github.com/tinylibs/tinybench --out ./out-tinybench
-```
-
-### npm Status
-
-`package.json` currently declares:
-
-- package name: `@haodehaode378/repo2skill`;
-- CLI bin: `repo2skill -> dist/index.js`;
-- publish files: `dist`, `README.md`, `LICENSE`.
-
-The unscoped npm name `repo2skill` may be occupied by another package, so the package identity is scoped while the executable command remains `repo2skill` after npm publication:
-
-```bash
-npx @haodehaode378/repo2skill https://github.com/tinylibs/tinybench --out ./out-tinybench
+npm run dev -- . --summary-only
+npm run dev -- https://github.com/example/repo --no-cache --audit-only
+npm run dev -- . --format json --out ./out-json
+npm run dev -- . --format md --out ./out-md
+npm run dev -- . --format all --out ./out-all
 ```
 
 ### Generated Artifacts
 
-| File                     | Purpose                                                   |
-| ------------------------ | --------------------------------------------------------- |
-| `repo2skill.json`        | Structured analysis for downstream tooling                |
-| `project-map.md`         | Concise repository map                                    |
-| `AGENTS.md`              | Repository-level instructions for coding agents           |
-| `SKILL.md`               | Repository skill that can be copied into an agent session |
-| `maintenance-profile.md` | Maintainer handoff profile for agents                     |
-| `quickstart.windows.md`  | Windows quickstart                                        |
-| `quickstart.macos.md`    | macOS quickstart                                          |
-| `quickstart.linux.md`    | Linux quickstart                                          |
-| `report.html`            | HTML report generated with `--format all`                 |
+| File                     | v0.4 purpose                                                             |
+| ------------------------ | ------------------------------------------------------------------------ |
+| `repo2skill.json`        | Unified facts, packages, internal edges, commands, and focus state       |
+| `project-map.md`         | Package table, entrypoints, commands, consumers, and small Mermaid graph |
+| `AGENTS.md`              | Before-edit references, root/package validation, and consumer checks     |
+| `SKILL.md`               | Package references, entrypoint roles, scoped commands, and focus context |
+| `maintenance-profile.md` | Package inventory and impact facts based on direct-consumer count        |
+| `quickstart.*.md`        | Root and package commands for Windows, macOS, and Linux                  |
+| `report.html`            | Self-contained workspace report with no runtime network dependency       |
 
-Export formats:
-
-| Flag            | Generated files                                                                         |
-| --------------- | --------------------------------------------------------------------------------------- |
-| `--format json` | `repo2skill.json` only                                                                  |
-| `--format md`   | `project-map.md`, `AGENTS.md`, `SKILL.md`, `maintenance-profile.md`, and OS quickstarts |
-| `--format all`  | all Markdown artifacts, JSON, and `report.html`                                         |
-
-`AGENTS.md` gives clear pre-change navigation and validation guidance:
-
-```md
-## Before Changing Code
-
-- Review relevant config first: `package.json`, `vitest.config.ts`.
-- Start from evidenced directories: `src`.
-
-## Validation Before Finishing
-
-- Run only the evidenced validation commands that are relevant to your change.
-- Run `pnpm test` for the `test` command.
-```
-
-`SKILL.md` preserves evidence, including the difference between source entrypoints and package output entrypoints:
-
-```md
-## References
-
-- Config: `vitest.config.ts` (test, high)
-- Entrypoint: `./dist/index.js` (package-output, high, main)
-- Entrypoint: `src/index.ts` (source, medium)
-- Directory: `src` (source, medium)
-```
-
-See [examples/analysis-target](./examples/analysis-target) for committed sample output.
-
-### Source vs. Package Entrypoints
-
-`main`, `module`, `browser`, and `bin` describe how a package is loaded or executed, and may point to build output under `dist`. `repo2skill` preserves that package evidence without promoting `dist`, `build`, `out`, or `coverage` as source navigation. When source conventions such as `src/index.ts`, `src/main.ts`, or `src/cli/index.ts` are present, generated agent guidance prioritizes those source directories.
-
-### Recommended Workflow
+### Deterministic Evaluation and Benchmark
 
 ```bash
-# 1. Inspect lightweight risk hints without generating artifacts
-npm run dev -- https://github.com/tinylibs/tinybench --no-cache --audit-only
-
-# 2. Generate agent onboarding artifacts
-npm run dev -- https://github.com/tinylibs/tinybench --no-cache --out ./out-tinybench
-
-# 3. Review before handing the artifacts to an agent
-ls ./out-tinybench
+npm run evaluate -- ./evaluations/v0.3-local.json --out ./evaluation-out/v0.3
+npm run evaluate -- ./evaluations/v0.4-local.json --out ./evaluation-out/v0.4
+npm run benchmark -- ./benchmarks/public-monorepo-smoke.json --cache-dir ./repo2skill-cache --out ./benchmark-smoke-out
 ```
 
-Put `AGENTS.md` at a repository root to provide project-level constraints for coding agents. Copy `SKILL.md` into a skill-capable agent environment when you want to reuse the same evidence-backed context across sessions.
+v0.4 semantic assertions validate exact packages, paths, internal edges, package commands, entrypoints, important directories, and focused-package state. Public benchmarks are supplementary: network, checkout, and upstream drift do not replace deterministic local evaluation.
 
-### What It Detects Today
+### Difference from General Knowledge-Graph Tools
 
-- Package manager from lockfiles.
-- Project type from framework config, dependencies, and CLI signals.
-- Commands from `package.json` scripts, rendered as executable commands such as `pnpm test` or `npm run build`.
-- Entrypoints with roles such as `source`, `package-output`, `cli`, and `generated`.
-- Workspace signals such as `pnpm-workspace.yaml`, `package.json workspaces`, `turbo.json`, and `nx.json`.
-- Important directories from source entrypoints and workspace globs, without treating `dist` as a priority navigation target.
-- Key config files such as `tsconfig`, Vite, Next.js, ESLint, Prettier, Vitest, GitHub Actions, and Dockerfile.
-- Environment variables from `.env.example`, `.env.local.example`, and `process.env.*` usage.
-- Audit-only hints for lifecycle scripts, workflows, env files, AI instruction files, and suspected secrets.
+`repo2skill` is a **deterministic preflight compiler**. It turns explicit repository evidence into coding-agent checks, validation commands, and a package-level operational graph.
 
-### Common Commands
+It does not build function-call or symbol graphs, use an LLM for architecture summaries, provide vector search, or ship a dashboard or guided tour. For deep knowledge exploration, use it alongside Understand-Anything: `repo2skill` supplies reviewable preflight facts, while a knowledge-graph tool can provide broader exploration.
 
-Analyze a specific GitHub branch:
+### Trust Boundaries and Explicit Limits
 
-```bash
-npm run dev -- https://github.com/octocat/Hello-World --branch master --out ./out-github
-```
+- Deep support is limited to Node.js/TypeScript repositories.
+- Inputs are local repositories or public GitHub repositories; private authentication is not implemented.
+- Target install, build, test, deploy, publish, migration, and lifecycle scripts are never run.
+- Target dependencies are never installed automatically.
+- Real `.env` secret contents are not read; only allowed names and safe metadata are collected.
+- This is not a complete sandbox, malware detector, or dependency vulnerability scanner.
+- v0.4 stops at direct package relationships; there is no function, class, symbol, import, or call-level graph.
+- Generated agent instructions and command candidates still require human review.
 
-Refresh the cache before analysis:
+See the [security model](./docs/security-model.md) for details.
 
-```bash
-npm run dev -- https://github.com/octocat/Hello-World --refresh --out ./out-github
-```
-
-Use a temporary clone that is deleted after analysis:
+### Development and Release Checks
 
 ```bash
-npm run dev -- https://github.com/octocat/Hello-World --no-cache --out ./out-github
-```
-
-Run the benchmark manifest:
-
-```bash
-npm run benchmark -- ./benchmarks/public-node-ts-smoke.json --cache-dir ./repo2skill-cache --out ./benchmark-smoke-out
-```
-
-Run the deterministic local semantic evaluation first:
-
-```bash
-npm run evaluate -- ./evaluations/v0.3-local.json --out ./evaluation-out
-```
-
-Use tinybench as a supplementary public-repository evaluation:
-
-```bash
-npm run evaluate -- ./evaluations/tinybench.json --cache-dir ./repo2skill-cache --out ./evaluation-tinybench-out
-```
-
-### Development
-
-```bash
+npm run format
 npm run release:check
+npm pack --dry-run --json
+npm audit
 ```
 
-Use `npm run format` before opening a release PR.
-
-### Current Scope
-
-Supported now:
-
-- Local repositories and public GitHub repositories.
-- Node.js / TypeScript-oriented projects.
-- `json`, `md`, and `all` export modes.
-- GitHub clone cache, `--refresh`, and `--no-cache`.
-- Smoke/full benchmark baselines and regression comparison.
-- Workspace-aware root navigation, not complete per-package semantic analysis.
-- Local semantic evaluation of exact facts rather than counts alone.
-
-Not implemented yet:
-
-- Private repository authentication.
-- Deep semantic analysis for broad multi-language repositories.
-- Full sandboxing or malware detection for untrusted repositories.
-
-### Trust Boundary
-
-`repo2skill` reads unfamiliar repository content, so generated files should still be reviewed before they are treated as agent instructions. `--audit-only` is a lightweight risk hint, not a complete security scanner. See the [Security model](./docs/security-model.md) for details.
-
-[Back to top](#repo2skill)
+The npm package identity is `@haodehaode378/repo2skill`; `repo2skill` remains the CLI bin. See [CONTRIBUTING.md](./CONTRIBUTING.md) and the [release checklist](./docs/release-checklist.md).

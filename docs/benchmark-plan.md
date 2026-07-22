@@ -4,6 +4,7 @@
 
 - a main benchmark manifest at [`benchmarks/public-node-ts.json`](../benchmarks/public-node-ts.json)
 - a smaller smoke manifest at [`benchmarks/public-node-ts-smoke.json`](../benchmarks/public-node-ts-smoke.json)
+- a one-repository monorepo smoke manifest at [`benchmarks/public-monorepo-smoke.json`](../benchmarks/public-monorepo-smoke.json)
 - a runnable benchmark CLI via `npm run benchmark -- <manifest> --out <dir>`
 - committed baseline summaries under [`benchmarks/baselines`](../benchmarks/baselines)
 - regression comparison via `--compare`
@@ -41,6 +42,10 @@ Regression fields:
 - `configFileCount`
 - `entrypointCount`
 - `envVarCount`
+- `workspacePackageCount`
+- `internalDependencyEdgeCount`
+- `packageCommandCount`
+- `focusedPackageSuccess` when a benchmark repo requests `package`
 
 Next steps:
 
@@ -54,6 +59,15 @@ Use the local semantic manifest before the public benchmark:
 
 ```bash
 npm run evaluate -- ./evaluations/v0.3-local.json --out ./evaluation-out
+npm run evaluate -- ./evaluations/v0.4-local.json --out ./evaluation-out/v0.4
 ```
 
 This asserts exact entrypoints, commands, config files, and allowed navigation directories. Artifact `includes` and `excludes` then verify that the structured facts survive rendering. The semantic suite lives in evaluation rather than duplicating the same assertion engine in benchmark code.
+
+The v0.4 public monorepo smoke is supplementary:
+
+```bash
+npm run benchmark -- ./benchmarks/public-monorepo-smoke.json --cache-dir <outside-repo-cache> --out ./benchmark-smoke-out
+```
+
+Do not overwrite a committed baseline after network, checkout, or upstream failures. Record the failure class and keep deterministic local evaluation as the correctness gate.

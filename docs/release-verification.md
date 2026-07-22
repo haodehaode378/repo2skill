@@ -1,92 +1,54 @@
-# v0.3 Release Verification
+# v0.4 Release Verification
 
 Date: 2026-07-22
 
-This file records the concrete checks run for repo2skill v0.3.0. Deterministic local gates passed. The public smoke benchmark also exposed one Windows checkout limitation and live upstream drift, recorded below without replacing the committed baseline.
-
-## Unified Local Quality Gate
-
-```bash
-npm run release:check
-```
-
-Result:
-
-- Formatting, lint, and type checking: passed.
-- Test files: 34 passed.
-- Tests: 135 passed.
-- Coverage: 92.90% statements, 92.90% lines, 84.49% branches, 98.45% functions.
-- Coverage thresholds: passed.
-- Pure CLI build: passed; `dist/index.js` was generated without an empty declaration file.
-
-## Self-Hosted Analysis
-
-```bash
-npm run dev -- . --summary-only
-npm run dev -- . --audit-only
-```
-
-Result:
-
-- Entrypoints: `dist/index.js`, `src/cli/index.ts`.
-- Generated `dist` output is retained as package evidence and is not an important source directory.
-- The ordinary `prepack` build hook is medium severity, not high.
-- The GitHub Actions workflow remains a low-severity review hint.
+This record tracks the concrete repo2skill v0.4.0 release checks. Final package, coverage, dependency, encoding, Git, and CI values are refreshed by the release preparation commit after all documentation and version metadata are complete.
 
 ## Deterministic Semantic Evaluation
 
 ```bash
-npm run evaluate -- ./evaluations/v0.3-local.json --out ./evaluation-out
+npm run evaluate -- ./evaluations/v0.3-local.json --out ./evaluation-out/v0.3
+npm run evaluate -- ./evaluations/v0.4-local.json --out ./evaluation-out/v0.4
 ```
 
-Result:
+Observed pre-release result:
 
-- Cases: 5.
-- Succeeded: 5.
+- v0.3: 5 cases succeeded, 0 failed.
+- v0.4: 9 cases succeeded, 0 failed.
+- v0.4 covers repo2skill single-package compatibility, pnpm and npm workspace discovery, exclusions, safe boundaries, typed dependency edges, unnamed and duplicate packages, package facts and commands, focused output, and Windows path normalization.
+
+## Public Monorepo Smoke
+
+```bash
+npm run benchmark -- ./benchmarks/public-monorepo-smoke.json --cache-dir <outside-repo-cache> --out ./benchmark-smoke-out --format json
+```
+
+Observed result against `vercel/turborepo`:
+
+- Repositories: 1.
+- Succeeded: 1.
 - Failed: 0.
-- Covered self-hosted CLI navigation, generated and source `bin` entrypoints, workspace navigation, and package-output/source separation.
+- Package manager: pnpm.
+- Workspace packages: 20.
+- Internal dependency edges: 40.
+- Package commands: 28.
 
-The supplementary public tinybench evaluation also passed: 1 case succeeded, 0 failed.
+The result was supplementary and did not overwrite a committed baseline. The clone cache was kept outside the repository for final lint and format checks.
 
-## Public Smoke Benchmark
+## Compatibility and Safety Checks
 
-```bash
-npm run benchmark -- ./benchmarks/public-node-ts-smoke.json --cache-dir ./repo2skill-cache --out ./benchmark-smoke-out --compare ./benchmarks/baselines/public-node-ts-smoke.summary.json
-```
+- Exporter tests preserve single-package sections when no concrete workspace packages exist.
+- Structured package facts use repository-relative `/` paths.
+- Target package scripts are detected and rendered but never executed.
+- Public benchmark network and upstream behavior are not treated as the sole correctness gate.
 
-Observed result after one timeout and one cache-assisted retry:
+## Final Gate
 
-- Repositories: 10.
-- Succeeded: 9.
-- Failed: 1.
-- Next.js failed during Windows checkout because an upstream fixture path exceeded the platform filename limit.
-- The comparison reported 2 unchanged repositories, 3 repositories with regression-classified count changes, and 5 with improvements.
-- The non-Next.js changes were live upstream count drift, including config and environment-variable counts.
-- The committed April 2026 baseline was not overwritten because the result was not a clean, reviewable detector-only change.
+The final release audit records:
 
-This public result is supplementary. The deterministic semantic suite is the correctness gate for exact v0.3 facts.
-
-## Package Check
-
-```bash
-npm pack --dry-run --json
-```
-
-Result:
-
-- Package: `@haodehaode378/repo2skill@0.3.0`.
-- Total files: 4.
-- Included: `dist/index.js`, `README.md`, `LICENSE`, and `package.json`.
-- Excluded: source, tests, examples, caches, evaluation output, benchmark output, and `dist/index.d.ts`.
-
-## Dependency and Encoding Checks
-
-```bash
-npm audit
-```
-
-Result:
-
-- The lockfile refresh removed all critical and high-severity audit findings.
-- One low-severity esbuild development-tool advisory remains because tsup, tsx, and Vite currently resolve the shared 0.27.x line; forcing an override outside their declared ranges was intentionally avoided.
-- A UTF-8 mojibake scan passed with no suspicious files.
+- `npm run release:check` test and coverage totals;
+- focused CLI, self-analysis, and self-audit results;
+- `npm pack --dry-run --json` file list and sizes;
+- `npm audit` result;
+- UTF-8/mojibake and `git diff --check` results;
+- local/remote SHA equality and final GitHub CI URL.

@@ -9,6 +9,37 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 No changes yet.
 
+## [0.4.0] - 2026-07-22
+
+### Added
+
+- Discover concrete workspace packages from pnpm YAML, array/object npm workspaces, and conventional workspace directories with glob exclusions and safe path boundaries.
+- Collect repository-relative package facts for metadata, scripts, commands, source/package-output entrypoints, configuration, important directories, project type, environment-variable hints, and evidence.
+- Derive typed direct internal dependency edges, direct dependencies, direct consumers, and duplicate-name diagnostics.
+- Generate pnpm, npm, and Yarn-aware package commands with explicit package-`cwd` fallback facts.
+- Add `--package <name-or-path>` focused workspace analysis with Windows path normalization and explicit selection errors.
+- Add workspace-aware JSON, project map, AGENTS, SKILL, maintenance profile, platform quickstarts, and self-contained HTML output.
+- Add deterministic v0.4 workspace semantic assertions and a nine-case local manifest.
+- Add benchmark metrics for workspace packages, internal dependency edges, package commands, and optional focused-package success.
+
+### Changed
+
+- Upgrade workspace detection from a repository-level signal to a package-level operational graph.
+- Keep every exporter on the unified analysis schema instead of repeating package inference.
+- Preserve single-package JSON and rendered output behavior when no concrete workspace packages exist.
+
+### Security
+
+- Reject unsafe or absolute workspace globs, avoid following symlinks, and skip generated/cache directories during package discovery.
+- Continue treating package scripts as untrusted evidence: commands are rendered but never executed.
+- Keep package paths repository-relative so exports do not reveal local absolute paths.
+
+### Testing
+
+- Add fixtures for pnpm exclusions, npm workspaces, package facts, typed dependency edges, duplicate and unnamed packages, command fallbacks, and focused selectors.
+- Keep the v0.3 semantic suite passing alongside the v0.4 monorepo suite.
+- Add a public Turborepo smoke manifest for supplementary monorepo validation.
+
 ## [0.3.0] - 2026-07-22
 
 ### Added

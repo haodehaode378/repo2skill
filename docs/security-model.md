@@ -26,6 +26,9 @@ Untrusted:
 - Normal analysis reads repository files and writes generated artifacts to the requested output directory.
 - The tool detects commands and configuration, but does not run target repository package scripts during analysis.
 - `--audit-only` materializes the repository, runs lightweight checks, prints a report, and does not write artifacts.
+- Workspace discovery expands only safe repository-relative globs, skips generated/cache directories, and does not follow symlinks.
+- Package analysis reuses a single collected file index and emits repository-relative paths.
+- Package scripts are evidence for generated commands; scoped and `cwd` fallback commands are never executed.
 
 ## Current Audit Checks
 
@@ -49,6 +52,7 @@ The lightweight audit flags:
 - No policy engine for blocking unsafe output.
 - No private repository authentication model.
 - No protection against a user manually running dangerous commands found in generated docs.
+- No function-level dependency or call-graph security analysis.
 
 ## Safe Usage Guidance
 
@@ -58,3 +62,4 @@ The lightweight audit flags:
 - Treat severity as triage guidance: a medium publish hook still requires review, while high findings deserve priority.
 - Do not run package lifecycle scripts from an untrusted repository without inspection.
 - Keep output directories separate from source repositories when reviewing unknown projects.
+- Treat package dependency edges as package metadata facts, not proof that the referenced code is safe.

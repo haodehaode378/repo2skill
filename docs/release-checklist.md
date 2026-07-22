@@ -1,140 +1,69 @@
-# v0.3 Release Checklist / v0.3 发布检查清单
-
-This checklist keeps the release focused on evidence-backed Node.js/TypeScript onboarding correctness.
-
-这份清单用于确保 v0.3 聚焦于 Node.js/TypeScript onboarding 的证据与正确性。
+# v0.4 Release Checklist / v0.4 发布检查清单
 
 ## Scope / 范围
 
-- Public GitHub repositories / 公开 GitHub 仓库
-- Local repositories / 本地仓库
-- Node.js / TypeScript-oriented repositories
-- Evidence-backed exports only / 只输出有证据支撑的内容
-- Workspace-aware root navigation, not complete per-package analysis / 感知 workspace 根目录，不做完整子包分析
-- No private repository authentication / 不做私有仓库鉴权
-- No broad multi-language support / 不做广泛多语言支持
+- [ ] Concrete pnpm and `package.json` workspace packages are discovered.
+- [ ] Glob exclusions, Windows normalization, stable ordering, and safe directory boundaries are covered.
+- [ ] Package-local facts use repository-relative paths and distinguish source from package output.
+- [ ] Direct internal dependency types, dependencies, consumers, unnamed packages, and duplicate diagnostics are covered.
+- [ ] Package commands are evidence-backed and `--package` focus behaves explicitly.
+- [ ] Single-package analysis remains compatible.
 
-## Generated Artifacts / 生成物
+- [ ] 能发现真实 pnpm 与 `package.json` workspace packages。
+- [ ] 已覆盖 glob 排除、Windows 路径、稳定排序和安全目录边界。
+- [ ] 包级事实使用仓库相对路径，并区分源码入口与发布产物入口。
+- [ ] 已覆盖内部依赖类型、直接消费者、无名包和重复名称诊断。
+- [ ] 包级命令有证据，`--package` 聚焦行为明确。
+- [ ] 单包仓库保持兼容。
 
-Do not commit transient local outputs:
-
-不要提交临时本地输出：
-
-- `out`
-- `out-*`
-- `benchmark-out`
-- `benchmark-smoke-out`
-- `dist`
-
-These paths are already covered by `.gitignore`.
-
-这些路径已经被 `.gitignore` 覆盖。
-
-Committed examples are allowed:
-
-允许提交的示例：
-
-- `examples/analysis-target`
-
-The committed example should stay deterministic and should not contain machine-specific absolute paths.
-
-已提交示例应保持稳定，并且不应包含本机绝对路径。
-
-## Required Verification / 必跑验证
-
-Run before release:
-
-发布前运行：
+## Required Local Gates / 必须通过的本地门禁
 
 ```bash
+npm run format
 npm run release:check
-```
-
-Run the stable fixture export:
-
-运行稳定 fixture 导出：
-
-```bash
-npm run dev -- ./tests/fixtures/analysis-target --out ./examples/analysis-target
-```
-
-After regenerating examples, check that local absolute paths are not committed.
-
-重新生成 examples 后，检查不要提交本机绝对路径。
-
-## npm Package / npm 包检查
-
-Before publishing, verify the package contents locally:
-
-发布前先在本地验证包内容：
-
-```bash
+npm run evaluate -- ./evaluations/v0.3-local.json --out ./evaluation-out/v0.3
+npm run evaluate -- ./evaluations/v0.4-local.json --out ./evaluation-out/v0.4
+npm run dev -- . --summary-only
+npm run dev -- . --audit-only
+npm run dev -- ./tests/fixtures/workspaces/package-facts --package @fixture/core --summary-only
 npm pack --dry-run --json
+npm audit
+python <text-encoding-guard-skill>/scripts/check_mojibake.py --root .
+git diff --check
 ```
 
-The dry-run package listing should include:
+The final coverage percentages must not fall below the recorded v0.3 baseline, and thresholds must not be reduced or bypassed with new exclusions.
 
-打包产物应包含：
+最终覆盖率不得低于记录的 v0.3 基线；不得降低阈值，也不得通过新增排除项绕过覆盖率。
+
+## Public Monorepo Smoke / 公开 Monorepo 补充检查
+
+```bash
+npm run benchmark -- ./benchmarks/public-monorepo-smoke.json --cache-dir <outside-repo-cache> --out ./benchmark-smoke-out
+```
+
+- [ ] Record workspace package, internal edge, and package command counts.
+- [ ] Classify failures as code regression, network, checkout, or upstream drift.
+- [ ] Do not overwrite a committed baseline unless every delta is reviewed.
+
+Public results are supplementary; local v0.3 and v0.4 semantic suites remain the correctness gates.
+
+## Package Contents / npm 包内容
+
+The dry-run package must contain only the expected release files:
 
 - `dist/index.js`
 - `README.md`
 - `LICENSE`
 - `package.json`
 
-The packed tarball should not include:
+It must exclude source, tests, fixtures, caches, evaluation/benchmark output, machine paths, and an empty `dist/index.d.ts`.
 
-打包产物不应包含：
+## Git and CI / Git 与 CI
 
-- `src`
-- `tests`
-- `examples`
-- `benchmark-out`
-- `out-*`
-- `node_modules`
-
-The package is a pure CLI and should not contain an empty `dist/index.d.ts` declaration artifact.
-
-## Benchmark Checks / Benchmark 检查
-
-Smoke benchmark:
-
-```bash
-npm run benchmark -- ./benchmarks/public-node-ts-smoke.json --cache-dir ./repo2skill-cache --out ./benchmark-smoke-out
-```
-
-Compare with baseline:
-
-```bash
-npm run benchmark -- ./benchmarks/public-node-ts-smoke.json --cache-dir ./repo2skill-cache --out ./benchmark-smoke-out --compare ./benchmarks/baselines/public-node-ts-smoke.summary.json
-```
-
-The comparison should not report regressions in:
-
-对比结果不应出现以下字段退化：
-
-- `success`
-- `packageManager`
-- `projectType`
-- `workspace`
-- `scriptCount`
-- `commandCount`
-- `configFileCount`
-- `entrypointCount`
-- `envVarCount`
-
-Equal counts do not prove equal facts. Run the deterministic semantic suite as a separate required gate:
-
-```bash
-npm run evaluate -- ./evaluations/v0.3-local.json --out ./evaluation-out
-```
-
-## README / README 检查
-
-- The README should remain bilingual / README 应保持中英双语
-- The first screen should show value quickly / 首屏应快速展示价值
-- Output preview should point to `examples/analysis-target` / 输出预览应指向 `examples/analysis-target`
-- Claims should match implemented behavior / 文案承诺应与已实现行为一致
-
-## Encoding / 编码检查
-
-README 和发布文档包含中文。编辑器和自动化应保持 UTF-8，并在发布前检查中英文文本没有乱码。
+- [ ] Every milestone is a Conventional Commit and has been pushed.
+- [ ] `REPO_ROAST_REPORT.md` remains unmodified, untracked, and uncommitted.
+- [ ] No force push, tag, npm publish, or GitHub Release was performed.
+- [ ] Local and `origin/main` full SHAs match.
+- [ ] The final GitHub CI run succeeds.
+- [ ] Final `git status` contains only the user's pre-existing untracked file.

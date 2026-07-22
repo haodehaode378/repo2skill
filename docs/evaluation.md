@@ -44,6 +44,14 @@ npm run evaluate -- ./evaluations/v0.3-local.json --out ./evaluation-out
 
 It covers self-hosted CLI navigation, generated and source `bin` entrypoints, workspace navigation, and package-output/source separation without network access.
 
+Run the deterministic v0.4 monorepo suite as the package-graph correctness gate:
+
+```bash
+npm run evaluate -- ./evaluations/v0.4-local.json --out ./evaluation-out/v0.4
+```
+
+It covers repo2skill's single-package compatibility, pnpm and both npm workspace forms, exclusions, source/package-output separation, four dependency sections, unnamed and duplicate packages, scoped commands, focused output, and Windows path normalization.
+
 Then use the public tinybench case as a supplementary network evaluation:
 
 ```bash
@@ -103,6 +111,15 @@ Semantic fact fields are optional, so existing artifact-only manifests remain va
 - `expectedImportantDirectories` and `forbiddenImportantDirectories`
 - `expectedCommands`
 - `expectedConfigFiles`
+- `expectedWorkspacePackages` and `forbiddenWorkspacePackages`
+- `expectedWorkspacePackagePaths` and `forbiddenWorkspacePackagePaths`
+- `expectedInternalDependencies` and `forbiddenInternalDependencies`
+- `expectedPackageCommands` and `forbiddenPackageCommands`
+- `expectedPackageEntrypoints` and `forbiddenPackageEntrypoints`
+- `expectedPackageImportantDirectories` and `forbiddenPackageImportantDirectories`
+- `expectedFocusedPackage`
+
+Dependency, command, entrypoint, and directory assertions use structured objects. Evaluation cases may set `package` to apply the same name/path focus behavior as the main CLI before artifacts and facts are checked.
 
 Failures print the case, fact or artifact target, expected value, and actual observed value. Exact fact assertions catch regressions that preserve the same count while changing the detected path.
 

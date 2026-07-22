@@ -44,6 +44,20 @@ Use this checklist when changing detectors, exporters, README content, examples,
 - `dist`、`build`、`out`、`coverage` 这类生成目录不能被提升为 `Important Directories`。
 - `Important Directories` 应优先展示源码目录和 workspace 根目录。
 
+## Workspace Rules / Workspace 规则
+
+- Only existing directories with `package.json` are workspace packages.
+- Normalize structured paths to repository-relative `/` paths; never export local absolute paths.
+- Reject unsafe/absolute globs, skip generated and cache directories, and do not follow symlinks.
+- Internal edges must target uniquely named discovered packages; duplicate names produce diagnostics instead of ambiguous edges.
+- Package commands must come from that package's scripts and must preserve `cwd` when scoped syntax is unavailable.
+- Focused analysis must retain only the selected package, direct dependencies, direct consumers, and required root context.
+
+- 只有真实存在且包含 `package.json` 的目录才算 workspace package。
+- 结构化路径统一使用仓库相对 `/` 路径，不得导出本机绝对路径。
+- 内部边只能指向名称唯一的已发现包；重复名称应产生诊断，不能生成歧义边。
+- 包级命令必须来自该包自身脚本；无法生成 scoped syntax 时必须保留 `cwd`。
+
 ## Release Verification / 发布验证
 
 Run before a release:
@@ -69,5 +83,6 @@ For artifact-level context checks:
 
 ```bash
 npm run evaluate -- ./evaluations/v0.3-local.json --out ./evaluation-out
+npm run evaluate -- ./evaluations/v0.4-local.json --out ./evaluation-out/v0.4
 npm run evaluate -- ./evaluations/tinybench.json --cache-dir ./repo2skill-cache --out ./evaluation-tinybench-out
 ```
