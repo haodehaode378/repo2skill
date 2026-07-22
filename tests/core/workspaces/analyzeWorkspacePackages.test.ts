@@ -50,6 +50,32 @@ describe("analyzeWorkspacePackages", () => {
     expect(corePackage?.directories?.map((directory) => directory.path)).not.toContain(
       "packages/core/dist"
     );
+    expect(corePackage?.commands).toEqual([
+      {
+        name: "build",
+        role: "build",
+        command: "pnpm --filter @fixture/core build",
+        rawScript: "tsc -p tsconfig.json",
+        cwd: ".",
+        packageName: "@fixture/core",
+        packagePath: "packages/core",
+        source: "packages/core/package.json",
+        confidence: "high",
+        scoped: true
+      },
+      {
+        name: "test",
+        role: "test",
+        command: "pnpm --filter @fixture/core test",
+        rawScript: "vitest run",
+        cwd: ".",
+        packageName: "@fixture/core",
+        packagePath: "packages/core",
+        source: "packages/core/package.json",
+        confidence: "high",
+        scoped: true
+      }
+    ]);
     expect(webPackage).toMatchObject({
       path: "apps/web",
       projectType: "vite",

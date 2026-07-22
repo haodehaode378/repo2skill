@@ -164,6 +164,19 @@ export const WorkspaceDiagnosticSchema = z.object({
   confidence: ConfidenceLevelSchema
 });
 
+export const WorkspacePackageCommandSchema = z.object({
+  name: z.string(),
+  role: CommandRoleSchema,
+  command: z.string(),
+  rawScript: z.string(),
+  cwd: z.string(),
+  packageName: z.string().optional(),
+  packagePath: z.string(),
+  source: z.string(),
+  confidence: ConfidenceLevelSchema,
+  scoped: z.boolean()
+});
+
 export const WorkspacePackageSchema = z.object({
   path: z.string(),
   packageJsonPath: z.string(),
@@ -181,7 +194,8 @@ export const WorkspacePackageSchema = z.object({
   envVars: z.array(EnvVarSchema).optional(),
   evidence: z.array(EvidenceRecordSchema).optional(),
   directDependencies: z.array(WorkspacePackageReferenceSchema).optional(),
-  directConsumers: z.array(WorkspacePackageReferenceSchema).optional()
+  directConsumers: z.array(WorkspacePackageReferenceSchema).optional(),
+  commands: z.array(WorkspacePackageCommandSchema).optional()
 });
 
 export const WorkspaceInfoSchema = z.object({
@@ -243,5 +257,6 @@ export type WorkspacePackageReference = z.infer<typeof WorkspacePackageReference
 export type WorkspaceDependencyType = z.infer<typeof WorkspaceDependencyTypeSchema>;
 export type WorkspaceDependencyEdge = z.infer<typeof WorkspaceDependencyEdgeSchema>;
 export type WorkspaceDiagnostic = z.infer<typeof WorkspaceDiagnosticSchema>;
+export type WorkspacePackageCommand = z.infer<typeof WorkspacePackageCommandSchema>;
 export type WorkspacePackage = z.infer<typeof WorkspacePackageSchema>;
 export type WorkspaceInfo = z.infer<typeof WorkspaceInfoSchema>;

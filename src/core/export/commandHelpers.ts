@@ -1,7 +1,8 @@
-import type { CommandCandidate, CommandRole, RepoAnalysis } from "../../schemas/analysis.js";
+import type { CommandCandidate, RepoAnalysis } from "../../schemas/analysis.js";
+import { getCommandRole, VALIDATION_SCRIPT_ORDER } from "../commands/commandRoles.js";
 import { renderPackageScriptCommand } from "../commands/packageScripts.js";
 
-const VALIDATION_SCRIPT_ORDER = ["test", "lint", "typecheck", "build"] as const;
+export { getCommandRole } from "../commands/commandRoles.js";
 
 export function getCommands(analysis: RepoAnalysis): CommandCandidate[] {
   if (analysis.detected.commands.length > 0) {
@@ -25,18 +26,6 @@ export function getValidationCommands(commands: CommandCandidate[]): CommandCand
     const command = byRole.get(scriptName);
     return command ? [command] : [];
   });
-}
-
-export function getCommandRole(name: string): CommandRole {
-  if (
-    name === "dev" ||
-    name === "format" ||
-    VALIDATION_SCRIPT_ORDER.includes(name as (typeof VALIDATION_SCRIPT_ORDER)[number])
-  ) {
-    return name as CommandRole;
-  }
-
-  return "other";
 }
 
 export function formatCode(value: string): string {
