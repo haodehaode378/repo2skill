@@ -11,6 +11,14 @@ const CONVENTIONAL_ENTRYPOINTS = [
   "src/index.tsx",
   "src/index.js",
   "src/index.jsx",
+  "src/cli/index.ts",
+  "src/cli/index.tsx",
+  "src/cli/index.js",
+  "src/cli/index.jsx",
+  "src/cli/main.ts",
+  "src/cli/main.tsx",
+  "src/cli/main.js",
+  "src/cli/main.jsx",
   "src/server.ts",
   "src/server.js",
   "server.ts",
@@ -139,7 +147,7 @@ function registerEntrypoint(
 }
 
 function normalizePath(filePath: string): string {
-  return filePath.split(path.sep).join("/");
+  return filePath.replace(/\\/g, "/").split(path.sep).join("/");
 }
 
 function getEntrypointRole(
@@ -147,18 +155,18 @@ function getEntrypointRole(
   sourceFile: string,
   reason?: string
 ): EntrypointRole {
-  if (reason === "bin") {
-    return "cli";
-  }
-
   const normalized = trimLeadingDotSlash(entrypoint);
+
+  if (isGeneratedPath(normalized)) {
+    return sourceFile === "package.json" ? "package-output" : "generated";
+  }
 
   if (normalized === "src" || normalized.startsWith("src/")) {
     return "source";
   }
 
-  if (isGeneratedPath(normalized)) {
-    return sourceFile === "package.json" ? "package-output" : "generated";
+  if (reason === "bin") {
+    return "cli";
   }
 
   return "other";

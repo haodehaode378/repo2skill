@@ -125,6 +125,26 @@ describe("analyzeLocalRepo", () => {
       confidence: "high"
     });
   });
+
+  it("uses this CLI source entrypoint for self-hosted navigation", async () => {
+    const analysis = await analyzeLocalRepo(path.resolve("."));
+
+    expect(analysis.detected.entrypointFacts).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          path: "dist/index.js",
+          role: "package-output",
+          reason: "bin"
+        }),
+        expect.objectContaining({
+          path: "src/cli/index.ts",
+          role: "source"
+        })
+      ])
+    );
+    expect(analysis.detected.directories.map((directory) => directory.path)).toContain("src/cli");
+    expect(analysis.detected.directories.map((directory) => directory.path)).not.toContain("dist");
+  });
 });
 
 describe("exportAnalysisArtifacts", () => {
@@ -191,6 +211,25 @@ describe("exportAnalysisArtifacts", () => {
     expect(skillMd).toContain("- Entrypoint: `src/index.ts` (source, medium)");
     expect(skillMd).toContain("- Entrypoint: `./dist/index.js` (package-output, high, main)");
     expect(projectMap).toContain("- `src` (source, medium) from `src/index.ts`");
+    expect(projectMap).not.toContain("- `dist`");
+  });
+
+  it("does not recommend generated CLI output when exporting this repository", async () => {
+    const outDir = await createTempDir();
+    const analysis = await analyzeLocalRepo(path.resolve("."));
+
+    await exportAnalysisArtifacts(outDir, analysis, "md");
+
+    const agentsMd = await fs.readFile(path.join(outDir, "AGENTS.md"), "utf8");
+    const skillMd = await fs.readFile(path.join(outDir, "SKILL.md"), "utf8");
+    const projectMap = await fs.readFile(path.join(outDir, "project-map.md"), "utf8");
+
+    expect(agentsMd).toContain("Start from evidenced directories: `src/cli`.");
+    expect(agentsMd).toContain("`dist/index.js` (package-output, high, bin)");
+    expect(agentsMd).toContain("`src/cli/index.ts` (source, medium)");
+    expect(agentsMd).not.toContain("- `dist`");
+    expect(skillMd).toContain("Entrypoint: `src/cli/index.ts` (source, medium)");
+    expect(projectMap).toContain("`src/cli` (source, medium) from `src/cli/index.ts`");
     expect(projectMap).not.toContain("- `dist`");
   });
 

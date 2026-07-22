@@ -143,6 +143,61 @@ describe("detectEntrypoints", () => {
     ]);
   });
 
+  it("keeps generated CLI outputs out of source navigation", async () => {
+    const analysis = createAnalysis();
+
+    await detectEntrypoints(path.resolve("tests/fixtures/entrypoints/cli-generated"), analysis);
+
+    expect(analysis.detected.entrypointFacts).toEqual([
+      {
+        path: "./dist/index.js",
+        role: "package-output",
+        source: "package.json",
+        confidence: "high",
+        reason: "bin"
+      },
+      {
+        path: "src/cli/index.ts",
+        role: "source",
+        source: "src/cli/index.ts",
+        confidence: "medium",
+        reason: undefined
+      }
+    ]);
+  });
+
+  it("preserves CLI intent when a bin points directly to source", async () => {
+    const analysis = createAnalysis();
+
+    await detectEntrypoints(path.resolve("tests/fixtures/entrypoints/cli-source"), analysis);
+
+    expect(analysis.detected.entrypointFacts).toEqual([
+      {
+        path: "src/cli/index.ts",
+        role: "source",
+        source: "package.json",
+        confidence: "high",
+        reason: "bin"
+      }
+    ]);
+  });
+
+  it("normalizes Windows package entrypoint separators", async () => {
+    const analysis = createAnalysis();
+
+    await detectEntrypoints("unused", analysis, { bin: ".\\dist\\index.js" }, []);
+
+    expect(analysis.detected.entrypointFacts).toEqual([
+      {
+        path: "./dist/index.js",
+        role: "package-output",
+        source: "package.json",
+        confidence: "high",
+        reason: "bin"
+      }
+    ]);
+  });
+
   it("does nothing when no known entrypoint exists", async () => {
     const analysis = createAnalysis();
 

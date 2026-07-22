@@ -1,0 +1,4 @@
+{
+  "name": "cli-source",
+  "bin": "src/cli/index.ts"
+}

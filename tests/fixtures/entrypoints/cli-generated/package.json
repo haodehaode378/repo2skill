@@ -1,0 +1,4 @@
+{
+  "name": "cli-generated",
+  "bin": "./dist/index.js"
+}
