@@ -9,6 +9,38 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 No changes yet.
 
+## [0.3.0] - 2026-07-22
+
+### Added
+
+- Detect conventional CLI source entrypoints under `src/cli`.
+- Add backward-compatible semantic evaluation assertions for exact entrypoints, important directories, commands, config files, and artifact content.
+- Add a deterministic five-case local semantic evaluation manifest.
+- Add contributor guidance for detector fixtures, semantic assertions, and repository safety boundaries.
+
+### Changed
+
+- Position the product as an evidence-backed onboarding compiler for Node.js/TypeScript repositories.
+- Keep count-based public benchmarks as the structural regression layer and use evaluation for semantic correctness.
+- Make `release:check` the single local and CI quality gate, including coverage thresholds.
+- Stop emitting an empty declaration file from the pure CLI build.
+
+### Fixed
+
+- Preserve generated `bin` entrypoints as package evidence without promoting `dist`, `build`, `out`, or `coverage` into source navigation.
+- Normalize Windows entrypoint separators in package metadata.
+
+### Security
+
+- Keep install lifecycle hooks at high severity while classifying ordinary preparation and publish hooks as medium.
+- Raise preparation or publish hooks back to high severity when commands contain suspicious network, shell, or eval-like behavior.
+
+### Testing
+
+- Add self-hosting regression coverage that requires `src/cli/index.ts` and forbids `dist` as an important directory.
+- Add a regression proving equal entrypoint counts cannot hide a changed path from semantic evaluation.
+- Refresh development dependency resolutions to patched Vitest, Vite, YAML, and brace-expansion releases.
+
 ## [0.2.0] - 2026-05-28
 
 ### Performance
