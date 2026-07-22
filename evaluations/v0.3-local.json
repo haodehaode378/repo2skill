@@ -1,0 +1,111 @@
+{
+  "name": "v0.3-local-semantic-quality",
+  "cases": [
+    {
+      "name": "repo2skill-self",
+      "input": ".",
+      "facts": {
+        "expectedEntrypoints": ["dist/index.js", "src/cli/index.ts"],
+        "forbiddenEntrypoints": ["coverage/index.js"],
+        "expectedImportantDirectories": ["src/cli"],
+        "forbiddenImportantDirectories": ["dist", "build", "out", "coverage"],
+        "expectedCommands": ["npm run test"],
+        "expectedConfigFiles": ["package.json", "tsconfig.json"]
+      },
+      "assertions": [
+        {
+          "artifact": "AGENTS.md",
+          "includes": [
+            "Start from evidenced directories: `src/cli`.",
+            "`dist/index.js` (package-output, high, bin)",
+            "`src/cli/index.ts` (source, medium)"
+          ],
+          "excludes": ["- `dist`"]
+        }
+      ]
+    },
+    {
+      "name": "generated-cli-bin",
+      "input": "tests/fixtures/entrypoints/cli-generated",
+      "facts": {
+        "expectedEntrypoints": ["./dist/index.js", "src/cli/index.ts"],
+        "forbiddenEntrypoints": [],
+        "expectedImportantDirectories": ["src/cli"],
+        "forbiddenImportantDirectories": ["dist", "build", "out", "coverage"],
+        "expectedCommands": [],
+        "expectedConfigFiles": ["package.json"]
+      },
+      "assertions": [
+        {
+          "artifact": "project-map.md",
+          "includes": [
+            "`src/cli` (source, medium) from `src/cli/index.ts`",
+            "`./dist/index.js` (package-output, high, bin)"
+          ],
+          "excludes": ["- `dist` (source", "- `dist` (other"]
+        }
+      ]
+    },
+    {
+      "name": "source-cli-bin",
+      "input": "tests/fixtures/entrypoints/cli-source",
+      "facts": {
+        "expectedEntrypoints": ["src/cli/index.ts"],
+        "forbiddenEntrypoints": ["dist/index.js"],
+        "expectedImportantDirectories": ["src/cli"],
+        "forbiddenImportantDirectories": ["dist", "build", "out", "coverage"],
+        "expectedCommands": [],
+        "expectedConfigFiles": ["package.json"]
+      },
+      "assertions": [
+        {
+          "artifact": "SKILL.md",
+          "includes": ["Entrypoint: `src/cli/index.ts` (source, high, bin)"],
+          "excludes": ["Entrypoint: `dist/index.js`"]
+        }
+      ]
+    },
+    {
+      "name": "workspace-navigation",
+      "input": "tests/fixtures/workspaces/conventions",
+      "facts": {
+        "expectedEntrypoints": [],
+        "forbiddenEntrypoints": ["dist/index.js"],
+        "expectedImportantDirectories": ["apps"],
+        "forbiddenImportantDirectories": ["dist", "build", "out", "coverage"],
+        "expectedCommands": [],
+        "expectedConfigFiles": []
+      },
+      "assertions": [
+        {
+          "artifact": "project-map.md",
+          "includes": ["## Workspace", "Package Globs: `apps/*`", "`apps` (workspace, medium)"],
+          "excludes": ["`dist` (source", "`dist` (workspace"]
+        }
+      ]
+    },
+    {
+      "name": "package-output-and-source",
+      "input": "tests/fixtures/export-entrypoints",
+      "facts": {
+        "expectedEntrypoints": ["./dist/index.js", "src/index.ts"],
+        "forbiddenEntrypoints": [],
+        "expectedImportantDirectories": ["src"],
+        "forbiddenImportantDirectories": ["dist", "build", "out", "coverage"],
+        "expectedCommands": ["pnpm test"],
+        "expectedConfigFiles": ["package.json"]
+      },
+      "assertions": [
+        {
+          "artifact": "AGENTS.md",
+          "includes": [
+            "Start from evidenced directories: `src`.",
+            "`./dist/index.js` (package-output, high, main)",
+            "`src/index.ts` (source, medium)"
+          ],
+          "excludes": ["- `dist`"]
+        }
+      ]
+    }
+  ]
+}

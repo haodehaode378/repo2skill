@@ -1,6 +1,7 @@
 import path from "node:path";
 import fs from "fs-extra";
 import type { EvaluationCase, EvaluationManifest } from "../../schemas/evaluation.js";
+import type { RepoAnalysis } from "../../schemas/analysis.js";
 import { materializeRepository } from "../collect/materializeRepository.js";
 import { resolveInput } from "../collect/resolveInput.js";
 import {
@@ -13,6 +14,7 @@ export type EvaluationFailure = {
   artifact: string;
   expected?: string;
   unexpected?: string;
+  actual?: string;
 };
 
 export type EvaluationCaseResult = {
@@ -94,11 +96,15 @@ export function renderEvaluationSummary(summary: EvaluationSummary): string {
 
       for (const failure of result.failures) {
         if (failure.expected) {
-          lines.push(`  missing ${failure.artifact}: ${failure.expected}`);
+          lines.push(
+            `  expected ${failure.artifact}: ${failure.expected}${renderActual(failure.actual)}`
+          );
         }
 
         if (failure.unexpected) {
-          lines.push(`  unexpected ${failure.artifact}: ${failure.unexpected}`);
+          lines.push(
+            `  forbidden ${failure.artifact}: ${failure.unexpected}${renderActual(failure.actual)}`
+          );
         }
       }
     }
@@ -145,7 +151,10 @@ async function runSingleEvaluationCase(
     const analysis = await analyze(rootDir);
     await exportArtifacts(options.outDir, analysis, format);
 
-    const failures = await collectAssertionFailures(options.outDir, evaluationCase);
+    const failures = [
+      ...collectFactFailures(analysis, evaluationCase),
+      ...(await collectArtifactAssertionFailures(options.outDir, evaluationCase))
+    ];
 
     return {
       name: evaluationCase.name,
@@ -172,7 +181,7 @@ async function runSingleEvaluationCase(
   }
 }
 
-async function collectAssertionFailures(
+async function collectArtifactAssertionFailures(
   outDir: string,
   evaluationCase: EvaluationCase
 ): Promise<EvaluationFailure[]> {
@@ -186,7 +195,8 @@ async function collectAssertionFailures(
       if (!content.includes(expected)) {
         failures.push({
           artifact: assertion.artifact,
-          expected
+          expected,
+          actual: "absent"
         });
       }
     }
@@ -195,11 +205,77 @@ async function collectAssertionFailures(
       if (content.includes(unexpected)) {
         failures.push({
           artifact: assertion.artifact,
-          unexpected
+          unexpected,
+          actual: "present"
         });
       }
     }
   }
 
   return failures;
+}
+
+function collectFactFailures(
+  analysis: RepoAnalysis,
+  evaluationCase: EvaluationCase
+): EvaluationFailure[] {
+  const facts = evaluationCase.facts;
+
+  if (!facts) {
+    return [];
+  }
+
+  const failures: EvaluationFailure[] = [];
+  const checks = [
+    {
+      artifact: "facts.entrypoints",
+      actual: analysis.detected.entrypoints,
+      expected: facts.expectedEntrypoints,
+      forbidden: facts.forbiddenEntrypoints
+    },
+    {
+      artifact: "facts.importantDirectories",
+      actual: analysis.detected.directories.map((directory) => directory.path),
+      expected: facts.expectedImportantDirectories,
+      forbidden: facts.forbiddenImportantDirectories
+    },
+    {
+      artifact: "facts.commands",
+      actual: analysis.detected.commands.map((command) => command.command),
+      expected: facts.expectedCommands,
+      forbidden: []
+    },
+    {
+      artifact: "facts.configFiles",
+      actual: analysis.detected.configFiles.map((configFile) => configFile.path),
+      expected: facts.expectedConfigFiles,
+      forbidden: []
+    }
+  ];
+
+  for (const check of checks) {
+    const actual = formatActualValues(check.actual);
+
+    for (const expected of check.expected) {
+      if (!check.actual.includes(expected)) {
+        failures.push({ artifact: check.artifact, expected, actual });
+      }
+    }
+
+    for (const forbidden of check.forbidden) {
+      if (check.actual.includes(forbidden)) {
+        failures.push({ artifact: check.artifact, unexpected: forbidden, actual });
+      }
+    }
+  }
+
+  return failures;
+}
+
+function formatActualValues(values: string[]): string {
+  return values.length > 0 ? `[${values.join(", ")}]` : "[]";
+}
+
+function renderActual(actual: string | undefined): string {
+  return actual ? `; actual=${actual}` : "";
 }

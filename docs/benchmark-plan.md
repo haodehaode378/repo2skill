@@ -14,6 +14,8 @@ Current purpose:
 - make it obvious which repositories should be reused for future validation
 - provide a stable format that later automation can consume
 
+`success` means a repository was materialized, analyzed, and exported without an exception. Count fields make detector shape changes visible, but they do not prove that the detected paths are correct. Two analyses can both report two entrypoints while naming different files.
+
 Current scope:
 
 - public GitHub repositories only
@@ -25,7 +27,7 @@ Current scope:
 Release check:
 
 ```bash
-npm run benchmark -- ./benchmarks/public-node-ts-smoke.json --cache-dir E:/r2s-cache --out ./benchmark-smoke-out --compare ./benchmarks/baselines/public-node-ts-smoke.summary.json
+npm run benchmark -- ./benchmarks/public-node-ts-smoke.json --cache-dir ./repo2skill-cache --out ./benchmark-smoke-out --compare ./benchmarks/baselines/public-node-ts-smoke.summary.json
 ```
 
 Regression fields:
@@ -45,3 +47,13 @@ Next steps:
 1. decide which benchmark failures are acceptable signal changes vs regressions
 2. add snapshot-style checks for selected generated artifacts
 3. add an agent-facing evaluation doc for real repository tasks
+
+## Semantic Quality Layer
+
+Use the local semantic manifest before the public benchmark:
+
+```bash
+npm run evaluate -- ./evaluations/v0.3-local.json --out ./evaluation-out
+```
+
+This asserts exact entrypoints, commands, config files, and allowed navigation directories. Artifact `includes` and `excludes` then verify that the structured facts survive rendering. The semantic suite lives in evaluation rather than duplicating the same assertion engine in benchmark code.

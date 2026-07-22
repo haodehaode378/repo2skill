@@ -6,6 +6,7 @@ import {
   renderEvaluationSummary,
   runEvaluationManifest
 } from "../../../src/core/evaluations/runEvaluationManifest.js";
+import { analyzeLocalRepo } from "../../../src/core/run/runLocalAnalysis.js";
 import type { EvaluationManifest } from "../../../src/schemas/evaluation.js";
 
 const tempDirs: string[] = [];
@@ -89,11 +90,60 @@ describe("runEvaluationManifest", () => {
     expect(summary.results[0]?.failures).toEqual([
       {
         artifact: "AGENTS.md",
-        expected: "missing fact"
+        expected: "missing fact",
+        actual: "absent"
       },
       {
         artifact: "AGENTS.md",
-        unexpected: "src/index.ts"
+        unexpected: "src/index.ts",
+        actual: "present"
+      }
+    ]);
+  });
+
+  it("checks concrete facts that count-only benchmarks cannot distinguish", async () => {
+    const outDir = await createTempDir();
+    const fixture = path.resolve("tests/fixtures/entrypoints/cli-generated");
+    const analysis = await analyzeLocalRepo(fixture);
+    const wrongAnalysis = {
+      ...analysis,
+      detected: {
+        ...analysis.detected,
+        entrypoints: ["./dist/index.js", "src/cli/wrong.ts"]
+      }
+    };
+    const manifest: EvaluationManifest = {
+      name: "semantic-entrypoints",
+      cases: [
+        {
+          name: "same-count-wrong-fact",
+          input: fixture,
+          assertions: [],
+          facts: {
+            expectedEntrypoints: ["src/cli/index.ts"],
+            forbiddenEntrypoints: [],
+            expectedImportantDirectories: [],
+            forbiddenImportantDirectories: ["dist"],
+            expectedCommands: [],
+            expectedConfigFiles: []
+          }
+        }
+      ]
+    };
+
+    expect(wrongAnalysis.detected.entrypoints).toHaveLength(analysis.detected.entrypoints.length);
+
+    const summary = await runEvaluationManifest(manifest, {
+      outDir,
+      analyzeLocalRepoFn: async () => wrongAnalysis
+    });
+
+    expect(summary.failureCount).toBe(1);
+    expect(summary.results[0]?.failures).toEqual([
+      {
+        artifact: "facts.entrypoints",
+        expected: "src/cli/index.ts",
+        actual: "[./dist/index.js, src/cli/wrong.ts]"
       }
     ]);
   });
@@ -125,6 +175,6 @@ describe("renderEvaluationSummary", () => {
 
     expect(text).toContain("Evaluation manifest: demo");
     expect(text).toContain("- FAIL | case-one | failures=1");
-    expect(text).toContain("missing SKILL.md: pnpm test");
+    expect(text).toContain("expected SKILL.md: pnpm test");
   });
 });
